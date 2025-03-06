@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <link rel="icon" href="icon.png" type="image/png">
+  <meta charset="UTF-8">
+  <title>F_Drive Súgó</title>
+  <style>
+    .balra { text-align: left; }
+    .kozepre { text-align: center; }
+    .jobbra { text-align: right; }
+    .piros { color: red; }
+    .kek { color: blue; }
+    body {
+      font-family: "FreeSans", sans-serif;
+      color: #000;
+      margin: 20px;
+      line-height: 1.6;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    /* Főmenük: kicsit nagyobb, félkövér */
+    h2 {
+      font-size: 24px;
+      font-weight: bold;
+      margin-top: 30px;
+      margin-bottom: 10px;
+    }
+    /* Almenük: kicsit kisebb, félkövér és dőlt */
+    h3 {
+      font-size: 20px;
+      font-weight: bold;
+      font-style: italic;
+      margin-top: 20px;
+      margin-bottom: 5px;
+    }
+    p {
+      font-size: 14px;
+      margin: 10px 0;
+    }
+    ul, ol {
+      margin-left: 20px;
+    }
+    .footer {
+      text-align: center;
+      background-color: #f0f0f0;
+      padding: 10px;
+      margin-top: 40px;
+      font-size: 10px;
+    }
+    .logo {
+      display: block;
+      margin: 0 auto 20px auto;
+      max-width: 300px;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <!-- Logó -->
+  <img src="fdlogo.png" alt="F_Drive Logó" class="logo">
+  
+  <h1>F_Drive - Family Frost flotta analitikai szoftver</h1>
+  
+  <h2>Röviden</h2>
+  <p>
+    Ez a szoftver a Family Frost gépjárművek napi, illetve időszaki mozgásának, állásidejének és futásteljesítményének elemzésére szolgál.
+    Az alkalmazás számos riportot és exportálási lehetőséget kínál, melyek segítségével részletes információk állnak rendelkezésre
+    a menedzsment részére.
+	
+  </p> 
+  <p>
+   Kihasználva a lehetőségeket jelentősen megkönnyíti a felhasználók (depóvezetők) munkáját, hiszen nemcsak az adatok importálása a webbase rendszerből, de a funkciók egy platformon történő elérhetősége is nagy előnyt jelenthet számukra. Az egyebekről meg talán a lentiekben:
+  </p> 
+  
+  <h2>Előkészületek</h2>
+  <p>
+    Egyetlen JSON kiterjesztésű fájlt kell letölteni a webbase rendszeréből, mely minden lényeges adatot tartalmaz.<br>
+	Fontos azonban, hogy ezek tartalmazzák a(z):<br>
+	- Elindulás/Megállás<br>
+	- Koordináták<br>
+	- Járművezető adatokat. <br>
+	Az itt engedélyezett időtartam maximum 2 hónap lehet. Ettől függetlenül a program lehetővé teszi a nagyobb intervallum elemzését is, kérdés, hogy ez mennyire szükséges. Amennyiben pl. az egy évvel ezelőtti adathoz szeretnénk valamit összehasonlítani, elég csak az akkori is a jelenlegi adatot beolvasni, a köztes adat ilyenkor irreleváns. 
+	<br>A futásteljesítménnyel kapcsolatos adatok egyezősége miatt időnként (2-4 havonta) célszerű a webbase felületen ún. "Kilométeróra-állás korrekciót" elvégezni, ezáltal egyezni fog a gépjármű és a statisztikák adata.  
+	
+	<a href="https://neddy3-my.sharepoint.com/:p:/g/personal/282600_office365online_co/EYZlaad9UDxKnGW_g9y8lIMBjn7Zfzjl2XUulHhyjy0P0w?e=yZx4C7
+	" target="_blank">Rövid bemutató a folyamatról</a>.
+
+	
+ 
+  </p> 
+  <h2>Menüpontok részletes leírása</h2>
+  
+  <h3>File</h3>
+  <p>
+    <strong>Megnyit:</strong>  A JSON adatfájlok kiválasztása és betöltése.
+    A felugró ablakban kiválasztható egy vagy több JSON fájl, amelyeket a program beolvas, ellenőriz és feldolgoz.
+    A már korábban betöltött fájlokat kihagyja, így elkerülhető az ismételt feldolgozás. A folyamat során - amennyiben a forrásadat nem tartalmaz "GPS", vagy "GÉPKOCSIVEZETŐ" adatot, nem engedi megnyitni, illetve ha feltételezhetően nem tartalmazza az "ELINDULÁSOK-MEGÁLLÁSOK" adatait, figyelmeztet, de ebben az esetben továbbenged. (Más kérdés, hogy mi lesz az erdmény...) 
+  </p>
+  <p>
+    <strong>Mentés:</strong> Biztonsági mentést készít a betöltött adatokból. Érdemes minden nagyobb időszakot átölelő adat (pl. egy hónap) beolvasását követően végrehajtani, így nem kell legközelebb a webbase rendszeréből újra letölteni azt.  
+    A mentett fájl neve a kezdő és végdátumot tartalmazza, és a <code>D:\F_Drive\Backup</code> könyvtárba kerül elmentésre.
+  </p>
+  <p>
+    <strong>Kilépés:</strong> A program bezárása.
+  </p>
+  
+  <h3>Túraanalízis - <strong><font color="red">60 STOP</font></strong></h3>
+  
+  <p>
+    <strong>Túraanalízis gépkocsinként:</strong>  Egy gépjármű időszaki, vagy adott napi, analízisét hajtja végre a megszokott formátumban.
+	
+    <p>
+    <strong>Túraanalízis összes gépkocsira:</strong> Az előzővel egyező formátumban, de az adatbázisban szereplő ÖSSZES gépjárműre elkészíti az időszaki, vagy adott napi analízist.
+   
+  </p>
+ <p>
+    <strong>Túraanalízis összesítő táblázat:</strong> Az adatbázisban szereplő összes gépkocsira és összes dátumra vonatkozóan készít egy listát jól látható jelöléssel a megfelelő, illetve a nem megfelelő stopszám függvényében, így könnyebben azozonosíthatókk a részletesebb vizsgálatra szoruló túrák.
+   
+  </p>
+ <p>
+    <strong>Túraadatok összehasonlítása - gépjármű statisztika:</strong> Egy autó egy napjának összehasonlítása az adatbázisban szereplő ugyenezen napok adataival. Elsősorban a gépjármű futása alapján történik az elemzés, úgymint a megtett távolság, állásidő, illetve ugyanezen adatok, de már az elméleti túrakezdéstől számítva, mindezek az átlagértékek feltüntetésével. Az attól <>15% nagyobb eltérés feltételes formázással jelenik meg. 
+  
+  </p>
+  <p>
+    <strong>Túraanalízis - részletes:</strong> Nagy kedvenc és nem is volt egyszerű összehozni. Egy autó - egy napjának elemzése. A túrák során a településenként mért állásidők, megtett km-ek és stop-ok száma jelenik meg. Az adatok csoportosítása és
+    feltételes formázása segíti a részletes elemzést. (Piros szám, ha több a rövid, mint az optimális (02:00-10:00) állás. Az adatok az elméleti kezdéstől számítva jelennek meg, azonban fontos, hogy itt egyedül ez az érték módosítható a lejjebb ismertetett módon (Útvonal export (TXT generálás). Fontos továbbá megemlíteni. hogy az utolsó település csak abban az esetben jelenik meg a listában, ha azt korábban, mint 18:30 lett kezdve. (Sajnos játszani kellet a korai esti érkezők miatt...) 
+  </p>
+  <p>
+    <strong>Több azonos túra (nap) analízise:</strong> A funkció egy autó egy napjának több, az adatbázisban szereplő azonos "hétnapon" történt túra adatait dolgozza fel települések szerinti elosztásban. Több táblázatban jeleníti meg az információkat (max. 4 dátumos csoportokban), melyekben az átlagos értékek is kiszámolásra kerülnek és az ettől <>15% értékek szintén piros színnel jelöltek. Lényeges, hogy itt - az előző menü funkciójától eltérően - amennyiben az autó visszatér egy-egy településre, akkor azok az adatok összeadódnak, míg az előzőnél teljesen megmarad a kronológiai sorrend. A lista dinamikusan változhat, azaz ha egy település később "jön be", a listában már látható lesz, az előzőből adódóan viszont alul. További információ: <a href='http://example.com'>Example Site</a>"
+	
+	</p>
+  
+  <h3>Túraútvonalak</h3>
+  <p>
+    <strong>Adatok módosítása, export előkészítése:</strong> Segítségével lehetővé válik az adatok módosítása a főablakban,
+    így a felhasználó módosíthatja a jobb felső sarokban látható elméleti túrakezdés időpontját, vagy éppenséggel adatsorokat (egyszerre többet is) lehet kijelölni és törölni (SHIFT+egér). A törlésre, akárcsak a kezdési időpont módosítására a kívánt adatsort kijelölve, a jobb egérgomb lenyomását követően van lehetőség. Fontos, hogy az adatbázis adatai nem változnak, hiszen akkor más statisztikák (pl, gk. futás) adatai is módosulnának, így amennyiben újra beolvasásra kerülne a JSON fájl, az adatok újra megjelennek. Az elállított kezdési időpont már dátumválasztásnál visszatér az eredeti értékre.  
+  </p>
+  <p>
+    <strong>Útvonal export (TXT generálás):</strong> A már megszokott TXT formátumú exportot készíti el.
+    A kötelezően elvárt paraméterek megadását követően (depónév, túra száma, minimum és maximum állásidő) a program elkészíti az útvonal koordinátáit, indulási időpontját és egyéb adatokat tartalmazó TXT fájlt. Lényeges, hogy a már "mindentől mentes", megtisztított adatsor kerüljön exportálásra. Hasznos kiegészítés lehet, hogy ha valamelyik adatsor miatt elbizonytalanodtok, dupla klikkel megjelenik a Google térképen. 
+  </p>
+  <p>
+    <strong>Útvonal és túraleírás export (TXT és pdf):</strong> Teljesen megegyezik az előzővel, azonban az útvonal mellett már tartalmazza a túra részletes leírását is (pl. megállások helyei, időpontok, állásidők),mely ideális az új partnerek részére történő átadásra.
+  </p>
+  
+  <h3>Útvonal</h3>
+  <p>
+    <strong>Optimális útvonal megjelenítése:</strong> A kijelölt szegmensek koordinátái alapján összeállít egy URL-t az útvonaltervezéshez (Google Maps), majd az alapértelmezett böngészőben megnyitja azt, így a felhasználó vizuálisan is ellenőrizheti az optimális útvonalat. Lényeges, hogy egyszerre maximum 10 adatpont (2 kezdő, illetve záró és 8 köztes) megjelenítésére alkalmas, de arra mindenesetre jó lehet, ha a felhasználó demonstrálni szeretne pl. egy-egy optimálisabb útvonalat a ténylegestől.   
+  </p>
+  
+  <h3>Menetlevél</h3>
+  <p>
+    <strong><font color="red">FONTOS! A hatályos jogszabály alapján (14/2021. (VIII. 31.) BM utasítás) ezen funkciók NEM mentesítenek a papír alapú menetlevelek vezetésétől!</font></strong>
+
+  </p>
+  <p>
+    <strong>Menetlevél gépkocsinként:</strong> Részletes riportot készít az aktuálisan
+    kiválasztott jármű menetleveléről, mely tartalmazza a rendszámot, gépkocsivezető nevét, dátumot, menetlevél sorszámot, indulási és érkezési időpontokat, valamint csoportosítja az azonos településen történt megállásokat, és megjeleníti az összesítő adatokat, beleértve a flotta záró km (ciklus) óra állását is.
+  </p>
+  <p>
+    <strong>Menetlevél összesítő:</strong> Összesítő kimutatást generál, amely tartalmazza az időszakot, rendszámot, gépkocsivezető, megtett távolságot, menetidőt, állásidőt, valamint a gyújtáson mért állásidőt, napi átlagokkal.
+    Az alján szerepel az összes jármű utolsó km óra állása, melyből az átlag is kiszámolható.
+  </p>
+  
+  <h3>FamilyFrost_NET</h3>
+  <p>
+    <strong>Túrakm export:</strong> Az <code>export_tours_km()</code> függvény Excel (XLSX) formátumban exportálja a járművek
+    megtett kilométer adatait, napokra bontva. Minden járműhöz külön mappát és fájlt generál a <code>D:\F_Drive\Túrakm_maison</code>
+    könyvtárban, amely tartalmazza a napi teljesítményt.
+  </p>
+  
+  <h3>Súgó</h3>
+  <p>
+    <strong>Névjegy F_Drive:</strong> Az <code>about_gui()</code> függvény megjeleníti a program névjegyét egy felugró ablakban,
+    ahol szerepel a program neve, verziószáma, készítő adatai, jogi nyilatkozat, valamint a logó (<code>fdlogo.png</code>).
+  </p>
+  <p>
+    A kódban megtalálható a <code>help_menu.add_command(label="Súgó", command=help_html)</code> sor,
+    amely a <code>help_html()</code> függvény segítségével megnyitja a HTML súgó fájlt az alapértelmezett böngészőben.
+  </p>
+  
+  <h2>Általános Működés</h2>
+  <p>
+    
+	A program működése során a D:\F_Drive könyvtárba exportálja a riportokat, ez a könyvtár (alkönyvtárakkal együtt) automatikusan létrejön, amennyiben nem létezik.
+	A program JSON formátumú adatfájlok beolvasásával indul, melyeket a <code>open_file()</code> függvény dolgoz fel.
+    Az adatokat validálja, majd különböző szűrők (pl. autó, dátum, település) segítségével elemzi őket.
+    Az eredmények alapján a felhasználó PDF és Excel riportokat generálhat, illetve optimális útvonalakat jeleníthet meg.
+    Az interaktív felület lehetővé teszi az adatok kézi módosítását is, mielőtt az exportálási folyamat végbemenne.
+  </p>
+  
+  <div class="footer">
+    F_Drive - Family Frost flotta analitikai szoftver<br>
+    © 2025 FabuSoft – Készítette: Fabu Szilárd (Minden jog fenntartva)
+  </div>
+</body>
+</html>
