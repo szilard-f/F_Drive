@@ -111,7 +111,7 @@
 	- elindulás/megállás<br>
 	- koordináták<br>
 	- járművezető adatokat <br>
-	<a href="static/video/import_from_webbase_pp.mp4" target="_blank">(webbase művelet)</a>	<br>
+	<a href="static/video/import_from_webbase.mp4" target="_blank">(webbase művelet)</a>	<br>
 	 A webbase-n engedélyezett időtartam maximum 2 hónap lehet. Ettől függetlenül a program lehetővé teszi a nagyobb intervallum elemzését is, kérdés, hogy ez mennyire szükséges. Amennyiben pl. az egy évvel ezelőtti adathoz szeretnénk valamit összehasonlítani, elég csak az akkori és a jelenlegi adatot beolvasni, a köztes adat ilyenkor irreleváns. 
 	<br>A futásteljesítménnyel kapcsolatos adatok egyezősége miatt időnként (2-4 havonta) célszerű a webbase felületen ún. "Kilométeróra-állás korrekciót" elvégezni, ezáltal egyezni fog a gépjármű és a statisztikák adata.  
 	
@@ -123,7 +123,7 @@
   <h3>File</h3>
   <p>
     <strong>Megnyit:</strong>  A JSON adatfájlok kiválasztása és betöltése.
-    A felugró ablakban a felhasználó kiválasztható egy vagy több JSON fájl, amelyeket a program beolvas, ellenőriz és feldolgoz.
+    A felugró ablakban kiválasztható egy vagy több JSON fájl, amelyeket a program beolvas, ellenőriz és feldolgoz.
     A már korábban betöltött fájlokat kihagyja, így elkerülhető az ismételt feldolgozás. A folyamat során - amennyiben a forrásadat nem tartalmaz "GPS", vagy "GÉPKOCSIVEZETŐ" adatot, nem engedi megnyitni, illetve ha feltételezhetően nem tartalmazza az "ELINDULÁSOK-MEGÁLLÁSOK" adatait, figyelmeztet, de ebben az esetben továbbenged.
   </p>
   <p>
@@ -165,12 +165,12 @@
   
   <h3>Útvonal</h3>
   <p>
-    <strong>Optimális útvonal megjelenítése:</strong> A kijelölt szegmensek koordinátái alapján összeállít egy URL-t az útvonaltervezéshez (Google Maps), majd az alapértelmezett böngészőben megnyitja azt, így a felhasználó vizuálisan is ellenőrizheti az optimális útvonalat. Lényeges, hogy egyszerre maximum 10 adatpont (2 kezdő, illetve záró és 8 köztes) megjelenítésére alkalmas, de arra mindenesetre jó lehet, ha a felhasználó demonstrálni szeretne pl. egy-egy optimálisabb útvonalat a ténylegestől.
+    <strong>Optimális útvonal megjelenítése:</strong> A kijelölt szegmensek koordinátái alapján összeállít egy URL-t az útvonaltervezéshez (Google Maps), majd az alapértelmezett böngészőben megnyitja azt, így vizuálisan is ellenőrizhető az optimális útvonal. Lényeges, hogy egyszerre maximum 10 adatpont (2 kezdő, illetve záró és 8 köztes) megjelenítésére alkalmas, de arra mindenesetre jó lehet, ha demonstrálni kell pl. egy-egy optimálisabb útvonalat a ténylegestől.
   </p>
   
   <h3>Menetlevél</h3>
   <p>
-    <strong><font color="red">FONTOS! A hatályos jogszabály alapján (14/2021. (VIII. 31.) BM utasítás) ezen funkciók NEM mentesítenek a papír alapú menetlevelek vezetésétől!</font></strong>
+    <strong>FONTOS! A hatályos jogszabály alapján (14/2021. (VIII. 31.) BM utasítás) ezen funkciók <font color="red">NEM</font> mentesítenek a papír alapú menetlevelek vezetésétől!</strong>
   </p>
   <p>
     <strong>Menetlevél gépkocsinként:</strong>  Részletes riportot készít az aktuálisan kiválasztott jármű menetleveléről, mely tartalmazza a rendszámot, gépkocsivezető nevét, dátumot, menetlevél sorszámot, indulási és érkezési időpontokat, valamint csoportosítja az azonos településen történt megállásokat, és megjeleníti az összesítő adatokat, beleértve a flotta záró km (ciklus) óra állását is.
