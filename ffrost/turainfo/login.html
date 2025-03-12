@@ -2,11 +2,9 @@
 <html lang="hu">
 <head>
     <meta charset="UTF-8">
-   
     <link rel="icon" href="/turainfo/static/images/fflogo.png" type="image/png">
-	<link rel="shortcut icon" href="/turainfo/static/images/fflogo.png" type="image/png">
-    <title>FF_túraadatok</title>
-    <title>Bejelentkezés</title>
+    <link rel="shortcut icon" href="/turainfo/static/images/fflogo.png" type="image/png">
+    <title>Bejelentkezés - FF_túraadatok</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
@@ -15,7 +13,6 @@
     {% if error %}
         <div class="alert alert-danger">{{ error }}</div>
     {% endif %}
-
     <form method="post" action="login">
         <div class="form-group">
             <label>Felhasználónév v. depó (pl. depo02)</label>
