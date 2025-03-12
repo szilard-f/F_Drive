@@ -13,7 +13,7 @@
     <h3>Bejelentkezés</h3>
     <!-- Hibák megjelenítésére szolgáló hely -->
     <div id="errorMsg" class="alert alert-danger" style="display: none;"></div>
-    <form id="loginForm" method="post" action="https://fdriveanalytics.com/ffrost/turainfo/login">
+    <form id="loginForm" method="post" action="https://fabuszilard.myftp.org/turainfo/login">
         <div class="form-group">
             <label>Felhasználónév v. depó (pl. depo02)</label>
             <input type="text" name="username" class="form-control" required>
@@ -31,22 +31,25 @@
 <script>
 $(document).ready(function(){
     $('#loginForm').on('submit', function(e){
-        e.preventDefault(); // Ne küldje el hagyományosan az űrlapot
-
+        e.preventDefault(); // Megakadályozzuk a hagyományos űrlapküldést
+        // Elrejtjük az esetleges előző hibákat
+        $('#errorMsg').hide().text('');
+        
         $.ajax({
-            url: "https://fdriveanalytics.com/ffrost/turainfo/login", // Ellenőrizd az URL-t
+            url: $(this).attr('action'),
             type: 'POST',
             data: $(this).serialize(),
-            xhrFields: { withCredentials: true }, // Cookie-k küldése
+            xhrFields: { withCredentials: true }, // Küldjük el a cookie-kat is
             success: function(response){
                 if(response.success) {
+                    // Sikeres bejelentkezés esetén átirányítás
                     window.location.href = response.redirect;
                 } else {
+                    // Hibás bejelentkezés esetén megjelenítjük a hibaüzenetet
                     $('#errorMsg').text(response.error).show();
                 }
             },
-            error: function(xhr){
-                console.log(xhr);
+            error: function(){
                 $('#errorMsg').text('Hiba történt a bejelentkezés során.').show();
             }
         });
