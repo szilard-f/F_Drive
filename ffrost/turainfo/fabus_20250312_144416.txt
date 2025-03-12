@@ -1,0 +1,638 @@
+Szia!
+
+
+Jelenleg asus router (Merlin fw) + entware alatt futó py alkalmazás a routeren található honlapokat szolgál ki.
+https://fabuszilard.myftp.org/turainfo/login, majd itt belépve:
+https://fabuszilard.myftp.org/turainfo/
+
+nginx.conf:
+user nobody;
+worker_processes  1;
+pid /opt/var/run/nginx.pid;
+
+events {
+    worker_connections  64;
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+    sendfile      on;
+    keepalive_timeout  65;
+
+    # ------------------------------------------------
+    # 1) HTTP blokk: minden 8080-as kérést HTTPS-re (8443) irányít
+    # ------------------------------------------------
+    server {
+        listen 8080;
+        server_name fabuszilard.myftp.org;
+        return 301 https://$host:8443$request_uri;
+    }
+
+    # ------------------------------------------------
+    # 2) HTTPS blokk: reverz proxy mindkét alkalmazáshoz (FFCITES és FFTours/TuraInfo)
+    # ------------------------------------------------
+    server {
+        listen 8443 ssl;
+        server_name fabuszilard.myftp.org;
+
+        ssl_certificate     /opt/etc/nginx/ssl/fabuszilard.crt;
+        ssl_certificate_key /opt/etc/nginx/ssl/fabuszilard.key;
+        ssl_protocols       TLSv1.2 TLSv1.3;
+        ssl_ciphers         HIGH:!aNULL:!MD5;
+        ssl_prefer_server_ciphers on;
+
+        # ------------------------------------------------
+        # 🔹 1. FFCITES ALKALMAZÁS (port 5000):
+        #     Statikus fájlok + dinamikus tartalom
+        # ------------------------------------------------
+
+        # Statikus fájlok (közvetlen alias)
+        location /ffcites/static/ {
+            alias /opt/web/ffcities/static/;
+            autoindex on;
+        }
+
+        # Dinamikus tartalom (/ffcites/ útvonalon)
+        location /ffcites/ {
+            proxy_pass http://127.0.0.1:5000/ffcites/;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        }
+
+        # ------------------------------------------------
+        # 🔹 2. FFTours/TuraInfo ALKALMAZÁS (port 5012):
+        #     MINDENT a /turainfo alatt szolgálunk ki
+        # ------------------------------------------------
+
+        # 2/a) Ha valaki csak /turainfo perjel nélkül írja:
+        location /turainfo/static/ {
+			alias /opt/web/turainfo/static/; 
+			# (ügyelj, hogy per jel legyen a végén)
+		}
+
+		
+		
+		
+		
+		location = /turainfo {
+            return 301 /turainfo/;  # automatikus perjeles átirányítás
+        }
+
+        # 2/b) A /turainfo/ prefixet belsőleg "levágjuk", 
+        #      így a Flask továbbra is /-ként látja a kérést
+        #      (pl. /turainfo/login -> Flask felé /login)
+        location /turainfo/ {
+            rewrite ^/turainfo/(.*) /$1 break;
+            proxy_pass http://127.0.0.1:5012/;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        }
+    }
+}
+
+
+login.html:
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+   
+    <link rel="icon" href="/turainfo/static/images/fflogo.png" type="image/png">
+	<link rel="shortcut icon" href="/turainfo/static/images/fflogo.png" type="image/png">
+    <title>FF_túraadatok</title>
+    <title>Bejelentkezés</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container" style="max-width: 400px; margin-top: 100px;">
+    <h3>Bejelentkezés</h3>
+    {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+
+    <form method="post" action="login">
+        <div class="form-group">
+            <label>Felhasználónév v. depó (pl. depo02)</label>
+            <input type="text" name="username" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label>Jelszó</label>
+            <input type="password" name="password" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Bejelentkezés</button>
+    </form>
+</div>
+</body>
+</html>
+
+
+index.html:
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    
+    <link rel="icon" href="/turainfo/static/images/fflogo.png" type="image/png">
+    <link rel="shortcut icon" href="/turainfo/static/images/fflogo.png" type="image/png">
+
+    <title>FF_túraadatok</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+    <style>
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .red { color: red; font-weight: bold; }
+        .blue { color: blue; font-weight: bold; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h3>
+        <span class="red">F</span><span class="blue">F</span>_túraadatok - részletes lekérdezés
+    </h3>
+
+    <a href="logout" class="btn btn-secondary" style="float:right; margin-top:-40px;">Kijelentkezés</a>
+
+    <div class="form-group">
+        <label for="search-input">Település vagy irányítószám</label>
+        <input type="text" id="search-input" class="form-control" placeholder="Pl. Budapest vagy 1037" style="width:300px;">
+    </div>
+    <div class="form-group">
+        <label for="street-input">Közterület (opcionális)</label>
+        <input type="text" id="street-input" class="form-control" placeholder="Közterület" style="width:300px;">
+        <small id="streetHelp" class="form-text text-muted">
+            A közterület szűrés csak település megadása után működik!
+        </small>
+    </div>
+    <div class="d-flex align-items-center">
+        <button id="search-btn" class="btn btn-primary">Keresés</button>
+        <button id="clear-btn" class="btn btn-danger" style="margin-left: 82px;">Szűrések törlése</button>
+    </div>
+    <hr>
+    <div id="results"></div>
+    <div id="details"></div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script>
+  window.addEventListener("beforeunload", function () {
+    navigator.sendBeacon("logout");
+  });
+</script>
+
+<script>
+$(document).ready(function(){
+
+
+    function removeAccents(str) {
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    $('#search-input').autocomplete({
+        source: function(request, response) {
+            $.ajax({
+                url: 'suggest',
+                data: { field: 'city', q: request.term },
+                success: function(data) {
+                    response(data);
+                }
+            });
+        },
+        minLength: 2
+    });
+
+    $('#street-input').autocomplete({
+        source: function(request, response) {
+            var selectedCity = $('#search-input').val().trim();
+            if (!selectedCity) {
+                response([]);
+                return;
+            }
+            $.ajax({
+                url: 'suggest',
+                data: { field: 'street', q: request.term, city: selectedCity },
+                success: function(data) {
+                    response(data);
+                }
+            });
+        },
+        minLength: 2
+    });
+
+    $('#clear-btn').click(function(){
+        $('#search-input').val('');
+        $('#street-input').val('');
+        $('#results').html('');
+        $('#details').html('');
+    });
+
+    $('#search-btn').click(function(){
+        var query = $('#search-input').val();
+        var street = $('#street-input').val();
+        $('#results').html('');
+        $('#details').html('');
+        if(query.trim() === ''){
+            alert("Kérem adja meg a települést vagy irányítószámot!");
+            return;
+        }
+        $.ajax({
+            url: 'search',
+            data: { q: query, street: street },
+            success: function(data){
+                if(data.error){
+                    $('#results').html('<p>Hiba történt: ' + data.error + '</p>');
+                    return;
+                }
+                if(data.length === 0){
+                    $('#results').html('<p>Nincs találat.</p>');
+                } else {
+                    var tableHtml = '<table class="table table-bordered"><thead><tr>' +
+                        '<th class="text-center">Depó</th>'+
+                        '<th class="text-center">Túraszám</th>'+
+                        '<th class="text-center">Település</th>'+
+                        '<th class="text-center">Irányítószám</th>'+
+                        '<th class="text-center">Közterület</th>'+
+                        '<th class="text-center">Nap</th>'+
+                        '<th class="text-center">Időintervallum</th>'+
+                        '<th class="text-center">Műveletek</th>'+
+                        '</tr></thead><tbody>';
+                    data.forEach(function(item){
+                        tableHtml += '<tr class="summary" data-depo="'+item.depo+'" data-tour_number="'+item.tour_number+'">' +
+                            '<td class="text-center">'+item.depo+'</td>' +
+                            '<td class="text-center">'+item.tour_number+'</td>' +
+                            '<td>'+item.city+'</td>' +
+                            '<td class="text-center">'+item.postal_code+'</td>' +
+                            '<td>'+item.street+'</td>' +
+                            '<td class="text-center">'+item.date+'</td>' +
+                            '<td class="text-center">'+item.time_interval+'</td>' +
+                            '<td class="text-center">' +
+                                '<button class="btn btn-info btn-sm details-btn">Részletek</button> ' +
+                                '<button class="btn btn-secondary btn-sm pdf-btn">PDF letöltés</button>' +
+                            '</td>' +
+                            '</tr>';
+                    });
+                    tableHtml += '</tbody></table>';
+                    $('#results').html(tableHtml);
+                }
+            }
+        });
+    });
+
+    $('#results').on('click', '.details-btn', function(){
+        var container = $(this).closest('.summary');
+        var depo = container.data('depo');
+        var tour_number = container.data('tour_number');
+        $.ajax({
+            url: 'details',
+            data: { depo: depo, tour_number: tour_number },
+            success: function(data){
+                if (!data || !data[0]) {
+                    $('#details').html('<p>Nincs részlet.</p>');
+                    return;
+                }
+                var rawDate = data[0].date;
+                var cleaned = rawDate.replace(/\.$/, "").trim().replace(/\-/g, ".");
+                var jsDate = new Date(cleaned);
+                var weekdayMap = {0:"vasárnap", 1:"hétfő", 2:"kedd", 3:"szerda", 4:"csütörtök", 5:"péntek", 6:"szombat"};
+                var weekday = isNaN(jsDate.getDay()) ? rawDate : weekdayMap[jsDate.getDay()];
+                var formattedDate = weekday + " (" + cleaned + ")";
+
+                var detailsHtml = '<h5>Dátum: <span class="text-primary">'+formattedDate+'</span></h5>';
+                detailsHtml += '<table class="table table-bordered"><thead><tr>'+
+                    '<th class="text-center">Depó</th>'+
+                    '<th class="text-center">Túraszám</th>'+
+                    '<th class="text-center">Település</th>'+
+                    '<th class="text-center">Irányítószám</th>'+
+                    '<th class="text-center">Közterület</th>'+
+                    '<th class="text-center">Időintervallum</th>'+
+                    '<th class="text-center">Térkép</th>'+
+                    '</tr></thead><tbody>';
+                data.forEach(function(row){
+                    
+                    var normalizedCity = removeAccents(row.city.trim());
+                    var normalizedStreet = removeAccents(row.street.trim());
+                    
+                    
+                    normalizedStreet = normalizedStreet.replace(/^(?!dr\b)([^\s]+)\s+.+\s+(utca)$/i, "$1 $2");
+                    
+                    var postal = row.postal_code.trim();
+                    var mapUrl = 'https://www.google.com/maps/place/'
+                        + encodeURIComponent(normalizedCity) + ',+'
+                        + encodeURIComponent(normalizedStreet) + ',+'
+                        + encodeURIComponent(postal);
+                    detailsHtml += '<tr>'+
+                        '<td class="text-center">'+row.depo+'</td>'+
+                        '<td class="text-center">'+row.tour_number+'</td>'+
+                        '<td>'+row.city+'</td>'+
+                        '<td class="text-center">'+row.postal_code+'</td>'+
+                        '<td>'+row.street+'</td>'+
+                        '<td class="text-center">'+row.start_time+' - '+row.end_time+'</td>'+
+                        '<td class="text-center"><a href="'+mapUrl+'" target="_blank"><i class="fas fa-map-marker-alt"></i></a></td>'+
+                        '</tr>';
+                });
+                detailsHtml += '</tbody></table>';
+                $('#details').html(detailsHtml);
+            }
+        });
+    });
+
+    $('#results').on('click', '.pdf-btn', function(){
+        var container = $(this).closest('.summary');
+        var depo = container.data('depo');
+        var tour_number = container.data('tour_number');
+  
+        window.open('pdf?depo=' + encodeURIComponent(depo) + '&tour_number=' + encodeURIComponent(tour_number));
+    });
+
+});
+</script>
+</body>
+</html>
+
+tours.py:
+
+from flask import Flask, render_template, request, jsonify, send_file, session, redirect, url_for
+import sqlite3
+import io
+import os
+from datetime import datetime
+from datetime import timedelta
+from fpdf import FPDF
+
+
+app = Flask(__name__, static_url_path='/turainfo/static', static_folder='static')
+
+app.secret_key = 'your_secret_key_here'
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(seconds=300)
+DATABASE = '/mnt/SSD/SSD/ffcities/ff_toursstop.db'
+#DATABASE = r'W:\ffcities\ff_toursstop.db'
+
+def get_db_connection():
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+users = {
+    'user': {'password': 'password', 'allowed_depo': 'all'},
+    'kozpont': {'password': 'kozpont', 'allowed_depo': 'all'},
+    'depo01': {'password': 'depo01', 'allowed_depo': 'Székesfehérvár'},
+    'depo10': {'password': 'depo10', 'allowed_depo': 'Nagybajom'}
+}
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    error = None
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '').strip()
+        if username in users and users[username]['password'] == password:
+            session['username'] = username
+            session['allowed_depo'] = users[username]['allowed_depo']
+           
+            return redirect('/turainfo/')
+     
+        else:
+            error = "Hibás felhasználónév vagy jelszó!"
+    return render_template('login.html', error=error)
+
+@app.route('/logout', methods=['GET', 'POST'])
+def logout():
+    session.clear()
+    
+    return redirect('login')
+
+@app.route('/')
+def index():
+    if 'username' not in session:
+       
+        return redirect('login')
+    return render_template('index.html')
+
+@app.route('/search')
+def search():
+    if 'username' not in session:
+        return jsonify({"error": "Nincs bejelentkezve!"}), 401
+    allowed_depo = session.get('allowed_depo', 'all')
+    query = request.args.get('q', '')
+    street_filter = request.args.get('street', '')
+    conn = get_db_connection()
+    sql = "SELECT * FROM stops WHERE (city LIKE ? OR postal_code LIKE ?)"
+    params = [f"%{query}%", f"%{query}%"]
+    if street_filter.strip():
+        sql += " AND street LIKE ?"
+        params.append(f"%{street_filter}%")
+    if allowed_depo != 'all':
+        sql += " AND depo = ?"
+        params.append(allowed_depo)
+    try:
+        rows = conn.execute(sql, params).fetchall()
+    except sqlite3.OperationalError as e:
+        conn.close()
+        return jsonify({"error": str(e)}), 500
+    conn.close()
+
+    results = {}
+    for row in rows:
+        key = (row["depo"], row["tour_number"])
+        if key not in results:
+            results[key] = []
+        results[key].append(dict(row))
+
+    result_list = []
+    for key, items in results.items():
+        full_date = items[0]["date"]
+        cleaned_date = full_date.rstrip('.').strip()
+        dt = None
+        day_of_week = full_date
+        try:
+            dt = datetime.strptime(cleaned_date, "%Y.%m.%d")
+        except ValueError:
+            try:
+                dt = datetime.strptime(cleaned_date, "%Y-%m-%d")
+            except ValueError:
+                dt = None
+        if dt:
+            weekday_map = {
+                0: "Hétfő", 1: "Kedd", 2: "Szerda",
+                3: "Csütörtök", 4: "Péntek",
+                5: "Szombat", 6: "Vasárnap"
+            }
+            day_of_week = weekday_map.get(dt.weekday(), full_date)
+
+        if not street_filter.strip():
+            street_val = ""
+        else:
+            street_val = ""
+            for item in items:
+                if item["street"] and item["street"].strip():
+                    street_val = item["street"].strip()
+                    break
+            if not street_val:
+                street_val = "–"
+
+        min_start = min(item["start_time"] for item in items)
+        max_end = max(item["end_time"] for item in items)
+
+        summary = {
+            "depo": key[0],
+            "tour_number": key[1],
+            "city": items[0]["city"],
+            "postal_code": items[0]["postal_code"],
+            "street": street_val,
+            "date": day_of_week,
+            "full_date": full_date,
+            "time_interval": f"{min_start} - {max_end}",
+            "details": items
+        }
+        result_list.append(summary)
+
+    return jsonify(result_list)
+
+@app.route('/details')
+def details():
+    if 'username' not in session:
+        return jsonify({"error": "Nincs bejelentkezve!"}), 401
+    allowed_depo = session.get('allowed_depo', 'all')
+    depo = request.args.get('depo')
+    tour_number = request.args.get('tour_number')
+    if allowed_depo != 'all' and allowed_depo != depo:
+        return jsonify({"error": "Nincs jogosultság a kért adatokhoz!"}), 403
+    conn = get_db_connection()
+    sql = "SELECT * FROM stops WHERE depo = ? AND tour_number = ?"
+    rows = conn.execute(sql, (depo, tour_number)).fetchall()
+    conn.close()
+    details_list = [dict(row) for row in rows]
+    details_list.sort(key=lambda r: r['start_time'])
+    return jsonify(details_list)
+
+class PDF(FPDF):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.unifontsubset = False
+
+    def header(self):
+        if hasattr(self, 'table_header') and hasattr(self, 'col_widths'):
+            table_width = sum(self.col_widths)
+            x = (self.w - table_width) / 2
+            self.set_x(x)
+            self.set_fill_color(100, 100, 100)
+            self.set_text_color(255, 255, 255)
+            for header, width in zip(self.table_header, self.col_widths):
+                self.cell(width, self.row_height, header, border=1, align='C', fill=True)
+            self.ln(self.row_height)
+            self.set_text_color(0, 0, 0)
+
+@app.route('/pdf')
+def generate_pdf():
+    if 'username' not in session:
+        return jsonify({"error": "Nincs bejelentkezve!"}), 401
+    allowed_depo = session.get('allowed_depo', 'all')
+    depo = request.args.get('depo')
+    tour_number = request.args.get('tour_number')
+    if allowed_depo != 'all' and allowed_depo != depo:
+        return jsonify({"error": "Nincs jogosultság a kért adatokhoz!"}), 403
+    conn = get_db_connection()
+    sql = "SELECT * FROM stops WHERE depo = ? AND tour_number = ?"
+    rows = conn.execute(sql, (depo, tour_number)).fetchall()
+    conn.close()
+    details_list = [dict(row) for row in rows]
+    details_list = sorted(details_list, key=lambda r: r['start_time'])
+
+    pdf = PDF(orientation='P', format='A4')
+    font_path = os.path.join(os.path.dirname(__file__), 'fonts', 'DejaVuSans.ttf')
+    pdf.add_font('DejaVuSans', '', font_path, uni=True)
+    pdf.add_font('DejaVuSans', '', 'DejaVuSans.ttf', uni=True)
+    pdf.set_font('DejaVuSans', '', 8)
+    pdf.set_auto_page_break(auto=True, margin=10)
+
+    headers = ['Depó', 'Túraszám', 'Település', 'Irányítószám', 'Közterület', 'Időintervallum', 'Dátum']
+    col_widths = [30, 15, 35, 20, 40, 30, 20]
+    pdf.table_header = headers
+    pdf.col_widths = col_widths
+    pdf.row_height = 8
+
+    pdf.add_page()
+    table_width = sum(col_widths)
+    start_x = (pdf.w - table_width) / 2
+
+    for row in details_list:
+        pdf.set_x(start_x)
+        interval = f"{row['start_time']} - {row['end_time']}"
+        row_data = [
+            row['depo'],
+            str(row['tour_number']),
+            row['city'],
+            row['postal_code'],
+            row['street'],
+            interval,
+            row['date']
+        ]
+        for data, width in zip(row_data, col_widths):
+            pdf.cell(width, pdf.row_height, str(data)[:20], border=1, align='C')
+        pdf.ln(pdf.row_height)
+
+    pdf_output = pdf.output(dest='S').encode('latin1')
+    buffer = io.BytesIO(pdf_output)
+    filename = f"{depo}_{tour_number}.pdf"
+    return send_file(buffer, mimetype='application/pdf', as_attachment=True, download_name=filename)
+
+@app.route('/suggest')
+def suggest():
+    if 'username' not in session:
+        return jsonify([])
+    allowed_depo = session.get('allowed_depo', 'all')
+    field = request.args.get('field')
+    q = request.args.get('q', '')
+    if field not in ['city', 'street']:
+        return jsonify([])
+    conn = get_db_connection()
+    params = []
+    if field == 'street':
+        city = request.args.get('city', '')
+        sql = "SELECT DISTINCT street FROM stops WHERE street LIKE ?"
+        params.append(f"%{q}%")
+        if city:
+            sql += " AND city LIKE ?"
+            params.append(f"%{city}%")
+        if allowed_depo != 'all':
+            sql += " AND depo = ?"
+            params.append(allowed_depo)
+        sql += " ORDER BY street LIMIT 10"
+        suggestions = conn.execute(sql, params).fetchall()
+    else:
+        sql = "SELECT DISTINCT city FROM stops WHERE city LIKE ?"
+        params.append(f"%{q}%")
+        if allowed_depo != 'all':
+            sql += " AND depo = ?"
+            params.append(allowed_depo)
+        sql += " ORDER BY city LIMIT 10"
+        suggestions = conn.execute(sql, params).fetchall()
+    conn.close()
+
+    result = [row[field] for row in suggestions if row[field]]
+    return jsonify(result)
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5012, debug=False)
+
+
+
+
+Cél: 
+
+Index és login html (és persze icon, stb, ) fájlok kerüljenek át a GITHUB-ra, a https://github.com/szilard-f/F_Drive/tree/main/ffrost/turainfo könyvátba, mely a https://fdriveanalytics.com/ffrost/turainfo/login.html címen érhető el. 
+
+Természetesen úgy, hogy a routeren futó alkalmazás által nyújtott adatokat elérjék a weboldalak és tökéletesen működenek is minden funkciójukat tekintve!
+
+Kérlek, alaposan tanulmáynozz át mindent és a módosított fájlokat készítsd el magyarázatokkal együtt.
