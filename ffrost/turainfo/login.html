@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <link rel="icon" href="/turainfo/static/images/fflogo.png" type="image/png">
-    <link rel="shortcut icon" href="/turainfo/static/images/fflogo.png" type="image/png">
     <title>Bejelentkezés - FF_túraadatok</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
 <div class="container" style="max-width: 400px; margin-top: 100px;">
     <h3>Bejelentkezés</h3>
+    <!-- Hibák, stb. megjelenítése -->
     {% if error %}
-        <div class="alert alert-danger">{{ error }}</div>
+      <div class="alert alert-danger">{{ error }}</div>
     {% endif %}
     <form method="post" action="login">
         <div class="form-group">
-            <label>Felhasználónév v. depó (pl. depo02)</label>
+            <label>Felhasználónév vagy depó (pl. depo02)</label>
             <input type="text" name="username" class="form-control" required>
         </div>
         <div class="form-group">
@@ -24,6 +24,24 @@
         </div>
         <button type="submit" class="btn btn-primary">Bejelentkezés</button>
     </form>
+    <!-- Dinamikus adatok megjelenítése -->
+    <div id="dynamicData" style="margin-top:20px;"></div>
 </div>
+
+<script>
+    // A routeren futó API URL-je; állítsd be a megfelelő URL-t/portot!
+    const apiUrl = "https://fabuszilard.myftp.org:5012/api/userdata";
+
+    fetch(apiUrl)
+      .then(response => response.json())
+      .then(data => {
+          // Például megjelenítheted a backendről kapott üzenetet
+          document.getElementById("dynamicData").innerText = data.message;
+      })
+      .catch(error => {
+          console.error("API hiba:", error);
+          document.getElementById("dynamicData").innerText = "Nem sikerült az adatokat lekérni.";
+      });
+</script>
 </body>
 </html>
