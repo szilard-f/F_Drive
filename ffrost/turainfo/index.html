@@ -5,13 +5,10 @@
     <!-- Statikus erőforrások relatív útvonalon -->
     <link rel="icon" href="static/images/fflogo.png" type="image/png">
     <link rel="shortcut icon" href="static/images/fflogo.png" type="image/png">
-
     <title>FF_túraadatok - részletes lekérdezés</title>
-
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-
     <style>
         .btn {
             display: inline-flex;
@@ -27,10 +24,9 @@
     <h3>
         <span class="red">F</span><span class="blue">F</span>_túraadatok - részletes lekérdezés
     </h3>
-
-    <!-- A kijelentkezés gombnál az URL-t abszolút URL-re módosítjuk -->
+    <!-- A kijelentkezés gomb abszolút URL-t használ -->
     <a href="https://fabuszilard.myftp.org/turainfo/logout" class="btn btn-secondary" style="float:right; margin-top:-40px;">Kijelentkezés</a>
-
+    
     <div class="form-group">
         <label for="search-input">Település vagy irányítószám</label>
         <input type="text" id="search-input" class="form-control" placeholder="Pl. Budapest vagy 1037" style="width:300px;">
@@ -53,15 +49,13 @@
 
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-
 <!-- Az oldal elhagyásakor a kijelentkezés is a dinamikus backend URL-jére hivatkozik -->
 <script>
   window.addEventListener("beforeunload", function () {
     navigator.sendBeacon("https://fabuszilard.myftp.org/turainfo/logout");
   });
 </script>
-
-<!-- Definiálunk egy globális változót, amely tartalmazza a dinamikus Flask-alkalmazás URL-jét -->
+<!-- Globális változó a backend URL számára -->
 <script>
 const backendUrl = "https://fabuszilard.myftp.org/turainfo/";
 </script>
@@ -73,12 +67,15 @@ $(document).ready(function(){
         return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     }
 
-    // Autocomplete városokhoz: a kérések most az abszolút URL-re mennek
+    // Autocomplete városokhoz
     $('#search-input').autocomplete({
         source: function(request, response) {
             $.ajax({
                 url: backendUrl + 'suggest',
                 data: { field: 'city', q: request.term },
+                xhrFields: {
+                    withCredentials: true
+                },
                 success: function(data) {
                     response(data);
                 }
@@ -87,7 +84,7 @@ $(document).ready(function(){
         minLength: 2
     });
 
-    // Autocomplete közterülethez: szintén az abszolút URL-t használja
+    // Autocomplete közterülethez
     $('#street-input').autocomplete({
         source: function(request, response) {
             var selectedCity = $('#search-input').val().trim();
@@ -98,6 +95,9 @@ $(document).ready(function(){
             $.ajax({
                 url: backendUrl + 'suggest',
                 data: { field: 'street', q: request.term, city: selectedCity },
+                xhrFields: {
+                    withCredentials: true
+                },
                 success: function(data) {
                     response(data);
                 }
@@ -125,6 +125,9 @@ $(document).ready(function(){
         $.ajax({
             url: backendUrl + 'search',
             data: { q: query, street: street },
+            xhrFields: {
+                withCredentials: true
+            },
             success: function(data){
                 if(data.error){
                     $('#results').html('<p>Hiba történt: ' + data.error + '</p>');
@@ -165,7 +168,7 @@ $(document).ready(function(){
         });
     });
 
-    // Részletek lekérése abszolút URL-t használva
+    // Részletek lekérése
     $('#results').on('click', '.details-btn', function(){
         var container = $(this).closest('.summary');
         var depo = container.data('depo');
@@ -173,6 +176,9 @@ $(document).ready(function(){
         $.ajax({
             url: backendUrl + 'details',
             data: { depo: depo, tour_number: tour_number },
+            xhrFields: {
+                withCredentials: true
+            },
             success: function(data){
                 if (!data || !data[0]) {
                     $('#details').html('<p>Nincs részlet.</p>');
@@ -217,7 +223,7 @@ $(document).ready(function(){
         });
     });
 
-    // PDF letöltés: a link abszolút URL-t használ
+    // PDF letöltés
     $('#results').on('click', '.pdf-btn', function(){
         var container = $(this).closest('.summary');
         var depo = container.data('depo');
