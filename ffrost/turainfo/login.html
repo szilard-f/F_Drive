@@ -2,7 +2,7 @@
 <html lang="hu">
 <head>
     <meta charset="UTF-8">
-    <!-- Statikus erőforrások: a GitHub-on elérhető fájlokhoz relatív útvonal -->
+    <!-- Statikus erőforrások relatív útvonallal -->
     <link rel="icon" href="static/images/fflogo.png" type="image/png">
     <link rel="shortcut icon" href="static/images/fflogo.png" type="image/png">
     <title>FF_túraadatok - Bejelentkezés</title>
@@ -11,8 +11,9 @@
 <body>
 <div class="container" style="max-width: 400px; margin-top: 100px;">
     <h3>Bejelentkezés</h3>
-    <!-- Hibaüzenet megjelenítése itt nem történik, mert nincs backend feldolgozás -->
-    <form method="post" action="https://fabuszilard.myftp.org/turainfo/login">
+    <!-- Hibák megjelenítésére szolgáló hely -->
+    <div id="errorMsg" class="alert alert-danger" style="display: none;"></div>
+    <form id="loginForm" method="post" action="https://fabuszilard.myftp.org/turainfo/login">
         <div class="form-group">
             <label>Felhasználónév v. depó (pl. depo02)</label>
             <input type="text" name="username" class="form-control" required>
@@ -24,5 +25,36 @@
         <button type="submit" class="btn btn-primary">Bejelentkezés</button>
     </form>
 </div>
+
+<!-- jQuery betöltése -->
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script>
+$(document).ready(function(){
+    $('#loginForm').on('submit', function(e){
+        e.preventDefault(); // Megakadályozzuk a hagyományos űrlapküldést
+        // Elrejtjük az esetleges előző hibákat
+        $('#errorMsg').hide().text('');
+        
+        $.ajax({
+            url: $(this).attr('action'),
+            type: 'POST',
+            data: $(this).serialize(),
+            xhrFields: { withCredentials: true }, // Küldjük el a cookie-kat is
+            success: function(response){
+                if(response.success) {
+                    // Sikeres bejelentkezés esetén átirányítás
+                    window.location.href = response.redirect;
+                } else {
+                    // Hibás bejelentkezés esetén megjelenítjük a hibaüzenetet
+                    $('#errorMsg').text(response.error).show();
+                }
+            },
+            error: function(){
+                $('#errorMsg').text('Hiba történt a bejelentkezés során.').show();
+            }
+        });
+    });
+});
+</script>
 </body>
 </html>
