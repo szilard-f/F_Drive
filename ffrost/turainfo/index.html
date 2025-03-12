@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    
+    <link rel="icon" href="/turainfo/static/images/fflogo.png" type="image/png">
+    <link rel="shortcut icon" href="/turainfo/static/images/fflogo.png" type="image/png">
+
+    <title>FF_túraadatok</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+    <style>
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .red { color: red; font-weight: bold; }
+        .blue { color: blue; font-weight: bold; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h3>
+        <span class="red">F</span><span class="blue">F</span>_túraadatok - részletes lekérdezés
+    </h3>
+
+    <a href="logout" class="btn btn-secondary" style="float:right; margin-top:-40px;">Kijelentkezés</a>
+
+    <div class="form-group">
+        <label for="search-input">Település vagy irányítószám</label>
+        <input type="text" id="search-input" class="form-control" placeholder="Pl. Budapest vagy 1037" style="width:300px;">
+        <!-- Rejtett mező, amelyben eltároljuk az autocomplete-tel kiválasztott települést -->
+        <input type="hidden" id="selected-city">
+    </div>
+    <div class="form-group">
+        <label for="street-input">Közterület (opcionális)</label>
+        <input type="text" id="street-input" class="form-control" placeholder="Közterület" style="width:300px;">
+        <small id="streetHelp" class="form-text text-muted">
+            A közterület szűrés csak település megadása után működik!
+        </small>
+    </div>
+    <div class="d-flex align-items-center">
+        <button id="search-btn" class="btn btn-primary">Keresés</button>
+        <button id="clear-btn" class="btn btn-danger" style="margin-left: 82px;">Szűrések törlése</button>
+    </div>
+    <hr>
+    <div id="results"></div>
+    <div id="details"></div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script>
+  window.addEventListener("beforeunload", function () {
+    navigator.sendBeacon("logout");
+  });
+</script>
+
+<script>
+$(document).ready(function(){
+
+    // Ékezetek eltávolítására szolgáló függvény
+    function removeAccents(str) {
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    // Alapértelmezetten legyen üres a rejtett input
+    $('#selected-city').val('');
+
+    // Település/autocomplete
+    $('#search-input').autocomplete({
+        source: function(request, response) {
+            $.ajax({
+                url: 'suggest',
+                data: { field: 'city', q: request.term },
+                success: function(data) {
+                    response(data);
+                }
+            });
+        },
+        minLength: 2,
+        // Ha itt ténylegesen kiválasztasz valamit a listából, elmentjük a rejtett mezőbe
+        select: function(event, ui) {
+            $('#selected-city').val(ui.item.value);
+        }
+    });
+
+    // Ha a felhasználó módosítja a szöveget, és az már nem egyezik a kiválasztott településsel, töröljük a rejtett mezőt
+    $('#search-input').on('input', function() {
+        if ($(this).val() !== $('#selected-city').val()) {
+            $('#selected-city').val('');
+        }
+    });
+
+    // Közterület/autocomplete
+    $('#street-input').autocomplete({
+        source: function(request, response) {
+            var selectedCity = $('#search-input').val().trim();
+            if (!selectedCity) {
+                response([]);
+                return;
+            }
+            $.ajax({
+                url: 'suggest',
+                data: { field: 'street', q: request.term, city: selectedCity },
+                success: function(data) {
+                    response(data);
+                }
+            });
+        },
+        minLength: 2
+    });
+
+    $('#clear-btn').click(function(){
+        $('#search-input').val('');
+        $('#street-input').val('');
+        $('#selected-city').val('');
+        $('#results').html('');
+        $('#details').html('');
+    });
+
+    $('#search-btn').click(function(){
+        var query = $('#search-input').val().trim();
+        var street = $('#street-input').val().trim();
+        var selectedCity = $('#selected-city').val().trim();
+        
+        // Ha a felhasználó valóban kiválasztott valamit a listából, és a beírt érték is ugyanaz, akkor exaktra szűrünk
+        var isExactMatch = (query && selectedCity && query.toLowerCase() === selectedCity.toLowerCase());
+
+        $('#results').html('');
+        $('#details').html('');
+        if(query === ''){
+            alert("Kérem adja meg a települést vagy irányítószámot!");
+            return;
+        }
+
+        $.ajax({
+            url: 'search',
+            data: { q: query, street: street },
+            success: function(data){
+                if(data.error){
+                    $('#results').html('<p>Hiba történt: ' + data.error + '</p>');
+                    return;
+                }
+                if(data.length === 0){
+                    $('#results').html('<p>Nincs találat.</p>');
+                } else {
+                    // Ha van exaktra szűrés, akkor kliense oldalon kiszűrjük a nem pontos találatokat
+                    if(isExactMatch) {
+                        data = data.filter(function(item){
+                            // Városnév ékezetmentes összehasonlítás, vagy irányítószám pontos egyezés
+                            return removeAccents(item.city.toLowerCase()) === removeAccents(query.toLowerCase())
+                                   || item.postal_code === query;
+                        });
+                    }
+
+                    if(data.length === 0){
+                        $('#results').html('<p>Nincs találat.</p>');
+                        return;
+                    }
+
+                    var tableHtml = '<table class="table table-bordered"><thead><tr>' +
+                        '<th class="text-center">Depó</th>'+
+                        '<th class="text-center">Túraszám</th>'+
+                        '<th class="text-center">Település</th>'+
+                        '<th class="text-center">Irányítószám</th>'+
+                        '<th class="text-center">Közterület</th>'+
+                        '<th class="text-center">Nap</th>'+
+                        '<th class="text-center">Időintervallum</th>'+
+                        '<th class="text-center">Műveletek</th>'+
+                        '</tr></thead><tbody>';
+                    data.forEach(function(item){
+                        tableHtml += '<tr class="summary" data-depo="'+item.depo+'" data-tour_number="'+item.tour_number+'">' +
+                            '<td class="text-center">'+item.depo+'</td>' +
+                            '<td class="text-center">'+item.tour_number+'</td>' +
+                            '<td>'+item.city+'</td>' +
+                            '<td class="text-center">'+item.postal_code+'</td>' +
+                            '<td>'+item.street+'</td>' +
+                            '<td class="text-center">'+item.date+'</td>' +
+                            '<td class="text-center">'+item.time_interval+'</td>' +
+                            '<td class="text-center">' +
+                                '<button class="btn btn-info btn-sm details-btn">Részletek</button> ' +
+                                '<button class="btn btn-secondary btn-sm pdf-btn">PDF letöltés</button>' +
+                            '</td>' +
+                            '</tr>';
+                    });
+                    tableHtml += '</tbody></table>';
+                    $('#results').html(tableHtml);
+                }
+            }
+        });
+    });
+
+    $('#results').on('click', '.details-btn', function(){
+        var container = $(this).closest('.summary');
+        var depo = container.data('depo');
+        var tour_number = container.data('tour_number');
+        $.ajax({
+            url: 'details',
+            data: { depo: depo, tour_number: tour_number },
+            success: function(data){
+                if (!data || !data[0]) {
+                    $('#details').html('<p>Nincs részlet.</p>');
+                    return;
+                }
+                var rawDate = data[0].date;
+                var cleaned = rawDate.replace(/\.$/, "").trim().replace(/\-/g, ".");
+                var jsDate = new Date(cleaned);
+                var weekdayMap = {0:"vasárnap", 1:"hétfő", 2:"kedd", 3:"szerda", 4:"csütörtök", 5:"péntek", 6:"szombat"};
+                var weekday = isNaN(jsDate.getDay()) ? rawDate : weekdayMap[jsDate.getDay()];
+                var formattedDate = weekday + " (" + cleaned + ")";
+
+                var detailsHtml = '<h5>Dátum: <span class="text-primary">'+formattedDate+'</span></h5>';
+                detailsHtml += '<table class="table table-bordered"><thead><tr>'+
+                    '<th class="text-center">Depó</th>'+
+                    '<th class="text-center">Túraszám</th>'+
+                    '<th class="text-center">Település</th>'+
+                    '<th class="text-center">Irányítószám</th>'+
+                    '<th class="text-center">Közterület</th>'+
+                    '<th class="text-center">Időintervallum</th>'+
+                    '<th class="text-center">Térkép</th>'+
+                    '</tr></thead><tbody>';
+                data.forEach(function(row){
+                    
+                    var normalizedCity = removeAccents(row.city.trim());
+                    var normalizedStreet = removeAccents(row.street.trim());
+                    
+                    // Példa regex kezelés: utca, stb.
+                    normalizedStreet = normalizedStreet.replace(/^(?!dr\b)([^\s]+)\s+.+\s+(utca)$/i, "$1 $2");
+                    
+                    var postal = row.postal_code.trim();
+                    var mapUrl = 'https://www.google.com/maps/place/'
+                        + encodeURIComponent(normalizedCity) + ',+'
+                        + encodeURIComponent(normalizedStreet) + ',+'
+                        + encodeURIComponent(postal);
+                    detailsHtml += '<tr>'+
+                        '<td class="text-center">'+row.depo+'</td>'+
+                        '<td class="text-center">'+row.tour_number+'</td>'+
+                        '<td>'+row.city+'</td>'+
+                        '<td class="text-center">'+row.postal_code+'</td>'+
+                        '<td>'+row.street+'</td>'+
+                        '<td class="text-center">'+row.start_time+' - '+row.end_time+'</td>'+
+                        '<td class="text-center"><a href="'+mapUrl+'" target="_blank"><i class="fas fa-map-marker-alt"></i></a></td>'+
+                        '</tr>';
+                });
+                detailsHtml += '</tbody></table>';
+                $('#details').html(detailsHtml);
+            }
+        });
+    });
+
+    $('#results').on('click', '.pdf-btn', function(){
+        var container = $(this).closest('.summary');
+        var depo = container.data('depo');
+        var tour_number = container.data('tour_number');
+  
+        window.open('pdf?depo=' + encodeURIComponent(depo) + '&tour_number=' + encodeURIComponent(tour_number));
+    });
+
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+   
+    <link rel="icon" href="/turainfo/static/images/fflogo.png" type="image/png">
+	<link rel="shortcut icon" href="/turainfo/static/images/fflogo.png" type="image/png">
+    <title>FF_túraadatok</title>
+    <title>Bejelentkezés</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container" style="max-width: 400px; margin-top: 100px;">
+    <h3>Bejelentkezés</h3>
+    {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+
+    <form method="post" action="login">
+        <div class="form-group">
+            <label>Felhasználónév v. depó (pl. depo02)</label>
+            <input type="text" name="username" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label>Jelszó</label>
+            <input type="password" name="password" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Bejelentkezés</button>
+    </form>
+</div>
+</body>
+</html>
