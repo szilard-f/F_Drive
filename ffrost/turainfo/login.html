@@ -2,7 +2,7 @@
 <html lang="hu">
 <head>
     <meta charset="UTF-8">
-    <!-- Statikus erőforrások: mivel a fájlok a GitHub-on lesznek, relatív útvonalat használunk -->
+    <!-- Statikus erőforrások: a GitHub-on elérhető fájlokhoz relatív útvonal -->
     <link rel="icon" href="static/images/fflogo.png" type="image/png">
     <link rel="shortcut icon" href="static/images/fflogo.png" type="image/png">
     <title>FF_túraadatok - Bejelentkezés</title>
@@ -11,11 +11,7 @@
 <body>
 <div class="container" style="max-width: 400px; margin-top: 100px;">
     <h3>Bejelentkezés</h3>
-    {% if error %}
-        <div class="alert alert-danger">{{ error }}</div>
-    {% endif %}
-
-    <!-- A form action most abszolút URL-re mutat, hogy a bejelentkezés a routeren futó dinamikus alkalmazáshoz kerüljön -->
+    <!-- Hibaüzenet megjelenítése itt nem történik, mert nincs backend feldolgozás -->
     <form method="post" action="https://fabuszilard.myftp.org/turainfo/login">
         <div class="form-group">
             <label>Felhasználónév v. depó (pl. depo02)</label>
