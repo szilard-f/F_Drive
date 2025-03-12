@@ -31,25 +31,22 @@
 <script>
 $(document).ready(function(){
     $('#loginForm').on('submit', function(e){
-        e.preventDefault(); // Megakadályozzuk a hagyományos űrlapküldést
-        // Elrejtjük az esetleges előző hibákat
-        $('#errorMsg').hide().text('');
-        
+        e.preventDefault(); // Ne küldje el hagyományosan az űrlapot
+
         $.ajax({
-            url: $(this).attr('action'),
+            url: "https://fdriveanalytics.com/ffrost/turainfo/login", // Ellenőrizd az URL-t
             type: 'POST',
             data: $(this).serialize(),
-            xhrFields: { withCredentials: true }, // Küldjük el a cookie-kat is
+            xhrFields: { withCredentials: true }, // Cookie-k küldése
             success: function(response){
                 if(response.success) {
-                    // Sikeres bejelentkezés esetén átirányítás
                     window.location.href = response.redirect;
                 } else {
-                    // Hibás bejelentkezés esetén megjelenítjük a hibaüzenetet
                     $('#errorMsg').text(response.error).show();
                 }
             },
-            error: function(){
+            error: function(xhr){
+                console.log(xhr);
                 $('#errorMsg').text('Hiba történt a bejelentkezés során.').show();
             }
         });
