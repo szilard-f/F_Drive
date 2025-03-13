@@ -2,7 +2,7 @@
 <html lang="hu">
 <head>
     <meta charset="UTF-8">
-    <!-- Statikus erőforrások relatív útvonallal -->
+
     <link rel="icon" href="static/images/fflogo.png" type="image/png">
     <link rel="shortcut icon" href="static/images/fflogo.png" type="image/png">
     <title>FF_túraadatok - Bejelentkezés</title>
@@ -11,7 +11,7 @@
 <body>
 <div class="container" style="max-width: 400px; margin-top: 100px;">
     <h3>Bejelentkezés</h3>
-    <!-- Hibák megjelenítésére szolgáló hely -->
+
     <div id="errorMsg" class="alert alert-danger" style="display: none;"></div>
     <form id="loginForm" method="post" action="https://fabuszilard.myftp.org/turainfo/login">
         <div class="form-group">
@@ -31,21 +31,20 @@
 <script>
 $(document).ready(function(){
     $('#loginForm').on('submit', function(e){
-        e.preventDefault(); // Megakadályozzuk a hagyományos űrlapküldést
-        // Elrejtjük az esetleges előző hibákat
+        e.preventDefault(); 
         $('#errorMsg').hide().text('');
         
         $.ajax({
             url: $(this).attr('action'),
             type: 'POST',
             data: $(this).serialize(),
-            xhrFields: { withCredentials: true }, // Küldjük el a cookie-kat is
+            xhrFields: { withCredentials: true }, 
             success: function(response){
                 if(response.success) {
-                    // Sikeres bejelentkezés esetén átirányítás
+              
                     window.location.href = response.redirect;
                 } else {
-                    // Hibás bejelentkezés esetén megjelenítjük a hibaüzenetet
+                
                     $('#errorMsg').text(response.error).show();
                 }
             },
