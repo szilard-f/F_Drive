@@ -148,7 +148,6 @@
           lastTime = player.currentTime;
         });
         player.on('seeking', () => {
-          // Ha a seek ugrás túl nagy, visszaállítjuk az előző értékre
           if (Math.abs(player.currentTime - lastTime) > 1) {
             player.currentTime = lastTime;
           }
