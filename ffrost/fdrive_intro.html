@@ -2,10 +2,10 @@
 <html lang="hu">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>F_Drive_intro</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.2/dist/plyr.css" />
-    <link rel="icon" href="/ffrost/fdrive/images/icon.png" type="image/png">   
+    <link rel="icon" href="/ffrost/fdrive/images/icon.png" type="image/png" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
     <style>
@@ -15,7 +15,7 @@
         padding: 0;
       }
       
-        #intro-header {
+      #intro-header {
         text-align: center;
       }
       
@@ -38,7 +38,7 @@
       #ticker {
         position: fixed;
         top: 20px;
-        left: 100vw; 
+        left: 100vw;
         z-index: 9999;
         background: rgba(255, 0, 0, 0.8);
         padding: 0.5rem 1rem;
@@ -48,6 +48,15 @@
         font-weight: bold;
         display: none; /* alapból rejtve */
       }
+      
+      #plyr-container {
+        position: fixed;
+        top: 40%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1; /* Alacsonyabb, mint a ticker és logo */
+        max-width: 90%; /* Opció: reszponzivitás miatt */
+      }
     </style>
   </head>
   <body class="text-white flex flex-col items-center min-h-screen">
@@ -56,17 +65,23 @@
     <div id="plyr-container" class="relative w-full max-w-4xl mx-auto mt-12">
       <video id="player" class="w-full h-auto rounded-xl shadow" playsinline controls>
         <source src="https://fabuszilard.myftp.org/fdriveintro" type="video/mp4">
-
         A böngésződ nem támogatja a videólejátszást.
       </video>
     </div>
-    <div id="ticker">Amennyiben a program felkeltette az érdeklődésedet, az áprilisi elszámolást követően 5 percben szívesen beszélek róla. Természetesen nem kötelező, mint ahogy a használata sem. (Semmi prezi, csak pár szó!)</div>
-    
+    <div
+      id="fullscreenTicker"
+      style="position: fixed; bottom: 10px; width: 100%; text-align: center; color: white; background: rgba(0,0,0,0.5); padding: 0.5rem; display: none;"
+    >
+      Nyomj F11-et a teljes képernyő módhoz!
+    </div>
+    <div id="ticker">
+      Ha többet szeretnél megtudni a programról – anélkül, hogy bárki idejét pazarolnám – az áprilisi elszámolás után 5 perc keretében szívesen beszélek a részletekről. Természetesen nem kötelező, akárcsak a használata sem; nem lesz semmiféle prezentáció, csupán néhány szó.
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/plyr@3.7.2/dist/plyr.polyfilled.js"></script>
     <script>
       const container = document.getElementById('plyr-container');
       const player = new Plyr('#player', {
-        controls: ['play', 'mute', 'volume', 'fullscreen'],
+        controls: ['play', 'mute', 'volume'],
         fullscreen: {
           enabled: true,
           fallback: true,
@@ -75,18 +90,60 @@
         }
       });
       
-      const start1 = 552, end1 = 557, start2 = 826, end2 = 832;
+      const images = [
+        "../ffrost/fdrive/images/background.jpg",
+        "../ffrost/fdrive/images/stars.jpg",
+        "../ffrost/fdrive/images/brownold.jpg",
+        "../ffrost/fdrive/images/brown.jpg",
+        "../ffrost/fdrive/images/fbackground.jpg"
+      ];
+      
+      images.forEach(src => {
+        const img = new Image();
+        img.src = src;
+      });
+      
+      const start1 = 611.4, end1 = 616.5, start2 = 888, end2 = 893;
+      const start3 = 11, end3 = 329;
+      const start4 = 334, end4 = 498;
+      const start5 = 498, end5 = 573;
+      const start6 = 619, end6 = 888;
+      
       player.on('timeupdate', () => {
         const t = player.currentTime;
+      
+        
         if ((t >= start1 && t <= end1) || (t >= start2 && t <= end2)) {
           document.body.style.background = "url('../ffrost/fdrive/images/background.jpg') no-repeat center center";
           document.body.style.backgroundSize = "cover";
-        } else {
+        }
+        
+        else if (t >= start3 && t <= end3) {
+          document.body.style.background = "url('../ffrost/fdrive/images/stars.jpg') no-repeat center center";
+          document.body.style.backgroundSize = "cover";
+        }
+        
+        else if (t >= start4 && t <= end4) {
+          document.body.style.background = "url('../ffrost/fdrive/images/brownold.jpg') no-repeat center center";
+          document.body.style.backgroundSize = "cover";
+        }
+        
+        else if (t >= start5 && t <= end5) {
+          document.body.style.background = "url('../ffrost/fdrive/images/brown.jpg') no-repeat center center";
+          document.body.style.backgroundSize = "cover";
+        }
+        
+        else if (t >= start6 && t <= end6) {
+          document.body.style.background = "url('../ffrost/fdrive/images/fbackground.jpg') no-repeat center center";
+          document.body.style.backgroundSize = "cover";
+        }
+        
+        else {
           document.body.style.background = "black";
         }
       });
       
-      const SWITCH_TIME = 620;
+      const SWITCH_TIME = 660;
       player.on('timeupdate', () => {
         if (player.currentTime >= SWITCH_TIME) {
           document.getElementById('intro-header').style.visibility = 'hidden';
@@ -101,22 +158,22 @@
         }
       });
       
-      const TICKER_START_TIME = 600;
+      const TICKER_START_TIME = 640;
       let tickerTween = null;
       let tickerActive = false;
       const tickerEl = document.getElementById('ticker');
-
+      
       function startTicker() {
         tickerEl.style.display = 'block';
-        gsap.set(tickerEl, { left: "100vw" });
+        gsap.set(tickerEl, { left: window.innerWidth + "px" });
         const tickerWidth = tickerEl.offsetWidth;
         tickerTween = gsap.to(tickerEl, {
           duration: 20,
-          left: -tickerWidth,
+          left: -tickerWidth + "px",
           ease: "none"
         });
       }
-
+      
       function stopTicker() {
         if (tickerTween) {
           tickerTween.kill();
@@ -124,8 +181,6 @@
         }
         tickerEl.style.display = 'none';
       }
-      
-    
       
       player.on('timeupdate', () => {
         const t = player.currentTime;
@@ -140,19 +195,19 @@
           stopTicker();
         }
       });
-
-    
-    
-        let lastTime = 0;
-        player.on('timeupdate', () => {
-          lastTime = player.currentTime;
-        });
-        player.on('seeking', () => {
-          if (Math.abs(player.currentTime - lastTime) > 1) {
-            player.currentTime = lastTime;
-          }
-        });
-
+      
+      
+      let lastTime = 0;
+      player.on('timeupdate', () => {
+        lastTime = player.currentTime;
+      });
+      player.on('seeking', () => {
+        if (Math.abs(player.currentTime - lastTime) > 1) {
+          player.currentTime = lastTime;
+        }
+      });
+      
+      
       document.addEventListener('fullscreenchange', () => {
         if (document.fullscreenElement) {
           document.fullscreenElement.appendChild(tickerEl);
