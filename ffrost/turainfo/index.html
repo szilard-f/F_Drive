@@ -6,23 +6,16 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
 
-    <!-- A favicon és a logo is innen töltődik -->
-    <link rel="icon" href="%%BACKEND_URL%%static/images/fdlogo.png" type="image/png">
-    <link rel="shortcut icon" href="%%BACKEND_URL%%static/images/fdlogo.png" type="image/png">
     <title>FF_túraadatok - részletes lekérdezés</title>
 
-    <!-- Külső CSS-ek -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384‑..." crossorigin="anonymous">
+    <!-- Bootstrap, jQuery UI, Font‑Awesome -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 
     <style>
         :root {
-            /* Itt állíthatod a logó méretét */
-            --logo-size: 180px;
-        }
-        body {
-            padding-top: 1rem;
+            --logo-size: 80px;
         }
         .logo-container img {
             width: var(--logo-size);
@@ -35,7 +28,6 @@
         }
         .red { color: red; font-weight: bold; }
         .blue { color: blue; font-weight: bold; }
-        /* minden táblázat fejlécét középre igazítjuk */
         table.table th {
             text-align: center !important;
             vertical-align: middle;
@@ -44,11 +36,11 @@
 </head>
 <body>
     <div class="container my-3">
-        <!-- Flex-sor: balon a cím, jobbra a logó -->
+        <!-- fejléc sor: balra cím, jobbra logó -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h3><span class="red">F</span><span class="blue">F</span>_túraadatok – részletes lekérdezés</h3>
             <div class="logo-container">
-                <img id="site-logo" src="%%BACKEND_URL%%static/images/fdlogo.png" alt="FF logo">
+                <img id="logo" src="" alt="FF logo">
             </div>
         </div>
 
@@ -65,76 +57,60 @@
             <button id="search-btn" class="btn btn-primary">Keresés</button>
             <button id="clear-btn" class="btn btn-danger ml-3">Szűrések törlése</button>
         </div>
+
         <hr>
         <div id="results"></div>
         <div id="details"></div>
     </div>
 
-    <!-- JS háttér URL beállítása -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script>
-      // Ide írd be a saját routered IP-címét vagy DNS nevét, végül a Flask app alapútvonalát:
-      const backendUrl = "http://192.168.1.1:5012/"; 
-    </script>
+    // ide írd a routered címét:
+    const backendUrl = "http://192.168.1.101:5012";
 
-    <!-- Külső JS-ek -->
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha384‑..." crossorigin="anonymous"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js" integrity="sha384‑..." crossorigin="anonymous"></script>
+    // logó beállítása
+    document.getElementById('logo').src = backendUrl + '/static/images/fdlogo.png';
 
-    <script>
     $(function(){
         function removeAccents(str){
             return str.normalize("NFD").replace(/[\u0300-\u036f]/g,"");
         }
 
         $('#search-input').autocomplete({
-            source: function(req, res){
-                $.ajax({
-                    url: backendUrl + 'suggest',
-                    data: { field:'city', q:req.term },
-                    xhrFields: { withCredentials: true },
-                    success: res
-                });
-            },
+            source: (req, res) => $.getJSON(backendUrl+'/suggest',{field:'city',q:req.term},res),
             minLength: 2
         });
 
         $('#street-input').autocomplete({
-            source: function(req, res){
+            source: (req, res) => {
                 const city = $('#search-input').val().trim();
                 if(!city){ return res([]); }
-                $.ajax({
-                    url: backendUrl + 'suggest',
-                    data: { field:'street', q:req.term, city:city },
-                    xhrFields: { withCredentials: true },
-                    success: res
-                });
+                $.getJSON(backendUrl+'/suggest',{field:'street',q:req.term,city},res);
             },
             minLength: 2
         });
 
-        $('#clear-btn').click(function(){
+        $('#clear-btn').click(()=>{
             $('#search-input,#street-input').val('');
             $('#results,#details').empty();
         });
 
-        $('#search-btn').click(function(){
+        $('#search-btn').click(()=>{
             const q = $('#search-input').val().trim(),
                   s = $('#street-input').val().trim();
             $('#results,#details').empty();
-            if(!q){
-                alert("Kérem adja meg a települést vagy irányítószámot!");
-                return;
-            }
+            if(!q){ return alert("Kérem adja meg a települést vagy irányítószámot!"); }
+
             $.ajax({
-                url: backendUrl + 'search',
-                data: { q:q, street:s },
-                xhrFields: { withCredentials: true },
-                success: function(resp){
-                    // admin-admin eset: tours_count visszaadása
-                    if(resp.length && resp[0].tours_count !== undefined){
+                url: backendUrl + '/search',
+                data: { q, street: s },
+                success(resp){
+                    // admin–admin összesítés
+                    if(resp.length && resp[0].tours_count!==undefined){
                         let html = '<table class="table table-bordered"><thead><tr>'
-                                 + '<th>Depó és feltöltött túrák száma</th>'
-                                 + '</tr></thead><tbody>';
+                                 +'<th>Depó és feltöltött túrák száma</th>'
+                                 +'</tr></thead><tbody>';
                         resp.forEach(i=>{
                             html += `<tr><td>${i.depo}_${i.tours_count} db</td></tr>`;
                         });
@@ -146,68 +122,56 @@
                         return $('#results').html('<p>Nincs találat.</p>');
                     }
                     let tbl = '<table class="table table-bordered"><thead><tr>'
-                            + '<th class="text-center">Depó</th>'
-                            + '<th class="text-center">Túraszám</th>'
-                            + '<th class="text-center">Település</th>'
-                            + '<th class="text-center">Irányítószám</th>'
-                            + '<th class="text-center">Közterület</th>'
-                            + '<th class="text-center">Nap</th>'
-                            + '<th class="text-center">Időintervallum</th>'
-                            + '<th class="text-center">Műveletek</th>'
-                            + '</tr></thead><tbody>';
+                            +'<th>Depó</th><th>Túraszám</th><th>Település</th>'
+                            +'<th>Irányítószám</th><th>Közterület</th><th>Nap</th>'
+                            +'<th>Időintervallum</th><th>Műveletek</th>'
+                            +'</tr></thead><tbody>';
                     resp.forEach(it=>{
                         tbl += `<tr class="summary" data-depo="${it.depo}" data-tour_number="${it.tour_number}">`
-                             + `<td class="text-center">${it.depo}</td>`
-                             + `<td class="text-center">${it.tour_number}</td>`
-                             + `<td class="text-center">${it.city}</td>`
-                             + `<td class="text-center">${it.postal_code}</td>`
-                             + `<td class="text-center">${it.street}</td>`
-                             + `<td class="text-center">${it.date}</td>`
-                             + `<td class="text-center">${it.time_interval}</td>`
-                             + `<td class="text-center">`
-                             + `<button class="btn btn-info btn-sm details-btn">Részletek</button> `
-                             + `<button class="btn btn-secondary btn-sm pdf-btn">PDF</button>`
-                             + `</td></tr>`;
+                             +`<td class="text-center">${it.depo}</td>`
+                             +`<td class="text-center">${it.tour_number}</td>`
+                             +`<td>${it.city}</td>`
+                             +`<td class="text-center">${it.postal_code}</td>`
+                             +`<td>${it.street}</td>`
+                             +`<td class="text-center">${it.date}</td>`
+                             +`<td class="text-center">${it.time_interval}</td>`
+                             +`<td class="text-center">`
+                               +`<button class="btn btn-info btn-sm details-btn">Részletek</button> `
+                               +`<button class="btn btn-secondary btn-sm pdf-btn">PDF letöltés</button>`
+                             +`</td>`
+                             +`</tr>`;
                     });
                     tbl += '</tbody></table>';
                     $('#results').html(tbl);
                 },
-                error: function(){
+                error(){
                     $('#results').html('<p>Hiba történt a keresés során.</p>');
                 }
             });
+
             // mezők törlése
             $('#search-input,#street-input').val('');
         });
 
         // Részletek
         $('#results').on('click','.details-btn',function(){
-            const $tr = $(this).closest('tr.summary');
-            $.ajax({
-                url: backendUrl + 'details',
-                data: {
-                  depo: $tr.data('depo'),
-                  tour_number: $tr.data('tour_number')
-                },
-                xhrFields: { withCredentials: true },
-                success: html => {
-                    $('#details').html(html);
-                    $('html,body').animate({ scrollTop: $('#details').offset().top }, 500);
-                }
+            const row = $(this).closest('.summary');
+            $.get(backendUrl+'/details',{
+                depo: row.data('depo'),
+                tour_number: row.data('tour_number')
+            }, html=>{
+                $('#details').html(html);
+                $('html,body').animate({scrollTop:$('#details').offset().top},500);
             });
         });
 
         // PDF
         $('#results').on('click','.pdf-btn',function(){
-            const $tr = $(this).closest('tr.summary');
-            window.open(
-              backendUrl + 'pdf?depo='
-              + encodeURIComponent($tr.data('depo'))
-              + '&tour_number='
-              + encodeURIComponent($tr.data('tour_number'))
-            );
+            const row = $(this).closest('.summary');
+            window.open(backendUrl + '/pdf?depo='
+                        +encodeURIComponent(row.data('depo'))
+                        +'&tour_number='+encodeURIComponent(row.data('tour_number')));
         });
-
     });
     </script>
 </body>
