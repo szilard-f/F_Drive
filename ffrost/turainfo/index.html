@@ -5,22 +5,13 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-
+    <link rel="icon" href="static/images/fflogo.png" type="image/png">
+    <link rel="shortcut icon" href="static/images/fflogo.png" type="image/png">
     <title>FF_túraadatok - részletes lekérdezés</title>
-
-    <!-- Bootstrap, jQuery UI, Font‑Awesome -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-
     <style>
-        :root {
-            --logo-size: 80px;
-        }
-        .logo-container img {
-            width: var(--logo-size);
-            height: auto;
-        }
         .btn {
             display: inline-flex;
             align-items: center;
@@ -28,151 +19,230 @@
         }
         .red { color: red; font-weight: bold; }
         .blue { color: blue; font-weight: bold; }
-        table.table th {
-            text-align: center !important;
-            vertical-align: middle;
-        }
     </style>
 </head>
 <body>
-    <div class="container my-3">
-        <!-- fejléc sor: balra cím, jobbra logó -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3><span class="red">F</span><span class="blue">F</span>_túraadatok – részletes lekérdezés</h3>
-            <div class="logo-container">
-                <img id="logo" src="" alt="FF logo">
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label for="search-input">Település vagy irányítószám</label>
-            <input type="text" id="search-input" class="form-control" placeholder="Pl. Budapest vagy 1037" style="width:300px;">
-        </div>
-        <div class="form-group">
-            <label for="street-input">Közterület (opcionális)</label>
-            <input type="text" id="street-input" class="form-control" placeholder="Közterület" style="width:300px;">
-            <small class="form-text text-muted">A közterület szűrés csak település megadása után működik!</small>
-        </div>
-        <div class="d-flex align-items-center mb-3">
-            <button id="search-btn" class="btn btn-primary">Keresés</button>
-            <button id="clear-btn" class="btn btn-danger ml-3">Szűrések törlése</button>
-        </div>
-
-        <hr>
-        <div id="results"></div>
-        <div id="details"></div>
+<div class="container">
+    <h3>
+        <span class="red">F</span><span class="blue">F</span>_túraadatok - részletes lekérdezés
+    </h3>
+    <a href="https://fabuszilard.myftp.org/turainfo/logout" class="btn btn-secondary" style="float:right; margin-top:-40px;">Kijelentkezés</a>
+    
+    <div class="form-group">
+        <label for="search-input">Település vagy irányítószám</label>
+        <input type="text" id="search-input" class="form-control" placeholder="Pl. Budapest vagy 1037" style="width:300px;">
     </div>
+    <div class="form-group">
+        <label for="street-input">Közterület (opcionális)</label>
+        <input type="text" id="street-input" class="form-control" placeholder="Közterület" style="width:300px;">
+        <small id="streetHelp" class="form-text text-muted">
+            A közterület szűrés csak település megadása után működik!
+        </small>
+    </div>
+    <div class="d-flex align-items-center">
+        <button id="search-btn" class="btn btn-primary">Keresés</button>
+        <button id="clear-btn" class="btn btn-danger" style="margin-left: 82px;">Szűrések törlése</button>
+    </div>
+    <hr>
+    <div id="results"></div>
+    <div id="details"></div>
+</div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-    <script>
-    // ide írd a routered címét:
-    const backendUrl = "http://192.168.1.101:5012";
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
-    // logó beállítása
-    document.getElementById('logo').src = backendUrl + '/static/images/fdlogo.png';
 
-    $(function(){
-        function removeAccents(str){
-            return str.normalize("NFD").replace(/[\u0300-\u036f]/g,"");
-        }
+<script>
+  window.addEventListener("beforeunload", function () {
 
-        $('#search-input').autocomplete({
-            source: (req, res) => $.getJSON(backendUrl+'/suggest',{field:'city',q:req.term},res),
-            minLength: 2
-        });
+    navigator.sendBeacon("https://fabuszilard.myftp.org/turainfo/logout");
+  });
+  
 
-        $('#street-input').autocomplete({
-            source: (req, res) => {
-                const city = $('#search-input').val().trim();
-                if(!city){ return res([]); }
-                $.getJSON(backendUrl+'/suggest',{field:'street',q:req.term,city},res);
-            },
-            minLength: 2
-        });
+  window.addEventListener("pageshow", function(event) {
+    if (event.persisted) {
+      window.location.reload();
+    }
+  });
+</script>
 
-        $('#clear-btn').click(()=>{
-            $('#search-input,#street-input').val('');
-            $('#results,#details').empty();
-        });
 
-        $('#search-btn').click(()=>{
-            const q = $('#search-input').val().trim(),
-                  s = $('#street-input').val().trim();
-            $('#results,#details').empty();
-            if(!q){ return alert("Kérem adja meg a települést vagy irányítószámot!"); }
+<script>
+const backendUrl = "https://fabuszilard.myftp.org/turainfo/";
+</script>
 
+<script>
+$(document).ready(function(){
+
+    function removeAccents(str) {
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+
+    $('#search-input').autocomplete({
+        source: function(request, response) {
             $.ajax({
-                url: backendUrl + '/search',
-                data: { q, street: s },
-                success(resp){
-                    // admin–admin összesítés
-                    if(resp.length && resp[0].tours_count!==undefined){
-                        let html = '<table class="table table-bordered"><thead><tr>'
-                                 +'<th>Depó és feltöltött túrák száma</th>'
-                                 +'</tr></thead><tbody>';
-                        resp.forEach(i=>{
-                            html += `<tr><td>${i.depo}_${i.tours_count} db</td></tr>`;
-                        });
-                        html += '</tbody></table>';
-                        return $('#results').html(html);
-                    }
-                    // normál találatok
-                    if(!resp.length){
-                        return $('#results').html('<p>Nincs találat.</p>');
-                    }
-                    let tbl = '<table class="table table-bordered"><thead><tr>'
-                            +'<th>Depó</th><th>Túraszám</th><th>Település</th>'
-                            +'<th>Irányítószám</th><th>Közterület</th><th>Nap</th>'
-                            +'<th>Időintervallum</th><th>Műveletek</th>'
-                            +'</tr></thead><tbody>';
-                    resp.forEach(it=>{
-                        tbl += `<tr class="summary" data-depo="${it.depo}" data-tour_number="${it.tour_number}">`
-                             +`<td class="text-center">${it.depo}</td>`
-                             +`<td class="text-center">${it.tour_number}</td>`
-                             +`<td>${it.city}</td>`
-                             +`<td class="text-center">${it.postal_code}</td>`
-                             +`<td>${it.street}</td>`
-                             +`<td class="text-center">${it.date}</td>`
-                             +`<td class="text-center">${it.time_interval}</td>`
-                             +`<td class="text-center">`
-                               +`<button class="btn btn-info btn-sm details-btn">Részletek</button> `
-                               +`<button class="btn btn-secondary btn-sm pdf-btn">PDF letöltés</button>`
-                             +`</td>`
-                             +`</tr>`;
-                    });
-                    tbl += '</tbody></table>';
-                    $('#results').html(tbl);
+                url: backendUrl + 'suggest',
+                data: { field: 'city', q: request.term },
+                xhrFields: {
+                    withCredentials: true
                 },
-                error(){
-                    $('#results').html('<p>Hiba történt a keresés során.</p>');
+                success: function(data) {
+                    response(data);
                 }
             });
+        },
+        minLength: 2
+    });
 
-            // mezők törlése
-            $('#search-input,#street-input').val('');
-        });
 
-        // Részletek
-        $('#results').on('click','.details-btn',function(){
-            const row = $(this).closest('.summary');
-            $.get(backendUrl+'/details',{
-                depo: row.data('depo'),
-                tour_number: row.data('tour_number')
-            }, html=>{
-                $('#details').html(html);
-                $('html,body').animate({scrollTop:$('#details').offset().top},500);
+    $('#street-input').autocomplete({
+        source: function(request, response) {
+            var selectedCity = $('#search-input').val().trim();
+            if (!selectedCity) {
+                response([]);
+                return;
+            }
+            $.ajax({
+                url: backendUrl + 'suggest',
+                data: { field: 'street', q: request.term, city: selectedCity },
+                xhrFields: {
+                    withCredentials: true
+                },
+                success: function(data) {
+                    response(data);
+                }
             });
-        });
+        },
+        minLength: 2
+    });
 
-        // PDF
-        $('#results').on('click','.pdf-btn',function(){
-            const row = $(this).closest('.summary');
-            window.open(backendUrl + '/pdf?depo='
-                        +encodeURIComponent(row.data('depo'))
-                        +'&tour_number='+encodeURIComponent(row.data('tour_number')));
+    $('#clear-btn').click(function(){
+        $('#search-input').val('');
+        $('#street-input').val('');
+        $('#results').html('');
+        $('#details').html('');
+    });
+
+    $('#search-btn').click(function(){
+        var query = $('#search-input').val();
+        var street = $('#street-input').val();
+        $('#results').html('');
+        $('#details').html('');
+        if(query.trim() === ''){
+            alert("Kérem adja meg a települést vagy irányítószámot!");
+            return;
+        }
+        $.ajax({
+            url: backendUrl + 'search',
+            data: { q: query, street: street },
+            xhrFields: {
+                withCredentials: true
+            },
+            success: function(data){
+                if(data.error){
+                    $('#results').html('<p>Hiba történt: ' + data.error + '</p>');
+                    return;
+                }
+                if(data.length === 0){
+                    $('#results').html('<p>Nincs találat.</p>');
+                } else {
+                    var tableHtml = '<table class="table table-bordered"><thead><tr>' +
+                        '<th class="text-center">Depó</th>'+
+                        '<th class="text-center">Túraszám</th>'+
+                        '<th class="text-center">Település</th>'+
+                        '<th class="text-center">Irányítószám</th>'+
+                        '<th class="text-center">Közterület</th>'+
+                        '<th class="text-center">Nap</th>'+
+                        '<th class="text-center">Időintervallum</th>'+
+                        '<th class="text-center">Műveletek</th>'+
+                        '</tr></thead><tbody>';
+                    data.forEach(function(item){
+                        tableHtml += '<tr class="summary" data-depo="'+item.depo+'" data-tour_number="'+item.tour_number+'">' +
+                            '<td class="text-center">'+item.depo+'</td>' +
+                            '<td class="text-center">'+item.tour_number+'</td>' +
+                            '<td>'+item.city+'</td>' +
+                            '<td class="text-center">'+item.postal_code+'</td>' +
+                            '<td>'+item.street+'</td>' +
+                            '<td class="text-center">'+item.date+'</td>' +
+                            '<td class="text-center">'+item.time_interval+'</td>' +
+                            '<td class="text-center">' +
+                                '<button class="btn btn-info btn-sm details-btn">Részletek</button> ' +
+                                '<button class="btn btn-secondary btn-sm pdf-btn">PDF letöltés</button>' +
+                            '</td>' +
+                            '</tr>';
+                    });
+                    tableHtml += '</tbody></table>';
+                    $('#results').html(tableHtml);
+                }
+            }
         });
     });
-    </script>
+
+
+    $('#results').on('click', '.details-btn', function(){
+        var container = $(this).closest('.summary');
+        var depo = container.data('depo');
+        var tour_number = container.data('tour_number');
+        $.ajax({
+            url: backendUrl + 'details',
+            data: { depo: depo, tour_number: tour_number },
+            xhrFields: {
+                withCredentials: true
+            },
+            success: function(data){
+                if (!data || !data[0]) {
+                    $('#details').html('<p>Nincs részlet.</p>');
+                    return;
+                }
+                var rawDate = data[0].date;
+                var cleaned = rawDate.replace(/\.$/, "").trim().replace(/\-/g, ".");
+                var jsDate = new Date(cleaned);
+                var weekdayMap = {0:"vasárnap", 1:"hétfő", 2:"kedd", 3:"szerda", 4:"csütörtök", 5:"péntek", 6:"szombat"};
+                var weekday = isNaN(jsDate.getDay()) ? rawDate : weekdayMap[jsDate.getDay()];
+                var formattedDate = weekday + " (" + cleaned + ")";
+
+                var detailsHtml = '<h5>Dátum: <span class="text-primary">'+formattedDate+'</span></h5>';
+                detailsHtml += '<table class="table table-bordered"><thead><tr>'+
+                    '<th class="text-center">Depó</th>'+
+                    '<th class="text-center">Túraszám</th>'+
+                    '<th class="text-center">Település</th>'+
+                    '<th class="text-center">Irányítószám</th>'+
+                    '<th class="text-center">Közterület</th>'+
+                    '<th class="text-center">Időintervallum</th>'+
+                    '<th class="text-center">Térkép</th>'+
+                    '</tr></thead><tbody>';
+                data.forEach(function(row){
+                    var normalizedCity = removeAccents(row.city.trim());
+                    var normalizedStreet = removeAccents(row.street.trim());
+                    normalizedStreet = normalizedStreet.replace(/^(?!dr\b)([^\s]+)\s+.+\s+(utca)$/i, "$1 $2");
+                    var postal = row.postal_code.trim();
+                    var mapUrl = 'https://www.google.com/maps/place/' + encodeURIComponent(normalizedCity) + ',+' + encodeURIComponent(normalizedStreet) + ',+' + encodeURIComponent(postal);
+                    detailsHtml += '<tr>'+
+                        '<td class="text-center">'+row.depo+'</td>'+
+                        '<td class="text-center">'+row.tour_number+'</td>'+
+                        '<td>'+row.city+'</td>'+
+                        '<td class="text-center">'+row.postal_code+'</td>'+
+                        '<td>'+row.street+'</td>'+
+                        '<td class="text-center">'+row.start_time+' - '+row.end_time+'</td>'+
+                        '<td class="text-center"><a href="'+mapUrl+'" target="_blank"><i class="fas fa-map-marker-alt"></i></a></td>'+
+                        '</tr>';
+                });
+                detailsHtml += '</tbody></table>';
+                $('#details').html(detailsHtml);
+            }
+        });
+    });
+
+
+    $('#results').on('click', '.pdf-btn', function(){
+        var container = $(this).closest('.summary');
+        var depo = container.data('depo');
+        var tour_number = container.data('tour_number');
+        window.open(backendUrl + 'pdf?depo=' + encodeURIComponent(depo) + '&tour_number=' + encodeURIComponent(tour_number));
+    });
+
+});
+</script>
 </body>
 </html>
