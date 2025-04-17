@@ -6,9 +6,9 @@
   <meta http-equiv="Pragma"        content="no-cache">
   <meta http-equiv="Expires"       content="0">
 
-  <!-- ─── favicon és apple‑touch icon a Flask‑szervertől ─── -->
-  <link rel="icon"          href="https://fabuszilard.myftp.org/static/images/fflogo.png" type="image/png">
-  <link rel="shortcut icon" href="https://fabuszilard.myftp.org/static/images/fflogo.png" type="image/png">
+  <!-- ── favicon relatív útvonallal ── -->
+  <link rel="icon"          href="static/images/fflogo.png" type="image/png">
+  <link rel="shortcut icon" href="static/images/fflogo.png" type="image/png">
 
   <title>FF_túraadatok – részletes lekérdezés</title>
 
@@ -30,24 +30,27 @@
   <div class="container my-3">
     <!-- fejléc + logó -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-      <h3>
-        <span class="red">F</span><span class="blue">F</span>_túraadatok – részletes lekérdezés
-      </h3>
+      <h3><span class="red">F</span><span class="blue">F</span>_túraadatok – részletes lekérdezés</h3>
       <div class="logo-container">
-        <img src="https://fabuszilard.myftp.org/static/images/fdlogo.png" alt="FF logo">
+        <!-- logó szintén relatív útvonalon -->
+        <img src="static/images/fdlogo.png" alt="FF logo">
       </div>
     </div>
 
     <!-- keresőmezők -->
     <div class="form-group">
       <label for="search-input">Település vagy irányítószám</label>
-      <input type="text" id="search-input" class="form-control" placeholder="Pl. Budapest vagy 1037" style="width:300px;">
+      <input type="text" id="search-input" class="form-control"
+             placeholder="Pl. Budapest vagy 1037" style="width:300px;">
     </div>
 
     <div class="form-group">
       <label for="street-input">Közterület (opcionális)</label>
-      <input type="text" id="street-input" class="form-control" placeholder="Közterület" style="width:300px;">
-      <small class="form-text text-muted">A közterület‑szűrés csak település megadása után működik.</small>
+      <input type="text" id="street-input" class="form-control" placeholder="Közterület"
+             style="width:300px;">
+      <small class="form-text text-muted">
+        A közterület‑szűrés csak település megadása után működik.
+      </small>
     </div>
 
     <div class="d-flex align-items-center mb-3">
@@ -63,7 +66,7 @@
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
-  <!-- a Flask‑szerver alap‑URL‑je -->
+  <!-- Flask‑szerver alap‑URL‑je -->
   <script>
     const backendUrl = "https://fabuszilard.myftp.org/turainfo/";
   </script>
@@ -71,114 +74,108 @@
   <script>
   $(function(){
 
-    /* ékezet‑eltávolító */
-    function removeAccents(str){
-      return str.normalize("NFD").replace(/[\u0300-\u036f]/g,"");
-    }
+    const $city   = $('#search-input');
+    const $street = $('#street-input');
 
-    /* ── autocomplete a településhez ── */
-    $('#search-input').autocomplete({
+    /* ── autocomplete ───────────────────────────────────────────── */
+    $city.autocomplete({
       source(request, response){
         $.getJSON( backendUrl + 'suggest',
                    { field:'city', q:request.term }, response );
       },
-      minLength:2
+      minLength: 2
     });
 
-    /* ── autocomplete a közterülethez (csak ha van település) ── */
-    $('#street-input').autocomplete({
+    $street.autocomplete({
       source(request, response){
-        const city = $('#search-input').val().trim();
+        const city = $city.val().trim();
         if(!city){ response([]); return; }
         $.getJSON( backendUrl + 'suggest',
-                   { field:'street', q:request.term, city:city }, response );
+                   { field:'street', q:request.term, city }, response );
       },
-      minLength:2
+      minLength: 2
     });
 
-    /* ── mezők ürítése ── */
-    $('#clear-btn').on('click', ()=>{
-      $('#search-input, #street-input').val('');
-      $('#results, #details').empty();
+    /* ── törlés ── */
+    $('#clear-btn').click(()=>{
+      $city.val(''); $street.val('');
+      $('#results,#details').empty();
     });
 
     /* ── keresés ── */
-    $('#search-btn').on('click', ()=>{
-      const q = $('#search-input').val().trim();
-      const s = $('#street-input').val().trim();
-      $('#results, #details').empty();
-
+    $('#search-btn').click(()=>{
+      const q = $city.val().trim();
+      const s = $street.val().trim();
+      $('#results,#details').empty();
       if(!q){ alert('Kérem adja meg a települést vagy irányítószámot!'); return; }
 
       $.ajax({
-        url  : backendUrl + 'search',
-        data : { q:q, street:s },
+        url : backendUrl + 'search',
+        data: { q, street:s },
         success(data){
 
-          /* admin‑admin összesítő nézet */
+          /* admin‑admin nézet */
           if(data.length && data[0].tours_count!==undefined){
-            let html = '<table class="table table-bordered"><thead><tr>'
-                     + '<th>Depó és feltöltött túrák száma</th>'
-                     + '</tr></thead><tbody>';
-            data.forEach(i=>{
-              html += `<tr><td>${i.depo}_${i.tours_count} db</td></tr>`;
-            });
-            $('#results').html(html + '</tbody></table>');
+            let h='<table class="table table-bordered"><thead><tr>'
+                + '<th>Depó és feltöltött túrák száma</th>'
+                + '</tr></thead><tbody>';
+            data.forEach(d=>{ h+=`<tr><td>${d.depo}_${d.tours_count} db</td></tr>`; });
+            $('#results').html(h+'</tbody></table>');
             return;
           }
 
-          /* normál eredmény */
           if(!data.length){
             $('#results').html('<p>Nincs találat.</p>');
             return;
           }
-          let tbl = '<table class="table table-bordered"><thead><tr>'
-                  + '<th>Depó</th><th>Túraszám</th><th>Település</th>'
-                  + '<th>Irányítószám</th><th>Közterület</th>'
-                  + '<th>Nap</th><th>Időintervallum</th><th>Műveletek</th>'
-                  + '</tr></thead><tbody>';
-          data.forEach(it=>{
+
+          let tbl='<table class="table table-bordered"><thead><tr>'
+                 +'<th>Depó</th><th>Túraszám</th><th>Település</th>'
+                 +'<th>Irányítószám</th><th>Közterület</th>'
+                 +'<th>Nap</th><th>Időintervallum</th><th>Műveletek</th>'
+                 +'</tr></thead><tbody>';
+          data.forEach(d=>{
             tbl += `
-              <tr class="summary" data-depo="${it.depo}" data-tour_number="${it.tour_number}">
-                <td class="text-center">${it.depo}</td>
-                <td class="text-center">${it.tour_number}</td>
-                <td>${it.city}</td>
-                <td class="text-center">${it.postal_code}</td>
-                <td>${it.street}</td>
-                <td class="text-center">${it.date}</td>
-                <td class="text-center">${it.time_interval}</td>
-                <td class="text-center">
-                  <button class="btn btn-info btn-sm details-btn">Részletek</button>
-                  <button class="btn btn-secondary btn-sm pdf-btn">PDF letöltés</button>
-                </td>
-              </tr>`;
+            <tr class="summary" data-depo="${d.depo}" data-tour_number="${d.tour_number}">
+              <td class="text-center">${d.depo}</td>
+              <td class="text-center">${d.tour_number}</td>
+              <td>${d.city}</td>
+              <td class="text-center">${d.postal_code}</td>
+              <td>${d.street}</td>
+              <td class="text-center">${d.date}</td>
+              <td class="text-center">${d.time_interval}</td>
+              <td class="text-center">
+                <button class="btn btn-info btn-sm details-btn">Részletek</button>
+                <button class="btn btn-secondary btn-sm pdf-btn">PDF letöltés</button>
+              </td>
+            </tr>`;
           });
-          $('#results').html(tbl + '</tbody></table>');
+          $('#results').html(tbl+'</tbody></table>');
         },
         error(){ $('#results').html('<p>Hiba a keresés során.</p>'); }
       });
 
-      /* mezők törlése a kattintás után */
-      $('#search-input, #street-input').val('');
+      /* mezők törlése katt után */
+      $city.val(''); $street.val('');
     });
 
-    /* ── részletek lekérése ── */
-    $('#results').on('click','.details-btn', function(){
-      const $r = $(this).closest('.summary');
+    /* ── részletek ── */
+    $('#results').on('click','.details-btn',function(){
+      const $tr = $(this).closest('.summary');
       $.get( backendUrl + 'details',
-             { depo:$r.data('depo'), tour_number:$r.data('tour_number') },
+             { depo:$tr.data('depo'), tour_number:$tr.data('tour_number') },
              html=>{
                $('#details').html(html);
                $('html,body').animate({scrollTop:$('#details').offset().top},500);
              });
     });
 
-    /* ── PDF letöltés ── */
-    $('#results').on('click','.pdf-btn', function(){
-      const $r = $(this).closest('.summary');
+    /* ── PDF ── */
+    $('#results').on('click','.pdf-btn',function(){
+      const $tr = $(this).closest('.summary');
       window.open(
-        `${backendUrl}pdf?depo=${encodeURIComponent($r.data('depo'))}`
-        + `&tour_number=${encodeURIComponent($r.data('tour_number'))}`
+        `${backendUrl}pdf?depo=${encodeURIComponent($tr.data('depo'))}`
+        + `&tour_number=${encodeURIComponent($tr.data('tour_number'))}`
       );
     });
 
