@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
-        :root { --logo-size: 180px; }
+        :root { --logo-size: 100px; }
         .logo-container img { width: var(--logo-size); height: auto; }
         .btn { display: inline-flex; align-items: center; justify-content: center; }
         .red  { color: red;  font-weight: bold; }
@@ -25,12 +25,23 @@
         <div class="d-flex justify-content-between align-items-center">
             <h3><span class="red">F</span><span class="blue">F</span>_túraadatok&nbsp;‑&nbsp;részletes lekérdezés</h3>
             <div class="logo-container">
+			  <img src="./static/images/fflogo.png" alt="FD logo">
+			</div>
+        </div>
+<div class="container2 my-2">
+        <div class="d-flex justify-content-between align-items-center">
+           <label for="search-input">Település vagy irányítószám</label>
+            <!-- <input type="text" id="search-input" class="form-control" placeholder="Pl. Budapest vagy 1037" style="width:300px;"> -->
+            <div class="logo-container">
 			  <img src="./static/images/fdlogo.png" alt="FD logo">
 			</div>
         </div>
-
-        <div class="form-group">
-            <label for="search-input">Település vagy irányítószám</label>
+        
+		
+		
+		
+		<div class="form-group">
+            <!-- <label for="search-input">Település vagy irányítószám</label> -->
             <input type="text" id="search-input" class="form-control" placeholder="Pl. Budapest vagy 1037" style="width:300px;">
         </div>
         <div class="form-group">
