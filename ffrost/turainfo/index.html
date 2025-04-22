@@ -2,12 +2,10 @@
 <html lang="hu">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon"          href="./static/images/logo.png" type="image/png">
-	<link rel="shortcut icon" href="./static/images/logo.png" type="image/png">
+    <link rel="icon" href="./static/images/logo.png" type="image/png">
+    <link rel="shortcut icon" href="./static/images/logo.png" type="image/png">
 
-
-
-   <title>FF_túraadatok</title>
+    <title>FF_túraadatok</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
@@ -18,30 +16,64 @@
         .red  { color: red;  font-weight: bold; }
         .blue { color: blue; font-weight: bold; }
         table.table th { text-align: center !important; vertical-align: middle; }
+
+        .maintenance-overlay {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            top: 0; left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #f8f9fa;
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .maintenance-box {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .countdown {
+            font-size: 2rem;
+            color: #dc3545;
+            margin-top: 15px;
+        }
     </style>
 </head>
 <body>
-    <div class="container my-3">
-        <div class="d-flex justify-content-between align-items-center">
-            <h3><span class="red">F</span><span class="blue">F</span>_túraadatok&nbsp;‑&nbsp;részletes lekérdezés</h3>
-            <div class="logo-container">
-			  <img src="./static/images/fflogo.png" alt="FD logo">
-			</div>
+
+
+<div class="maintenance-overlay" id="maintenance-overlay">
+    <div class="maintenance-box">
+        <h1>⛔ Jelenleg karbantartás zajlik</h1>
+        <p>Az oldal funkciói átmenetileg nem elérhetők.</p>
+        <p>Kérjük, látogass vissza később!</p>
+        <div>Várható újraindítás: <strong id="target-time">2025.04.22 10:10:00</strong></div>
+        <div class="countdown" id="countdown-timer">00:00:00</div>
+    </div>
+</div>
+
+
+<div class="container my-3" id="main-content">
+    <div class="d-flex justify-content-between align-items-center">
+        <h3><span class="red">F</span><span class="blue">F</span>_túraadatok&nbsp;‑&nbsp;részletes lekérdezés</h3>
+        <div class="logo-container">
+            <img src="./static/images/fflogo.png" alt="FD logo">
         </div>
-<div class="container2 my-2">
+    </div>
+
+    <div class="container2 my-2">
         <div class="d-flex justify-content-between align-items-center">
-           <label for="search-input">Település vagy irányítószám</label>
-            <!-- <input type="text" id="search-input" class="form-control" placeholder="Pl. Budapest vagy 1037" style="width:300px;"> -->
+            <label for="search-input">Település vagy irányítószám</label>
             <div class="logo-container">
-			  <img src="./static/images/fdlogo.png" alt="FD logo">
-			</div>
+                <img src="./static/images/fdlogo.png" alt="FD logo">
+            </div>
         </div>
-        
-		
-		
-		
-		<div class="form-group">
-            <!-- <label for="search-input">Település vagy irányítószám</label> -->
+
+        <div class="form-group">
             <input type="text" id="search-input" class="form-control" placeholder="Pl. Budapest vagy 1037" style="width:300px;">
         </div>
         <div class="form-group">
@@ -57,21 +89,59 @@
         <div id="results"></div>
         <div id="details"></div>
     </div>
+</div>
+
+<script>
+
+    const rawTime = document.getElementById("target-time").textContent.trim();
+    const formattedTime = rawTime.replace(".", "-").replace(".", "-").replace(" ", "T");
+    const targetDate = new Date(formattedTime);
+    const now = new Date();
+    const maintenanceMode = now < targetDate;
+
+    function updateCountdown() {
+        const now = new Date();
+        const diff = targetDate - now;
+
+        if (diff <= 0) {
+            document.getElementById("countdown-timer").innerText = "Karbantartás véget ért. Frissítés...";
+            setTimeout(() => location.reload(), 2000);
+            return;
+        }
+
+        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor((diff / (1000 * 60)) % 60);
+        const seconds = Math.floor((diff / 1000) % 60);
+
+        document.getElementById("countdown-timer").innerText =
+            String(hours).padStart(2, '0') + ":" +
+            String(minutes).padStart(2, '0') + ":" +
+            String(seconds).padStart(2, '0');
+    }
+
+    if (maintenanceMode) {
+        document.getElementById("main-content").style.display = "none";
+        const overlay = document.getElementById("maintenance-overlay");
+        overlay.style.display = "flex";
+        overlay.classList.add("d-flex");
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+    }
+</script>
 
 
-    <script>
-      const backendUrl = "https://fabuszilard.myftp.org/turainfo/";  
-    </script>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
-    <script>
+<script>
+if (!maintenanceMode) {
+    const backendUrl = "https://fabuszilard.myftp.org/turainfo/";
+
     $(function () {
         function removeAccents(str) {
             return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         }
-
 
         $('#search-input').autocomplete({
             source: function (req, res) {
@@ -88,7 +158,6 @@
             },
             minLength: 2
         });
-
 
         $('#clear-btn').click(function () {
             $('#search-input,#street-input').val('');
@@ -109,7 +178,6 @@
                 url: `${backendUrl}search`,
                 data: { q: q, street: s },
                 success: function (resp) {
-               
                     if (resp.length > 0 && resp[0].tours_count !== undefined) {
                         let html = '<table class="table table-bordered"><thead><tr>'
                                  + '<th>Depó és feltöltött túrák száma</th>'
@@ -121,11 +189,12 @@
                         $('#results').html(html);
                         return;
                     }
-           
+
                     if (!resp.length) {
                         $('#results').html('<p>Nincs találat.</p>');
                         return;
                     }
+
                     let tbl = '<table class="table table-bordered"><thead><tr>'
                             + '<th class="text-center">Depó</th>'
                             + '<th class="text-center">Túraszám</th>'
@@ -136,6 +205,7 @@
                             + '<th class="text-center">Időintervallum</th>'
                             + '<th class="text-center">Műveletek</th>'
                             + '</tr></thead><tbody>';
+
                     resp.forEach(function (it) {
                         tbl += '<tr class="summary" data-depo="' + it.depo + '" data-tour_number="' + it.tour_number + '">'
                              + '<td class="text-center">' + it.depo + '</td>'
@@ -148,9 +218,9 @@
                              + '<td class="text-center">'
                                + '<button class="btn btn-info btn-sm details-btn">Részletek</button> '
                                + '<button class="btn btn-secondary btn-sm pdf-btn">PDF letöltés</button>'
-                             + '</td>'
-                             + '</tr>';
+                             + '</td></tr>';
                     });
+
                     tbl += '</tbody></table>';
                     $('#results').html(tbl);
                 },
@@ -159,10 +229,8 @@
                 }
             });
 
-      
             $('#search-input, #street-input').val('');
         });
-
 
         $('#results').on('click', '.details-btn', function () {
             const r = $(this).closest('.summary');
@@ -177,12 +245,11 @@
 
         $('#results').on('click', '.pdf-btn', function () {
             const r = $(this).closest('.summary');
-            window.open(
-                `${backendUrl}pdf?depo=${encodeURIComponent(r.data('depo'))}`
-              + `&tour_number=${encodeURIComponent(r.data('tour_number'))}`
-            );
+            window.open(`${backendUrl}pdf?depo=${encodeURIComponent(r.data('depo'))}&tour_number=${encodeURIComponent(r.data('tour_number'))}`);
         });
     });
-    </script>
+}
+</script>
+
 </body>
 </html>
