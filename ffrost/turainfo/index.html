@@ -41,25 +41,32 @@
             color: #dc3545;
             margin-top: 15px;
         }
+
+        /* Új: inaktív esetén egész panel kiemelése */
+        .inactive-highlight {
+            background-color: rgba(255, 0, 0, 0.1);
+            border: 2px solid red;
+            border-radius: 4px;
+            padding: 0.5em;
+            transition: background-color 0.3s ease;
+        }
     </style>
 </head>
 <body>
-
 
 <div class="maintenance-overlay" id="maintenance-overlay">
     <div class="maintenance-box">
         <h1>⛔ Jelenleg karbantartás zajlik ⛔</h1>
         <p>Az oldal funkciói átmenetileg nem elérhetők.</p>
         <p>Kérjük, látogass vissza később!</p>
-        <div>Várható újraindítás: <strong id="target-time">2025.04.22	 10:10:00</strong></div>
+        <div>Várható újraindítás: <strong id="target-time">2025.04.22 10:10:00</strong></div>
         <div class="countdown" id="countdown-timer">00:00:00</div>
     </div>
 </div>
 
-
 <div class="container my-3" id="main-content">
     <div class="d-flex justify-content-between align-items-center">
-        <h3><span class="red">F</span><span class="blue">F</span>_túraadatok&nbsp;‑&nbsp;részletes lekérdezés</h3>
+        <h3><span class="red">F</span><span class="blue">F</span>_túraadatok&nbsp;-&nbsp;részletes lekérdezés</h3>
         <div class="logo-container">
             <img src="./static/images/fflogo.png" alt="FD logo">
         </div>
@@ -72,14 +79,13 @@
                 <img src="./static/images/fdlogo.png" alt="FD logo">
             </div>
         </div>
-
         <div class="form-group">
             <input type="text" id="search-input" class="form-control" placeholder="pl. Budapest vagy 1037" style="width:300px;">
         </div>
         <div class="form-group">
             <label for="street-input">Közterület (opcionális)</label>
             <input type="text" id="street-input" class="form-control" placeholder="pl. József Attila utca" style="width:300px;">
-            <small class="form-text text-muted">A közterület‑szűrés csak település megadása után működik!</small>
+            <small class="form-text text-muted">A közterület-szűrés csak település megadása után működik!</small>
         </div>
         <div class="d-flex align-items-center mb-3">
             <button id="search-btn" class="btn btn-primary">Keresés</button>
@@ -92,9 +98,8 @@
 </div>
 
 <script>
-
     const rawTime = document.getElementById("target-time").textContent.trim();
-    const formattedTime = rawTime.replace(".", "-").replace(".", "-").replace(" ", "T");
+    const formattedTime = rawTime.replace(/\./g, "-").replace(" ", "T");
     const targetDate = new Date(formattedTime);
     const now = new Date();
     const maintenanceMode = now < targetDate;
@@ -102,21 +107,19 @@
     function updateCountdown() {
         const now = new Date();
         const diff = targetDate - now;
-
         if (diff <= 0) {
             document.getElementById("countdown-timer").innerText = "Karbantartás véget ért. Frissítés...";
             setTimeout(() => location.reload(), 2000);
             return;
         }
-
-        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        // napok, órák, percek és másodpercek kiszámítása
+        const days    = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours   = Math.floor((diff / (1000 * 60 * 60)) % 24);
         const minutes = Math.floor((diff / (1000 * 60)) % 60);
         const seconds = Math.floor((diff / 1000) % 60);
 
         document.getElementById("countdown-timer").innerText =
-            String(hours).padStart(2, '0') + ":" +
-            String(minutes).padStart(2, '0') + ":" +
-            String(seconds).padStart(2, '0');
+            `${days} nap ${hours} óra ${minutes} perc ${seconds} mp`;
     }
 
     if (maintenanceMode) {
@@ -129,117 +132,79 @@
     }
 </script>
 
-
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-
 
 <script>
 if (!maintenanceMode) {
     const backendUrl = "https://fabuszilard.myftp.org/turainfo/";
-
     $(function () {
-        function removeAccents(str) {
-            return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        }
-
         $('#search-input').autocomplete({
-            source: function (req, res) {
-                $.getJSON(`${backendUrl}suggest`, { field: 'city', q: req.term }, res);
-            },
+            source: (req, res) => $.getJSON(`${backendUrl}suggest`, { field: 'city', q: req.term }, res),
             minLength: 2
         });
-
         $('#street-input').autocomplete({
-            source: function (req, res) {
-                const city = $('#search-input').val().trim();
-                if (!city) { res([]); return; }
-                $.getJSON(`${backendUrl}suggest`, { field: 'street', q: req.term, city: city }, res);
+            source: (req, res) => {
+                const city = $('#search-input').val().trim(); if (!city) return res([]);
+                $.getJSON(`${backendUrl}suggest`, { field: 'street', q: req.term, city }, res);
             },
             minLength: 2
         });
+        $('#clear-btn').click(() => $('#search-input,#street-input').add('#results,#details').empty());
 
-        $('#clear-btn').click(function () {
-            $('#search-input,#street-input').val('');
+        $('#search-btn').click(() => {
+            const q = $('#search-input').val().trim(), s = $('#street-input').val().trim();
             $('#results,#details').empty();
-        });
-
-        $('#search-btn').click(function () {
-            const q = $('#search-input').val().trim(),
-                  s = $('#street-input').val().trim();
-            $('#results,#details').empty();
-
-            if (!q) {
-                alert("Kérem adja meg a települést vagy irányítószámot!");
-                return;
-            }
-
+            if (!q) { alert("Kérem adja meg a települést vagy irányítószámot!"); return; }
             $.ajax({
-                url: `${backendUrl}search`,
-                data: { q: q, street: s },
-                success: function (resp) {
-                    if (resp.length > 0 && resp[0].tours_count !== undefined) {
-                        let html = '<table class="table table-bordered"><thead><tr>'
-                                 + '<th>Depó és feltöltött túrák száma</th>'
-                                 + '</tr></thead><tbody>';
-                        resp.forEach(function (i) {
-                            html += '<tr><td>' + i.depo + '_' + i.tours_count + ' db' + '</td></tr>';
-                        });
-                        html += '</tbody></table>';
-                        $('#results').html(html);
-                        return;
+                url: `${backendUrl}search`, data: { q, street: s },
+                success: resp => {
+                    if (resp.length && resp[0].tours_count !== undefined) {
+                        let html = '<table class="table table-bordered"><thead><tr>' +
+                                   '<th>Depó és feltöltött túrák száma</th></tr></thead><tbody>';
+                        resp.forEach(i => html += `<tr><td>${i.depo}_${i.tours_count} db</td></tr>`);
+                        $('#results').html(html + '</tbody></table>'); return;
                     }
-
-                    if (!resp.length) {
-                        $('#results').html('<p>Nincs találat.</p>');
-                        return;
-                    }
-
-                    let tbl = '<table class="table table-bordered"><thead><tr>'
-                            + '<th class="text-center">Depó</th>'
-                            + '<th class="text-center">Túraszám</th>'
-                            + '<th class="text-center">Település</th>'
-                            + '<th class="text-center">Irányítószám</th>'
-                            + '<th class="text-center">Közterület</th>'
-                            + '<th class="text-center">Nap</th>'
-                            + '<th class="text-center">Időintervallum</th>'
-                            + '<th class="text-center">Műveletek</th>'
-                            + '</tr></thead><tbody>';
-
-                    resp.forEach(function (it) {
-                        tbl += '<tr class="summary" data-depo="' + it.depo + '" data-tour_number="' + it.tour_number + '">'
-                             + '<td class="text-center">' + it.depo + '</td>'
-                             + '<td class="text-center">' + it.tour_number + '</td>'
-                             + '<td class="text-center">' + it.city + '</td>'
-                             + '<td class="text-center">' + it.postal_code + '</td>'
-                             + '<td class="text-center">' + it.street + '</td>'
-                             + '<td class="text-center">' + it.date + '</td>'
-                             + '<td class="text-center">' + it.time_interval + '</td>'
-                             + '<td class="text-center">'
-                               + '<button class="btn btn-info btn-sm details-btn">Részletek</button> '
-                               + '<button class="btn btn-secondary btn-sm pdf-btn">PDF letöltés</button>'
-                             + '</td></tr>';
-                    });
-
-                    tbl += '</tbody></table>';
-                    $('#results').html(tbl);
+                    if (!resp.length) return $('#results').html('<p>Nincs találat.</p>');
+                    let tbl = '<table class="table table-bordered"><thead><tr>' +
+                              ['Depó','Túraszám','Település','Irányítószám','Közterület','Nap','Időintervallum','Műveletek']
+                                .map(h=>`<th class="text-center">${h}</th>`).join('') +
+                              '</tr></thead><tbody>';
+                    resp.forEach(it => tbl += `<tr class="summary" data-depo="${it.depo}" data-tour_number="${it.tour_number}">` +
+                                             `<td class="text-center">${it.depo}</td>` +
+                                             `<td class="text-center">${it.tour_number}</td>` +
+                                             `<td class="text-center">${it.city}</td>` +
+                                             `<td class="text-center">${it.postal_code}</td>` +
+                                             `<td class="text-center">${it.street}</td>` +
+                                             `<td class="text-center">${it.date}</td>` +
+                                             `<td class="text-center">${it.time_interval}</td>` +
+                                             `<td class="text-center">` +
+                                               `<button class="btn btn-info btn-sm details-btn">Részletek</button> ` +
+                                               `<button class="btn btn-secondary btn-sm pdf-btn">PDF letöltés</button>` +
+                                             `</td></tr>`);
+                    $('#results').html(tbl + '</tbody></table>');
                 },
-                error: function () {
-                    $('#results').html('<p>Hiba történt a keresés során.</p>');
-                }
+                error: () => $('#results').html('<p>Hiba történt a keresés során.</p>')
             });
-
-            $('#search-input, #street-input').val('');
+            $('#search-input,#street-input').val('');
         });
 
+        // Új: bármely inaktiv előfordulás esetén kiemelés
         $('#results').on('click', '.details-btn', function () {
             const r = $(this).closest('.summary');
-            $.get(`${backendUrl}details`, {
-                depo: r.data('depo'),
-                tour_number: r.data('tour_number')
-            }, function (html) {
-                $('#details').html(html);
-                $('html,body').animate({ scrollTop: $('#details').offset().top }, 500);
+            $.get(`${backendUrl}details`, { depo: r.data('depo'), tour_number: r.data('tour_number') }, function (html) {
+                const $det = $('#details');
+                $det.html(html);
+                const allText = $det.text()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .toLowerCase();
+                if (allText.includes('inaktiv')) {
+                    $det.addClass('inactive-highlight');
+                } else {
+                    $det.removeClass('inactive-highlight');
+                }
+                $('html,body').animate({ scrollTop: $det.offset().top }, 500);
             });
         });
 
