@@ -42,13 +42,16 @@
             margin-top: 15px;
         }
 
-        /* Új: inaktív esetén egész panel kiemelése */
+      
         .inactive-highlight {
             background-color: rgba(255, 0, 0, 0.1);
             border: 2px solid red;
             border-radius: 4px;
             padding: 0.5em;
             transition: background-color 0.3s ease;
+        }
+        .inactive-highlight td {
+            background-color: rgba(255, 0, 0, 0.1);
         }
     </style>
 </head>
@@ -112,7 +115,6 @@
             setTimeout(() => location.reload(), 2000);
             return;
         }
-        // napok, órák, percek és másodpercek kiszámítása
         const days    = Math.floor(diff / (1000 * 60 * 60 * 24));
         const hours   = Math.floor((diff / (1000 * 60 * 60)) % 24);
         const minutes = Math.floor((diff / (1000 * 60)) % 60);
@@ -167,12 +169,13 @@ if (!maintenanceMode) {
                     }
                     if (!resp.length) return $('#results').html('<p>Nincs találat.</p>');
                     let tbl = '<table class="table table-bordered"><thead><tr>' +
-                              ['Depó','Túraszám','Település','Irányítószám','Közterület','Nap','Időintervallum','Műveletek']
+                             ['Depó','Túraszám','Rendszám','Település','Irányítószám','Közterület','Nap','Időintervallum','Műveletek']
                                 .map(h=>`<th class="text-center">${h}</th>`).join('') +
                               '</tr></thead><tbody>';
                     resp.forEach(it => tbl += `<tr class="summary" data-depo="${it.depo}" data-tour_number="${it.tour_number}">` +
                                              `<td class="text-center">${it.depo}</td>` +
                                              `<td class="text-center">${it.tour_number}</td>` +
+                                             `<td class="text-center">${it.plate_number}</td>` +
                                              `<td class="text-center">${it.city}</td>` +
                                              `<td class="text-center">${it.postal_code}</td>` +
                                              `<td class="text-center">${it.street}</td>` +
@@ -180,25 +183,31 @@ if (!maintenanceMode) {
                                              `<td class="text-center">${it.time_interval}</td>` +
                                              `<td class="text-center">` +
                                                `<button class="btn btn-info btn-sm details-btn">Részletek</button> ` +
-                                               `<button class="btn btn-secondary btn-sm pdf-btn">PDF letöltés</button>` +
+                                               `<button class="btn btn-secondary btn-sm pdf-btn">PDF letöltés</button>`+
                                              `</td></tr>`);
                     $('#results').html(tbl + '</tbody></table>');
+
+                    
+                    $('#results tr.summary').each(function() {
+                        const plateText = $(this).find('td').eq(2).text()
+                            .normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+                        if (plateText === 'inaktiv') {
+                            $(this).addClass('inactive-highlight');
+                        }
+                    });
                 },
                 error: () => $('#results').html('<p>Hiba történt a keresés során.</p>')
             });
             $('#search-input,#street-input').val('');
         });
 
-        // Új: bármely inaktiv előfordulás esetén kiemelés
+       
         $('#results').on('click', '.details-btn', function () {
             const r = $(this).closest('.summary');
             $.get(`${backendUrl}details`, { depo: r.data('depo'), tour_number: r.data('tour_number') }, function (html) {
                 const $det = $('#details');
                 $det.html(html);
-                const allText = $det.text()
-                    .normalize('NFD')
-                    .replace(/[\u0300-\u036f]/g, '')
-                    .toLowerCase();
+                const allText = $det.text().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
                 if (allText.includes('inaktiv')) {
                     $det.addClass('inactive-highlight');
                 } else {
@@ -208,6 +217,7 @@ if (!maintenanceMode) {
             });
         });
 
+        
         $('#results').on('click', '.pdf-btn', function () {
             const r = $(this).closest('.summary');
             window.open(`${backendUrl}pdf?depo=${encodeURIComponent(r.data('depo'))}&tour_number=${encodeURIComponent(r.data('tour_number'))}`);
@@ -215,6 +225,5 @@ if (!maintenanceMode) {
     });
 }
 </script>
-
 </body>
 </html>
