@@ -42,10 +42,11 @@
             margin-top: 15px;
         }
 
-      
+       
         .inactive-highlight {
             background-color: rgba(255, 0, 0, 0.1);
-            border: 2px solid red;
+            outline: 2px solid red;
+            outline-offset: -2px;
             border-radius: 4px;
             padding: 0.5em;
             transition: background-color 0.3s ease;
@@ -53,6 +54,8 @@
         .inactive-highlight td {
             background-color: rgba(255, 0, 0, 0.1);
         }
+       
+        table.table { border-collapse: separate; border-spacing: 0 0.1px; }
     </style>
 </head>
 <body>
@@ -152,7 +155,11 @@ if (!maintenanceMode) {
             },
             minLength: 2
         });
-        $('#clear-btn').click(() => $('#search-input,#street-input').add('#results,#details').empty());
+        $('#clear-btn').click(() => {
+            $('#search-input,#street-input').val('');
+            $('#results,#details').empty();
+            $('.inactive-highlight').removeClass('inactive-highlight');
+        });
 
         $('#search-btn').click(() => {
             const q = $('#search-input').val().trim(), s = $('#street-input').val().trim();
@@ -169,7 +176,7 @@ if (!maintenanceMode) {
                     }
                     if (!resp.length) return $('#results').html('<p>Nincs találat.</p>');
                     let tbl = '<table class="table table-bordered"><thead><tr>' +
-                             ['Depó','Túraszám','Rendszám','Település','Irányítószám','Közterület','Nap','Időintervallum','Műveletek']
+                             ['Depó','Túraszám','Rendszám','Település','Közterület','Nap','Időintervallum','Műveletek']
                                 .map(h=>`<th class="text-center">${h}</th>`).join('') +
                               '</tr></thead><tbody>';
                     resp.forEach(it => tbl += `<tr class="summary" data-depo="${it.depo}" data-tour_number="${it.tour_number}">` +
@@ -177,7 +184,6 @@ if (!maintenanceMode) {
                                              `<td class="text-center">${it.tour_number}</td>` +
                                              `<td class="text-center">${it.plate_number}</td>` +
                                              `<td class="text-center">${it.city}</td>` +
-                                             `<td class="text-center">${it.postal_code}</td>` +
                                              `<td class="text-center">${it.street}</td>` +
                                              `<td class="text-center">${it.date}</td>` +
                                              `<td class="text-center">${it.time_interval}</td>` +
@@ -187,7 +193,7 @@ if (!maintenanceMode) {
                                              `</td></tr>`);
                     $('#results').html(tbl + '</tbody></table>');
 
-                    
+                  
                     $('#results tr.summary').each(function() {
                         const plateText = $(this).find('td').eq(2).text()
                             .normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
@@ -217,7 +223,6 @@ if (!maintenanceMode) {
             });
         });
 
-        
         $('#results').on('click', '.pdf-btn', function () {
             const r = $(this).closest('.summary');
             window.open(`${backendUrl}pdf?depo=${encodeURIComponent(r.data('depo'))}&tour_number=${encodeURIComponent(r.data('tour_number'))}`);
