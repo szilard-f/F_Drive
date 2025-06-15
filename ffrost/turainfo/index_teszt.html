@@ -63,8 +63,6 @@
 <div class="maintenance-overlay" id="maintenance-overlay">
     <div class="maintenance-box">
         <h1>⛔ Jelenleg karbantartás zajlik ⛔</h1>
-        <!-- <p>Az oldal funkciói átmenetileg nem elérhetők.</p> -->
-        <!-- <p>Kérjük, látogass vissza később!</p> -->
         <div>Várható újraindítás: <strong id="target-time">2025.05.01 08:00:00</strong></div>
         <div class="countdown" id="countdown-timer">00:00:00</div>
     </div>
@@ -168,6 +166,18 @@ if (!maintenanceMode) {
             $.ajax({
                 url: `${backendUrl}search`, data: { q, street: s },
                 success: resp => {
+                    if (q.toLowerCase() === 'dupla' && s.toLowerCase() === 'dupla') {
+                        let html;
+                        if (Array.isArray(resp) && resp.length) {
+                            html = '<h5>Települések (dupla–dupla keresés):</h5><ul>';
+                            resp.forEach(city => html += '<li>' + city + '</li>');
+                            html += '</ul>';
+                        } else {
+                            html = '<p>Nincs olyan település, amely legalább kétszer szerepel, és egyikben kevesebb mint 30 perc.</p>';
+                        }
+                        $('#results').html(html);
+                        return;
+                    }
                     if (resp.length && resp[0].tours_count !== undefined) {
                         let html = '<table class="table table-bordered"><thead><tr>' +
                                    '<th>Depó és feltöltött túrák száma</th></tr></thead><tbody>';
@@ -193,10 +203,9 @@ if (!maintenanceMode) {
                                              `</td></tr>`);
                     $('#results').html(tbl + '</tbody></table>');
 
-                  
                     $('#results tr.summary').each(function() {
                         const plateText = $(this).find('td').eq(2).text()
-                            .normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+                            .normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
                         if (plateText === 'inaktiv') {
                             $(this).addClass('inactive-highlight');
                         }
@@ -207,7 +216,6 @@ if (!maintenanceMode) {
             $('#search-input,#street-input').val('');
         });
 
-       
         $('#results').on('click', '.details-btn', function () {
             const r = $(this).closest('.summary');
             $.get(`${backendUrl}details`, { depo: r.data('depo'), tour_number: r.data('tour_number') }, function (html) {
