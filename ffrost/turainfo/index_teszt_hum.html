@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="./static/images/logo.png" type="image/png">
+    <link rel="shortcut icon" href="./static/images/logo.png" type="image/png">
+
+    <title>FF_túraadatok</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        :root { --logo-size: 100px; }
+        .logo-container img { width: var(--logo-size); height: auto; }
+        .btn { display: inline-flex; align-items: center; justify-content: center; }
+        .red  { color: red; font-weight: bold; }
+        .blue { color: blue; font-weight: bold; }
+        table.table th { text-align: center !important; vertical-align: middle; }
+
+        .maintenance-overlay {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: #f8f9fa;
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .maintenance-box {
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .countdown {
+            font-size: 2rem;
+            color: #dc3545;
+            margin-top: 15px;
+        }
+
+        .inactive-highlight {
+            background-color: rgba(255,0,0,0.1);
+            outline: 2px solid red;
+            outline-offset: -2px;
+            border-radius: 4px;
+            padding: 0.5em;
+            transition: background-color 0.3s ease;
+        }
+        .inactive-highlight td {
+            background-color: rgba(255,0,0,0.1);
+        }
+        table.table { border-collapse: separate; border-spacing: 0 0.1px; }
+    </style>
+</head>
+<body>
+
+<div id="maintenance-overlay" class="maintenance-overlay">
+    <div class="maintenance-box">
+        <h1>⛔ Jelenleg karbantartás zajlik ⛔</h1>
+        <div>Várható újraindítás: <strong id="target-time">2025.07.01 08:00:00</strong></div>
+        <div id="countdown-timer" class="countdown">00:00:00</div>
+    </div>
+</div>
+
+<div id="main-content" class="container my-3">
+    <div class="d-flex justify-content-between align-items-center">
+        <h3><span class="red">F</span><span class="blue">F</span>_túraadatok – részletes lekérdezés</h3>
+        <div class="logo-container">
+            <img src="./static/images/fflogo.png" alt="FD logo">
+        </div>
+    </div>
+
+    <div class="container2 my-2">
+        <div class="d-flex justify-content-between align-items-center">
+            <label for="search-input">Település vagy irányítószám</label>
+            <div class="logo-container">
+                <img src="./static/images/fdlogo.png" alt="FD logo">
+            </div>
+        </div>
+        <div class="form-group">
+            <input id="search-input" class="form-control" placeholder="pl. Budapest vagy 1037" style="width:300px;">
+        </div>
+        <div class="form-group">
+            <label for="street-input">Közterület (opcionális)</label>
+            <input id="street-input" class="form-control" placeholder="pl. József Attila utca" style="width:300px;">
+            <small class="form-text text-muted">A közterület-szűrés csak település megadása után működik!</small>
+        </div>
+        <div class="d-flex align-items-center mb-3">
+            <button id="search-btn" class="btn btn-primary">Keresés</button>
+            <button id="clear-btn" class="btn btn-danger ml-3">Szűrések törlése</button>
+        </div>
+        <hr>
+        <div id="results"></div>
+        <div id="details"></div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const rawTime = document.getElementById('target-time').textContent.trim();
+    const targetDate = new Date(rawTime.replace(/\./g, '-') + 'T00:00:00');
+    const overlay = document.getElementById('maintenance-overlay');
+    const main    = document.getElementById('main-content');
+
+    function updateCountdown() {
+        const diff = targetDate - new Date();
+        if (diff <= 0) {
+            document.getElementById('countdown-timer').textContent = 'Karbantartás véget ért. Frissítés...';
+            return setTimeout(() => location.reload(), 2000);
+        }
+        const days    = Math.floor(diff / 86400000);
+        const hours   = Math.floor((diff / 3600000) % 24);
+        const minutes = Math.floor((diff / 60000) % 60);
+        const seconds = Math.floor((diff / 1000) % 60);
+        document.getElementById('countdown-timer').textContent =
+            `${days} nap ${hours} óra ${minutes} perc ${seconds} mp`;
+    }
+
+    if (new Date() < targetDate) {
+        main.style.display = 'none';
+        overlay.style.display = 'flex';
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+    }
+})();
+</script>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script>
+if (!document.getElementById('maintenance-overlay').style.display) {
+    const backendUrl = 'https://fabuszilard.myftp.org/turainfo/';
+    $(function() {
+        $('#search-input').autocomplete({
+            source(request, response) {
+                $.getJSON(`${backendUrl}suggest`, { field: 'city', q: request.term }, response);
+            },
+            minLength: 2
+        });
+        $('#street-input').autocomplete({
+            source(request, response) {
+                const city = $('#search-input').val().trim();
+                if (!city) return response([]);
+                $.getJSON(`${backendUrl}suggest`, { field: 'street', q: request.term, city }, response);
+            },
+            minLength: 2
+        });
+
+        $('#clear-btn').click(() => {
+            $('#search-input,#street-input').val('');
+            $('#results,#details').empty();
+            $('.inactive-highlight').removeClass('inactive-highlight');
+        });
+
+        $('#search-btn').click(() => {
+            const q = $('#search-input').val().trim();
+            const s = $('#street-input').val().trim();
+            $('#results,#details').empty();
+            if (!q) return alert('Kérem adja meg a települést vagy irányítószámot!');
+
+            $.ajax({
+                url: `${backendUrl}search`,
+                data: { q, street: s },
+                success(resp) {
+                    if (q.toLowerCase() === 'admin' && s.toLowerCase() === 'dupla') {
+                        const items = Array.isArray(resp) && resp.length
+                            ? resp
+                            : [];
+                        let html = '<h5>Többször szereplő, ellenőrizendő települések (van köztük gyanúsan rövid tartózkodás is):</h5>';
+                        html += items.length
+                            ? `<ul>${items.map(c => `<li>${c}</li>`).join('')}</ul>`
+                            : '<p>Nincs találat.</p>';
+                        return $('#results').html(html);
+                    }
+
+                    // admin összesítés
+                    if (resp.length && resp[0].tours_count !== undefined) {
+                        let html = '<table class="table table-bordered"><thead><tr>' +
+                                   '<th>Depó és túraszám</th>' +
+                                   '</tr></thead><tbody>';
+                        resp.forEach(i => html += `<tr><td>${i.depo}_${i.tours_count} db</td></tr>`);
+                        return $('#results').html(html + '</tbody></table>');
+                    }
+
+                    if (!resp.length) {
+                        return $('#results').html('<p>Nincs találat.</p>');
+                    }
+
+                    let table = '<table class="table table-bordered"><thead><tr>' +
+                                ['Depó','Túraszám','Rendszám','Település','Közterület','Nap','Időintervallum','Műveletek']
+                                   .map(h => `<th class="text-center">${h}</th>`).join('') +
+                                '</tr></thead><tbody>';
+                    resp.forEach(it => {
+                        table += `<tr class="summary" data-depo="${it.depo}" data-tour_number="${it.tour_number}">`
+                            + `<td class="text-center">${it.depo}</td>`
+                            + `<td class="text-center">${it.tour_number}</td>`
+                            + `<td class="text-center">${it.plate_number}</td>`
+                            + `<td class="text-center">${it.city}</td>`
+                            + `<td class="text-center">${it.street}</td>`
+                            + `<td class="text-center">${it.date}</td>`
+                            + `<td class="text-center">${it.time_interval}</td>`
+                            + `<td class="text-center">`
+                            + `<button class="btn btn-info btn-sm details-btn">Részletek</button> `
+                            + `<button class="btn btn-secondary btn-sm pdf-btn">PDF letöltés</button>`
+                            + `</td></tr>`;
+                    });
+                    $('#results').html(table + '</tbody></table>');
+
+                    // inaktiv sorok kiemelése
+                    $('#results tr.summary').each(function() {
+                        const plate = $(this).find('td').eq(2).text()
+                            .normalize('NFD').replace(/[̀-ͯ]/g, '')
+                            .toLowerCase().trim();
+                        if (plate === 'inaktiv') {
+                            $(this).addClass('inactive-highlight');
+                        }
+                    });
+                },
+                error() {
+                    $('#results').html('<p>Hiba történt a keresés során.</p>');
+                }
+            });
+        });
+
+        $('#results').on('click', '.details-btn', function() {
+            const row = $(this).closest('.summary');
+            $.get(`${backendUrl}details`, { depo: row.data('depo'), tour_number: row.data('tour_number') }, html => {
+                $('#details').html(html);
+                const text = $('#details').text()
+                    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+                    .toLowerCase();
+                $('#details').toggleClass('inactive-highlight', text.includes('inaktiv'));
+                $('html, body').animate({ scrollTop: $('#details').offset().top }, 500);
+            });
+        });
+
+        $('#results').on('click', '.pdf-btn', function() {
+            const row = $(this).closest('.summary');
+            window.open(
+                `${backendUrl}pdf?depo=${encodeURIComponent(row.data('depo'))}`
+                + `&tour_number=${encodeURIComponent(row.data('tour_number'))}`
+            );
+        });
+    });
+}
+</script>
+
+</body>
+</html>

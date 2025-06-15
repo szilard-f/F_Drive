@@ -63,7 +63,7 @@
 <div class="maintenance-overlay" id="maintenance-overlay">
     <div class="maintenance-box">
         <h1>⛔ Jelenleg karbantartás zajlik ⛔</h1>
-        <div>Várható újraindítás: <strong id="target-time">2025.05.01 08:00:00</strong></div>
+        <div>Várható újraindítás: <strong id="target-time">2025.06.12 08:00:00</strong></div>
         <div class="countdown" id="countdown-timer">00:00:00</div>
     </div>
 </div>
@@ -166,10 +166,10 @@ if (!maintenanceMode) {
             $.ajax({
                 url: `${backendUrl}search`, data: { q, street: s },
                 success: resp => {
-                    if (q.toLowerCase() === 'dupla' && s.toLowerCase() === 'dupla') {
+                    if (q.toLowerCase() === 'admin' && s.toLowerCase() === 'dupla') {
                         let html;
                         if (Array.isArray(resp) && resp.length) {
-                            html = '<h5>Települések (dupla–dupla keresés):</h5><ul>';
+                            html = '<h5>Többször szereplő, ellenőrizendő települések (van köztük gyanúsan rövid tartózkodás is):</h5><ul>';
                             resp.forEach(city => html += '<li>' + city + '</li>');
                             html += '</ul>';
                         } else {
