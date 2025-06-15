@@ -173,7 +173,7 @@ if (!maintenanceMode) {
                             resp.forEach(city => html += '<li>' + city + '</li>');
                             html += '</ul>';
                         } else {
-                            html = '<p>Nincs olyan település, amely legalább kétszer szerepel, és egyikben kevesebb mint 30 perc.</p>';
+                            html = '<p>Nincs olyan település, amely minimum kétszer szerepel, és legalább az egyikben kevesebb mint 30 perc a tartózkodási idő.</p>';
                         }
                         $('#results').html(html);
                         return;
