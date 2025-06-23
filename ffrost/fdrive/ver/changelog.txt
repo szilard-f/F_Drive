@@ -1,3 +1,6 @@
+1.26.1:
+- force update metódus változtatás
+- túrák törlésének tiltása
 1.25.6:
 - ÚJ FUNKCIÓ A TÚRÁK MEGNYITÁSÁNÁL: LÁSD A SÚGÓ IDEVONATKOZÓ RÉSZÉT (Túra megnyitása, törlése)! 
 - ablakkezelési hiba javítás
