@@ -42,7 +42,6 @@
             margin-top: 15px;
         }
 
-       
         .inactive-highlight {
             background-color: rgba(255, 0, 0, 0.1);
             outline: 2px solid red;
@@ -56,6 +55,16 @@
         }
        
         table.table { border-collapse: separate; border-spacing: 0 0.1px; }
+
+        /* ── új stílusok turalista listához ── */
+        .turalista-list .depot-header {
+            margin-top: 1rem;
+            color: #dc3545;           /* piros */
+            font-weight: bold;
+        }
+        .turalista-list .trip-line {
+            margin-left: 1.5rem;
+        }
     </style>
 </head>
 <body>
@@ -97,6 +106,7 @@
         </div>
         <hr>
         <div id="results"></div>
+        <pre id="resultsPlain" style="display:none; background:#f8f9fa; padding:1em;"></pre>
         <div id="details"></div>
     </div>
 </div>
@@ -148,25 +158,38 @@ if (!maintenanceMode) {
         });
         $('#street-input').autocomplete({
             source: (req, res) => {
-                const city = $('#search-input').val().trim(); if (!city) return res([]);
+                const city = $('#search-input').val().trim();
+                if (!city) return res([]);
                 $.getJSON(`${backendUrl}suggest`, { field: 'street', q: req.term, city }, res);
             },
             minLength: 2
         });
         $('#clear-btn').click(() => {
             $('#search-input,#street-input').val('');
-            $('#results,#details').empty();
+            $('#results,#resultsPlain,#details').empty();
+            $('#resultsPlain').hide();
             $('.inactive-highlight').removeClass('inactive-highlight');
         });
 
         $('#search-btn').click(() => {
-            const q = $('#search-input').val().trim(), s = $('#street-input').val().trim();
-            $('#results,#details').empty();
-            if (!q) { alert("Kérem adja meg a települést vagy irányítószámot!"); return; }
+            const q = $('#search-input').val().trim();
+            const s = $('#street-input').val().trim();
+            $('#results,#resultsPlain,#details').empty();
+            $('#resultsPlain').hide();
+
+            if (!q) {
+                alert("Kérem adja meg a települést vagy irányítószámot!");
+                return;
+            }
+
+            const isDupla     = q.toLowerCase() === 'admin' && s.toLowerCase() === 'dupla';
+            const isTuralista = q.toLowerCase() === 'admin' && s.toLowerCase() === 'turalista';
+
             $.ajax({
-                url: `${backendUrl}search`, data: { q, street: s },
+                url: `${backendUrl}search`,
+                data: { q, street: s },
                 success: resp => {
-                    if (q.toLowerCase() === 'admin' && s.toLowerCase() === 'dupla') {
+                    if (isDupla) {
                         let html;
                         if (Array.isArray(resp) && resp.length) {
                             html = '<h5>Többször szereplő, ellenőrizendő települések (van köztük gyanúsan rövid tartózkodás is):</h5><ul>';
@@ -182,25 +205,50 @@ if (!maintenanceMode) {
                         let html = '<table class="table table-bordered"><thead><tr>' +
                                    '<th>Depó és feltöltött túrák száma</th></tr></thead><tbody>';
                         resp.forEach(i => html += `<tr><td>${i.depo}_${i.tours_count} db</td></tr>`);
-                        $('#results').html(html + '</tbody></table>'); return;
+                        $('#results').html(html + '</tbody></table>');
+                        return;
                     }
-                    if (!resp.length) return $('#results').html('<p>Nincs találat.</p>');
+                    if (isTuralista) {
+                        let html;
+                        if (Array.isArray(resp) && resp.length) {
+                            html = '<h5>Depónkénti túralista:</h5><div class="turalista-list">';
+                            resp.forEach(line => {
+                                if (/^\d+\.$/.test(line)) {
+                                    html += `<div class="depot-header">${line}</div>`;
+                                } else {
+                                    html += `<div class="trip-line">${line}</div>`;
+                                }
+                            });
+                            html += '</div>';
+                        } else {
+                            html = '<p>Nincs találat a túralistára.</p>';
+                        }
+                        $('#results').html(html);
+                        return;
+                    }
+                    
+                    if (!resp.length) {
+                        return $('#results').html('<p>Nincs találat.</p>');
+                    }
+                 
                     let tbl = '<table class="table table-bordered"><thead><tr>' +
-                             ['Depó','Túraszám','Rendszám','Település','Közterület','Nap','Időintervallum','Műveletek']
+                              ['Depó','Túraszám','Rendszám','Település','Közterület','Nap','Időintervallum','Műveletek']
                                 .map(h=>`<th class="text-center">${h}</th>`).join('') +
                               '</tr></thead><tbody>';
-                    resp.forEach(it => tbl += `<tr class="summary" data-depo="${it.depo}" data-tour_number="${it.tour_number}">` +
-                                             `<td class="text-center">${it.depo}</td>` +
-                                             `<td class="text-center">${it.tour_number}</td>` +
-                                             `<td class="text-center">${it.plate_number}</td>` +
-                                             `<td class="text-center">${it.city}</td>` +
-                                             `<td class="text-center">${it.street}</td>` +
-                                             `<td class="text-center">${it.date}</td>` +
-                                             `<td class="text-center">${it.time_interval}</td>` +
-                                             `<td class="text-center">` +
-                                               `<button class="btn btn-info btn-sm details-btn">Részletek</button> ` +
-                                               `<button class="btn btn-secondary btn-sm pdf-btn">PDF letöltés</button>`+
-                                             `</td></tr>`);
+                    resp.forEach(it => {
+                        tbl += `<tr class="summary" data-depo="${it.depo}" data-tour_number="${it.tour_number}">` +
+                               `<td class="text-center">${it.depo}</td>` +
+                               `<td class="text-center">${it.tour_number}</td>` +
+                               `<td class="text-center">${it.plate_number}</td>` +
+                               `<td class="text-center">${it.city}</td>` +
+                               `<td class="text-center">${it.street}</td>` +
+                               `<td class="text-center">${it.date}</td>` +
+                               `<td class="text-center">${it.time_interval}</td>` +
+                               `<td class="text-center">` +
+                                 `<button class="btn btn-info btn-sm details-btn">Részletek</button> ` +
+                                 `<button class="btn btn-secondary btn-sm pdf-btn">PDF letöltés</button>`+
+                               `</td></tr>`;
+                    });
                     $('#results').html(tbl + '</tbody></table>');
 
                     $('#results tr.summary').each(function() {
