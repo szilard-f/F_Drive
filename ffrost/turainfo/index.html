@@ -71,7 +71,7 @@
       <div class="maintenance-overlay" id="maintenance-overlay">
          <div class="maintenance-box">
             <h1>⛔ Jelenleg karbantartás zajlik ⛔</h1>
-            <div>Várható újraindítás: <strong id="target-time">2025.06.27 12:00:00</strong></div>
+            <div>Várható újraindítás: <strong id="target-time">2025.06.12 08:00:00</strong></div>
             <div class="countdown" id="countdown-timer">00:00:00</div>
          </div>
       </div>
@@ -178,20 +178,25 @@
          
                      const isDupla     = q.toLowerCase() === 'admin' && s.toLowerCase() === 'dupla';
                      const isTuralista = q.toLowerCase() === 'admin' && s.toLowerCase() === 'turalista';
+                     const isStopszam  = q.toLowerCase() === 'admin' && s.toLowerCase() === 'stopszam';
          
                      $.ajax({
                          url: `${backendUrl}search`,
                          data: { q, street: s },
                          success: resp => {
-                     
                              if (isDupla) {
-                                 let html = '<h5>Többször szereplő, ellenőrizendő települések:</h5><ul>';
+                                 let html = '<h5>Többször szereplő, ellenőrizendő települések (van köztük gyanúsan rövid tartózkodás is):</h5><ul>';
                                  resp.forEach(city => html += `<li>${city}</li>`);
                                  html += '</ul>';
                                  $('#results').html(html);
                                  return;
                              }
-         
+                             if (isStopszam) {
+                                 let html = '<h5>60 stop alatti túrák depónként:</h5>';
+                                 html += '<pre>' + resp.join('\n') + '</pre>';
+                                 $('#results').html(html);
+                                 return;
+                             }
                              if (resp.length && resp[0].tours_count !== undefined) {
                                  let html = '<h5>Depók és feltöltött túraszámok:</h5><ul>';
                                  resp.forEach(i => html += `<li>${i.depo}: ${i.tours_count} túra</li>`);
@@ -199,7 +204,6 @@
                                  $('#results').html(html);
                                  return;
                              }
-         
                              if (isTuralista) {
                                  let html = '<h5>Depónkénti túralista:</h5><div class="turalista-list">';
                                  resp.forEach(line => {
