@@ -176,35 +176,35 @@
                          return;
                      }
          
-                     const isDupla     = q.toLowerCase() === 'admin' && s.toLowerCase() === 'dupla';
-                     const isTuralista = q.toLowerCase() === 'admin' && s.toLowerCase() === 'turalista';
-                     const isStopszam  = q.toLowerCase() === 'admin' && s.toLowerCase() === 'stopszam';
-         
                      $.ajax({
                          url: `${backendUrl}search`,
                          data: { q, street: s },
                          success: resp => {
-                             if (isDupla) {
+                            
+                             if (Array.isArray(resp) && resp.length && typeof resp[0] === 'string' && resp[0].match(/^\d+: /)) {
                                  let html = '<h5>Többször szereplő, ellenőrizendő települések (van köztük gyanúsan rövid tartózkodás is):</h5><ul>';
                                  resp.forEach(city => html += `<li>${city}</li>`);
                                  html += '</ul>';
                                  $('#results').html(html);
                                  return;
                              }
-                             if (isStopszam) {
+                             
+                             if (Array.isArray(resp) && resp.length && resp.some(line => typeof line === 'string' && line.includes('db ('))) {
                                  let html = '<h5>60 stop alatti túrák depónként:</h5>';
-                                 html += '<pre>' + resp.join('\n') + '</pre>';
+                                 html += '<div class="turalista-list">';
+                                 resp.forEach(line => {
+                                     if (/^\d+\.$/.test(line)) {
+                                         html += `<div class="depot-header">${line}</div>`;
+                                     } else if (line.includes('db (')) {
+                                         html += `<div class="trip-line">${line}</div>`;
+                                     }
+                                 });
+                                 html += '</div>';
                                  $('#results').html(html);
                                  return;
                              }
-                             if (resp.length && resp[0].tours_count !== undefined) {
-                                 let html = '<h5>Depók és feltöltött túraszámok:</h5><ul>';
-                                 resp.forEach(i => html += `<li>${i.depo}: ${i.tours_count} túra</li>`);
-                                 html += '</ul>';
-                                 $('#results').html(html);
-                                 return;
-                             }
-                             if (isTuralista) {
+                             
+                             if (Array.isArray(resp) && resp.length && typeof resp[0] === 'string' && resp[0].match(/^\d+\.$/)) {
                                  let html = '<h5>Depónkénti túralista:</h5><div class="turalista-list">';
                                  resp.forEach(line => {
                                      if (/^\d+\.$/.test(line)) {
@@ -216,6 +216,14 @@
                                      }
                                  });
                                  html += '</div>';
+                                 $('#results').html(html);
+                                 return;
+                             }
+                             
+                             if (Array.isArray(resp) && resp.length && resp[0].tours_count !== undefined) {
+                                 let html = '<h5>Depók és feltöltött túraszámok:</h5><ul>';
+                                 resp.forEach(i => html += `<li>${i.depo}: ${i.tours_count} túra</li>`);
+                                 html += '</ul>';
                                  $('#results').html(html);
                                  return;
                              }
