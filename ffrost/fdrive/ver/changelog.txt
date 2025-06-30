@@ -1,2 +1,2 @@
-1.26.5:
-- hálózati beállítás módosítása (túraadat feltöltés)
+1.26.7:
+- ideiglenes, de kötelező korlátozás aktiválása 
