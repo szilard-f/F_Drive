@@ -250,7 +250,8 @@
          
              $('#search-input').autocomplete({
                  source: (req, res) => $.getJSON(`${backendUrl}suggest`, { field: 'city', q: req.term }, res),
-                 minLength: 2,
+                 minLength: 3,
+                 delay: 400,
                  select: function(event, ui) {
                      $(this).val(ui.item.value);
                      $('#street-input').val('');
