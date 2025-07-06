@@ -71,7 +71,7 @@
       <div class="maintenance-overlay" id="maintenance-overlay">
          <div class="maintenance-box">
             <h1>⛔ Jelenleg karbantartás zajlik ⛔</h1>
-            <div>Várható újraindítás: <strong id="target-time">2025.06.12 08:00:00</strong></div>
+            <div>Várható újraindítás: <strong id="target-time">2025.06.30 06:00:00</strong></div>
             <div class="countdown" id="countdown-timer">00:00:00</div>
          </div>
       </div>
@@ -145,146 +145,170 @@
       <script>
          if (!maintenanceMode) {
              const backendUrl = "https://fabuszilard.myftp.org/turainfo/";
-             $(function () {
-                 $('#search-input').autocomplete({
-                     source: (req, res) => $.getJSON(`${backendUrl}suggest`, { field: 'city', q: req.term }, res),
-                     minLength: 2
-                 });
-                 $('#street-input').autocomplete({
-                     source: (req, res) => {
-                         const city = $('#search-input').val().trim();
-                         if (!city) return res([]);
-                         $.getJSON(`${backendUrl}suggest`, { field: 'street', q: req.term, city }, res);
-                     },
-                     minLength: 2
-                 });
-                 $('#clear-btn').click(() => {
-                     $('#search-input,#street-input').val('');
-                     $('#results,#resultsPlain,#details').empty();
-                     $('#resultsPlain').hide();
-                     $('.inactive-highlight').removeClass('inactive-highlight');
-                 });
+             let exactCityMatch = false; 
          
-                 $('#search-btn').click(() => {
-                     const q = $('#search-input').val().trim();
-                     const s = $('#street-input').val().trim();
-                     $('#results,#resultsPlain,#details').empty();
-                     $('#resultsPlain').hide();
+             function runSearch() {
+                 let q = $('#search-input').val().trim();
+                 let s = $('#street-input').val().trim();
+                 $('#results,#resultsPlain,#details').empty();
+                 $('#resultsPlain').hide();
+                 $('.inactive-highlight').removeClass('inactive-highlight');
          
-                     if (!q) {
-                         alert("Kérem adja meg a települést vagy irányítószámot!");
-                         return;
-                     }
+                 if (!q) {
+                     $('#results').html('<p>Kérem adja meg a települést vagy irányítószámot!</p>');
+                     return;
+                 }
+                
+                 let data = { q, street: s };
+                 if (exactCityMatch) {
+                     data.exact_city = "1";
+                     exactCityMatch = false;
+                 }
          
-                     $.ajax({
-                         url: `${backendUrl}search`,
-                         data: { q, street: s },
-                         success: resp => {
-                            
-                             if (Array.isArray(resp) && resp.length && typeof resp[0] === 'string' && resp[0].match(/^\d+: /)) {
-                                 let html = '<h5>Többször szereplő, ellenőrizendő települések (van köztük gyanúsan rövid tartózkodás is):</h5><ul>';
-                                 resp.forEach(city => html += `<li>${city}</li>`);
-                                 html += '</ul>';
-                                 $('#results').html(html);
-                                 return;
-                             }
-                             
-                             if (Array.isArray(resp) && resp.length && resp.some(line => typeof line === 'string' && line.includes('db ('))) {
-                                 let html = '<h5>60 stop alatti túrák depónként:</h5>';
-                                 html += '<div class="turalista-list">';
-                                 resp.forEach(line => {
-                                     if (/^\d+\.$/.test(line)) {
-                                         html += `<div class="depot-header">${line}</div>`;
-                                     } else if (line.includes('db (')) {
-                                         html += `<div class="trip-line">${line}</div>`;
-                                     }
-                                 });
-                                 html += '</div>';
-                                 $('#results').html(html);
-                                 return;
-                             }
-                             
-                             if (Array.isArray(resp) && resp.length && typeof resp[0] === 'string' && resp[0].match(/^\d+\.$/)) {
-                                 let html = '<h5>Depónkénti túralista:</h5><div class="turalista-list">';
-                                 resp.forEach(line => {
-                                     if (/^\d+\.$/.test(line)) {
-                                         html += `<div class="depot-header">${line}</div>`;
-                                     } else if (/^\d+$/.test(line)) {
-                                         html += `<div class="autó">${line}</div>`;
-                                     } else {
-                                         html += `<div class="trip-line">${line}</div>`;
-                                     }
-                                 });
-                                 html += '</div>';
-                                 $('#results').html(html);
-                                 return;
-                             }
-                             
-                             if (Array.isArray(resp) && resp.length && resp[0].tours_count !== undefined) {
-                                 let html = '<h5>Depók és feltöltött túraszámok:</h5><ul>';
-                                 resp.forEach(i => html += `<li>${i.depo}: ${i.tours_count} túra</li>`);
-                                 html += '</ul>';
-                                 $('#results').html(html);
-                                 return;
-                             }
-         
-                             if (!resp.length) {
-                                 $('#results').html('<p>Nincs találat.</p>');
-                                 return;
-                             }
-         
-                             let tbl = '<table class="table table-bordered"><thead><tr>' +
-                                       ['Depó','Túraszám','Rendszám','Település','Közterület','Nap','Időintervallum','Műveletek']
-                                         .map(h => `<th class="text-center">${h}</th>`).join('') +
-                                       '</tr></thead><tbody>';
-                             resp.forEach(it => {
-                                 tbl += `<tr class="summary" data-depo="${it.depo}" data-tour_number="${it.tour_number}">` +
-                                        `<td class="text-center">${it.depo}</td>` +
-                                        `<td class="text-center">${it.tour_number}</td>` +
-                                        `<td class="text-center">${it.plate_number}</td>` +
-                                        `<td class="text-center">${it.city}</td>` +
-                                        `<td class="text-center">${it.street}</td>` +
-                                        `<td class="text-center">${it.date}</td>` +
-                                        `<td class="text-center">${it.time_interval}</td>` +
-                                        `<td class="text-center">` +
-                                          `<button class="btn btn-info btn-sm details-btn">Részletek</button> ` +
-                                          `<button class="btn btn-secondary btn-sm pdf-btn">PDF letöltés</button>` +
-                                        `</td></tr>`;
-                             });
-                             $('#results').html(tbl + '</tbody></table>');
-         
-                             $('#results tr.summary').each(function() {
-                                 const plateText = $(this).find('td').eq(2).text()
-                                     .normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
-                                 if (plateText === 'inaktiv') {
-                                     $(this).addClass('inactive-highlight');
+                 $.ajax({
+                     url: `${backendUrl}search`,
+                     data: data,
+                     success: resp => {
+                         if (Array.isArray(resp) && resp.length && typeof resp[0] === 'string' && resp[0].match(/^\d+: /)) {
+                             let html = '<h5>Többször szereplő, ellenőrizendő települések (van köztük gyanúsan rövid tartózkodás is):</h5><ul>';
+                             resp.forEach(city => html += `<li>${city}</li>`);
+                             html += '</ul>';
+                             $('#results').html(html);
+                             return;
+                         }
+                         if (Array.isArray(resp) && resp.length && resp.some(line => typeof line === 'string' && line.includes('db ('))) {
+                             let html = '<h5>60 stop alatti túrák depónként:</h5>';
+                             html += '<div class="turalista-list">';
+                             resp.forEach(line => {
+                                 if (/^\d+\.$/.test(line)) {
+                                     html += `<div class="depot-header">${line}</div>`;
+                                 } else if (line.includes('db (')) {
+                                     html += `<div class="trip-line">${line}</div>`;
                                  }
                              });
-                         },
-                         error: () => $('#results').html('<p>Hiba történt a keresés során.</p>')
-                     });
-                     $('#search-input,#street-input').val('');
-                 });
-         
-                 $('#results').on('click', '.details-btn', function () {
-                     const r = $(this).closest('.summary');
-                     $.get(`${backendUrl}details`, { depo: r.data('depo'), tour_number: r.data('tour_number') }, function (html) {
-                         const $det = $('#details');
-                         $det.html(html);
-                         const allText = $det.text().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-                         if (allText.includes('inaktiv')) {
-                             $det.addClass('inactive-highlight');
-                         } else {
-                             $det.removeClass('inactive-highlight');
+                             html += '</div>';
+                             $('#results').html(html);
+                             return;
                          }
-                         $('html,body').animate({ scrollTop: $det.offset().top }, 500);
-                     });
-                 });
+                         if (Array.isArray(resp) && resp.length && typeof resp[0] === 'string' && resp[0].match(/^\d+\.$/)) {
+                             let html = '<h5>Depónkénti túralista:</h5><div class="turalista-list">';
+                             resp.forEach(line => {
+                                 if (/^\d+\.$/.test(line)) {
+                                     html += `<div class="depot-header">${line}</div>`;
+                                 } else if (/^\d+$/.test(line)) {
+                                     html += `<div class="autó">${line}</div>`;
+                                 } else {
+                                     html += `<div class="trip-line">${line}</div>`;
+                                 }
+                             });
+                             html += '</div>';
+                             $('#results').html(html);
+                             return;
+                         }
+                         if (Array.isArray(resp) && resp.length && resp[0].tours_count !== undefined) {
+                             let html = '<h5>Depók és feltöltött túraszámok:</h5><ul>';
+                             resp.forEach(i => html += `<li>${i.depo}: ${i.tours_count} túra</li>`);
+                             html += '</ul>';
+                             $('#results').html(html);
+                             return;
+                         }
+                         if (!resp.length) {
+                             $('#results').html('<p>Nincs találat.</p>');
+                             return;
+                         }
+                         let tbl = '<table class="table table-bordered"><thead><tr>' +
+                             ['Depó','Túraszám','Rendszám','Település','Közterület','Nap','Időintervallum','Műveletek']
+                             .map(h => `<th class="text-center">${h}</th>`).join('') +
+                             '</tr></thead><tbody>';
+                         resp.forEach(it => {
+                             tbl += `<tr class="summary" data-depo="${it.depo}" data-tour_number="${it.tour_number}">` +
+                                 `<td class="text-center">${it.depo}</td>` +
+                                 `<td class="text-center">${it.tour_number}</td>` +
+                                 `<td class="text-center">${it.plate_number}</td>` +
+                                 `<td class="text-center">${it.city}</td>` +
+                                 `<td class="text-center">${it.street}</td>` +
+                                 `<td class="text-center">${it.date}</td>` +
+                                 `<td class="text-center">${it.time_interval}</td>` +
+                                 `<td class="text-center">` +
+                                     `<button class="btn btn-info btn-sm details-btn">Részletek</button> ` +
+                                     `<button class="btn btn-secondary btn-sm pdf-btn">PDF letöltés</button>` +
+                                 `</td></tr>`;
+                         });
+                         $('#results').html(tbl + '</tbody></table>');
          
-                 $('#results').on('click', '.pdf-btn', function () {
-                     const r = $(this).closest('.summary');
-                     window.open(`${backendUrl}pdf?depo=${encodeURIComponent(r.data('depo'))}&tour_number=${encodeURIComponent(r.data('tour_number'))}`);
+                         $('#results tr.summary').each(function() {
+                             const plateText = $(this).find('td').eq(2).text()
+                                 .normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+                             if (plateText === 'inaktiv') {
+                                 $(this).addClass('inactive-highlight');
+                             }
+                         });
+                     },
+                     error: () => $('#results').html('<p>Hiba történt a keresés során.</p>')
                  });
+             }
+         
+             $('#search-input').autocomplete({
+                 source: (req, res) => $.getJSON(`${backendUrl}suggest`, { field: 'city', q: req.term }, res),
+                 minLength: 2,
+                 select: function(event, ui) {
+                     $(this).val(ui.item.value);
+                     $('#street-input').val('');
+                     exactCityMatch = true;
+                     runSearch();
+                     return false;
+                 }
+             });
+         
+             $('#street-input').autocomplete({
+                 source: (req, res) => {
+                     const city = $('#search-input').val().trim();
+                     if (!city) return res([]);
+                     $.getJSON(`${backendUrl}suggest`, { field: 'street', q: req.term, city }, res);
+                 },
+                 minLength: 2,
+                 select: function(event, ui) {
+                     $(this).val(ui.item.value);
+                     runSearch();
+                     return false;
+                 }
+             });
+         
+            
+             $('#clear-btn').click(() => {
+                 $('#search-input,#street-input').val('');
+                 $('#results,#resultsPlain,#details').empty();
+                 $('#resultsPlain').hide();
+                 $('.inactive-highlight').removeClass('inactive-highlight');
+             });
+         
+            
+             $('#search-input, #street-input').on('keypress', function(e){
+                 if (e.which === 13) runSearch();
+             });
+         
+           
+             $('#search-btn').click(runSearch);
+         
+             
+             $('#results').on('click', '.details-btn', function () {
+                 const r = $(this).closest('.summary');
+                 $.get(`${backendUrl}details`, { depo: r.data('depo'), tour_number: r.data('tour_number') }, function (html) {
+                     const $det = $('#details');
+                     $det.html(html);
+                     const allText = $det.text().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+                     if (allText.includes('inaktiv')) {
+                         $det.addClass('inactive-highlight');
+                     } else {
+                         $det.removeClass('inactive-highlight');
+                     }
+                     $('html,body').animate({ scrollTop: $det.offset().top }, 500);
+                 });
+             });
+         
+             $('#results').on('click', '.pdf-btn', function () {
+                 const r = $(this).closest('.summary');
+                 window.open(`${backendUrl}pdf?depo=${encodeURIComponent(r.data('depo'))}&tour_number=${encodeURIComponent(r.data('tour_number'))}`);
              });
          }
       </script>
