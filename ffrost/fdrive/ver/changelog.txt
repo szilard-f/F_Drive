@@ -1,2 +1,2 @@
-1.26.7:
-- ideiglenes, de kötelező korlátozás aktiválása 
+1.28.1:
+- mobil alkalmazás API cím változtatás 
