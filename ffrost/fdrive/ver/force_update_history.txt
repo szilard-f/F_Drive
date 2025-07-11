@@ -1,3 +1,6 @@
+3:
+1.28.5-re történő frissítés kényszerítése, melyben lehetőség van a csak a túra menü tiltására
+
 2:
 1.28.1-re történő frissítés kényszerítése, melyben megváltoztak az icontent API címei
 

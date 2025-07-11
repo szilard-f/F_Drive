@@ -1,4 +1,3 @@
-1.28.2:
-- teljes tiltás helyett csak a túrák menü tiltása (szerződéskötés és többi funkció engedélyezett)
-1.28.1:
-- mobil alkalmazás API cím változtatás 
+
+1.28.5:
+- szerveroldali változások
