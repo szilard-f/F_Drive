@@ -164,7 +164,7 @@
          <strong>Túraanalízis összesítő táblázat:</strong> A beolvasott összes gépjármű minden napjára vonatkozóan elkészíti a túraanalízis <a href="fdrive/pic/analízis_szum.jpg" target="_blank"> összesített</a> nézetét. Ez a gyors kontroll lehetősége miatt került fejlesztésre.
       </p>
       <p>
-         <span class="new-feature">ÚJ</span>
+         <!-- <span class="new-feature">ÚJ</span> -->
 		 <strong>Túraanalízis összesítő táblázat - 60 stop alattiak:</strong> Az előző menüvel egyező, azonban az elkészült riportban csak azok a napok szerepelnek, melyeken a minimum 60 stop feltétel nem teljesült.
       </p>	  
 	  <p>
@@ -188,9 +188,17 @@
       </p>
       <p>
         <strong>Túra megnyitása:</strong> A <a href="fdrive/pic/open_túra.png" target="_blank"> felbukkanó</a> ablakban ki tudjuk választani a már az adatbázisban lévő túrát, majd a megnyitást követően lehetőségünk van áttekinteni. (Itt a megállásokon nincs lehetőség módosítani).<br>
-	    <span class="new-feature">ÚJ FUNKCIÓ</span>Többször előfordul, hogy az eredeti (webbase) adatbázisban hibás a település neve. Ilyenkor mind az <a href="https://fdriveanalytics.com/ffrost/turainfo/" target="_blank" rel="noopener noreferrer">információs weboldalon</a>, mind a túraleírásban a téves név jelenik meg. Ez a mező dupla kattintással szerkeszthető lett, de ügyeljetek rá, hogy mindig az alábbi formátumot használjátok, különben a közterület belecsúszhat a település nevébe, ami még nagyobb bonyodalmakhoz vezethet:<code> irányítószám, település, közterület</code><br>
- 		Az alábbi példában a „Kaposvár - Fészerlakpuszta” eredetileg „Kaposvár” néven szerepelt, amit javítottam:<a href="fdrive/video/megállás_szerkesztés.mp4" target="_blank">Település módosítása</a>	<br>
-	  </p>
+	    <!-- <span class="new-feature">ÚJ FUNKCIÓ</span> -->
+	  <s>
+		Többször előfordul, hogy az eredeti (webbase) adatbázisban hibás a település neve. Ilyenkor mind az 
+		<a href="https://fdriveanalytics.com/ffrost/turainfo/" target="_blank" rel="noopener noreferrer">információs weboldalon</a>, 
+		mind a túraleírásban a téves név jelenik meg. Ez a mező dupla kattintással szerkeszthető lett, de ügyeljetek rá, hogy mindig az alábbi formátumot használjátok, különben a közterület belecsúszhat a település nevébe, ami még nagyobb bonyodalmakhoz vezethet: 
+		<code> irányítószám, település, közterület</code><br>
+		Az alábbi példában a „Kaposvár - Fészerlakpuszta” eredetileg „Kaposvár” néven szerepelt, amit javítottam:
+		<a href="fdrive/video/megállás_szerkesztés.mp4" target="_blank">Település módosítása</a><br>
+	  </s>
+	  <span style="color:gray; font-size:smaller;">(funkció felfüggesztve)</span>
+
       <p>
          <strong>Túra mentése, KML + PDF export lehetőség:</strong> Az adatbázisból betöltött túra alapbeállításai (gépkocsi száma, rendszám és a nap) módosítható. Amennyiben az eredeti túraleírás és KML fájl már nem lenne meg, az itt pótolható. A mentés során a megváltoztatott paraméterekkel kerül felülírásra az eredeti túra.
       </p>
