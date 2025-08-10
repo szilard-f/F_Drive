@@ -1,3 +1,6 @@
+1.32.7:
+- aktuális túralista exportálás lehetősége
+
 1.32.6:
 - inaktív státusz a rendszámlistában
 - aktuális menetrend exportálás lehetősége
