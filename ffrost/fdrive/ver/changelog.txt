@@ -1,3 +1,2 @@
-1.33.2:
-- hatékonyabb településnév tisztítás JSON és túra beolvasáskor 
-- aktuális túraleírás -> formátum módosítás
+✔ hatékonyabb településnév tisztítás JSON és túra beolvasáskor 
+✔ aktuális túraleírás ➔ formátum módosítás
