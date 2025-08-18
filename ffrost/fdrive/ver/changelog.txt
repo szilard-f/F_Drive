@@ -1,2 +1,2 @@
-✔ hatékonyabb településnév tisztítás JSON és túra beolvasáskor 
-✔ aktuális túraleírás ➔ formátum módosítás
+✔ menetrend táblázat ➔ összesítő sorok 
+✔ biztonsági mentés optimalizálása
