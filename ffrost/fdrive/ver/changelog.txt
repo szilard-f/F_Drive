@@ -1,3 +1,4 @@
+✔ hibajavítás
 ✔ menetrend táblázat ➔ összesítő sorok 
 ✔ menetrend táblázat ➔ hibás adatok jelzése
 ✔ biztonsági mentés optimalizálása
