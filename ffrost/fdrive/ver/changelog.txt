@@ -1,2 +1,4 @@
 ✔ menetrend táblázat ➔ összesítő sorok 
+✔ menetrend táblázat ➔ hibás adatok jelzése
 ✔ biztonsági mentés optimalizálása
+✔ jelentések, riportok automatikus megnyitása
