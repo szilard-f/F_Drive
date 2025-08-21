@@ -1,5 +1,2 @@
-✔ hibajavítás
-✔ menetrend táblázat ➔ összesítő sorok 
-✔ menetrend táblázat ➔ hibás adatok jelzése
-✔ biztonsági mentés optimalizálása
-✔ jelentések, riportok automatikus megnyitása
+✔ aktuális túraútvonalak ➔ esetleges (nem mindegyik) hibák kiemelése
+✘nem helyettesíti a manuális ellenőrzéseket✘
