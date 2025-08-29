@@ -29,7 +29,7 @@
         margin:0; padding:0; color:var(--ink);
         font: 400 16px/1.65 system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"Noto Sans";
         background: url('../fdrive/images/background.jpg') no-repeat center center fixed;
-        background-size:cover; min-height:100svh; overflow-y:auto;
+        background-size:cover; min-height:100svh;
       }
 
       .bg-overlay{ position:fixed; inset:0; background:var(--overlay); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); z-index:0; }
@@ -67,7 +67,7 @@
 
       .divider{ margin: 16px auto 16px; height:1px; width:min(520px, 70%); background: linear-gradient(90deg, transparent, rgba(0,0,0,.12), transparent); }
 
-      /* Alapból rejtve a találati sávok – csak ha nem üres */
+      /* találati sávok csak ha van tartalom */
       #results, #details { display:none; }
       #results:not(:empty), #details:not(:empty){
         display:block; background: rgba(255,255,255,.72); border-radius: 16px; padding: 12px; box-shadow: 0 3px 12px rgba(0,0,0,.06);
@@ -101,26 +101,27 @@
       .red{ color: var(--brand); font-weight: 800; }
       .blue{ color: var(--blue); font-weight: 800; }
 
-      /* MOBIL részletező kártya */
-      .m-details-card{
-        border-radius: 16px; background: rgba(255,255,255,.92); box-shadow: 0 6px 18px rgba(0,0,0,.10);
-        padding: 12px 14px; margin: 8px 0 4px;
+      /* Mobilos találati kártya */
+      .m-result-card{
+        border-radius: 22px; background: rgba(255,255,255,.95); box-shadow: 0 10px 22px rgba(0,0,0,.12);
+        padding: 14px 16px; margin: 10px 4px;
       }
-      .m-details-card .rowline{ display:flex; justify-content:space-between; gap:12px; padding:6px 0; border-bottom:1px dashed rgba(0,0,0,.08); }
-      .m-details-card .rowline:last-child{ border-bottom:none; }
-      .m-details-card .k{ color:var(--muted); font-weight:600; }
-      .m-details-card .v{ font-weight:700; }
+      .m-result-title{ font-weight: 900; font-size: 1.15rem; letter-spacing:.3px; margin-bottom: 8px; }
+      .m-result-row{ display:flex; justify-content:space-between; gap:12px; padding:6px 0; border-bottom:1px dashed rgba(0,0,0,.08); }
+      .m-result-row:last-of-type{ border-bottom:none; }
+      .m-k{ color:var(--muted); font-weight:700; }
+      .m-v{ font-weight:800; }
+      .m-btns{ display:flex; gap:12px; margin-top:10px; }
+      .m-btns .btn-pill{ min-width:unset; padding:10px 14px; }
+      .m-extra{ display:none; margin-top:10px; border-radius:14px; background:rgba(0,0,0,.03); padding:10px 12px; }
 
       @media (max-width: 600px){
-        html, body{ background-attachment: scroll; }
+        html, body{ background-attachment: scroll; overflow-x:hidden; }
         .card-app{ border-radius: 16px; padding: 18px; }
         .logo-container img{ width: 74px; }
         #results, #details{ border-radius: 12px; }
         .btn-pill{ width: auto; min-width: 140px; }
-        /* Biztonságból ne legyen vízszintes görgetés */
-        html, body { overflow-x: hidden; }
       }
-
       @media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important; } }
     </style>
   </head>
@@ -193,13 +194,12 @@
           setTimeout(() => location.reload(), 2000);
           return;
         }
-        const days = Math.floor(diff / (1000*60*60*24));
-        const hours = Math.floor((diff / (1000*60*60)) % 24);
-        const minutes = Math.floor((diff / (1000*60)) % 60);
-        const seconds = Math.floor((diff / 1000) % 60);
-        document.getElementById("countdown-timer").innerText = `${days} nap ${hours} óra ${minutes} perc ${seconds} mp`;
+        const d = Math.floor(diff/86400000);
+        const h = Math.floor((diff/3600000)%24);
+        const m = Math.floor((diff/60000)%60);
+        const s = Math.floor((diff/1000)%60);
+        document.getElementById("countdown-timer").innerText = `${d} nap ${h} óra ${m} perc ${s} mp`;
       }
-
       if (maintenanceMode){
         const overlay = document.getElementById("maintenance-overlay");
         overlay.style.display = "flex"; overlay.classList.add("d-flex");
@@ -225,7 +225,6 @@
         const origCenterCls = `${wA}-${wB}-center`;
         const origHintCls   = `${wA}-hint`;
         const origProgCls   = `${wA}-progress`;
-
         const aliasBtnCls    = "special-task-btn";
         const aliasCenterCls = "special-center";
         const aliasHintCls   = "special-hint";
@@ -237,8 +236,7 @@
             const $btn = $(this);
             $btn.addClass(aliasBtnCls).removeClass(origBtnCls);
             $btn.parent().addClass(aliasCenterCls);
-            const t = $btn.text();
-            $btn.text(t.replace(/menetrend/gi, 'Menetrend'));
+            $btn.text($btn.text().replace(/menetrend/gi, 'Menetrend'));
           });
           $tmp.find(`.${origCenterCls}`).removeClass(origCenterCls).addClass(aliasCenterCls);
           $tmp.find(`.${origHintCls}`).removeClass(origHintCls).addClass(aliasHintCls);
@@ -250,8 +248,8 @@
         }
 
         function runSearch(){
-          let q = $('#search-input').val().trim();
-          let s = $('#street-input').val().trim();
+          const q = $('#search-input').val().trim();
+          const s = $('#street-input').val().trim();
 
           $('#results,#resultsPlain,#details').empty();
           $('#resultsPlain').hide();
@@ -262,41 +260,31 @@
             return;
           }
 
-          let data = { q, street: s };
+          const data = { q, street: s };
           if (exactCityMatch){ data.exact_city = "1"; exactCityMatch = false; }
 
           $.ajax({
             url: `${backendUrl}search`,
             data: data,
             success: resp => {
+              // Admin blokk
               if (resp && resp.kind === respKind){
                 $('#results').html(cloakAdminHtml(resp.html));
                 return;
               }
 
-              // gyanús települések
+              // Szöveges speciálok változatlanul...
               if (Array.isArray(resp) && resp.length && typeof resp[0] === 'string' &&
-                  (resp[0].includes('kilógók:') || resp[0].includes('fő települések:') || resp[0].endsWith(':'))){
+                 (resp[0].includes('kilógók:') || resp[0].includes('fő települések:') || resp[0].endsWith(':'))){
                 let html = '<h5>Gyanús, oda nem illő települések depónként és túránként:</h5><div class="turalista-list">';
                 resp.forEach(line => {
-                  if (line.endsWith(':')){ html += `<div class="depot-header">${line.replace(/:$/, '')}</div>`; }
-                  else if (line.includes('kilógók:')){
-                    const m = line.match(/^(.*kilógók:)(.*?)(\s*\|\s*fő települések:)(.*)$/);
-                    if (m){
-                      html += `<div class="trip-line">${m[1]} <span style="color:#d9534f;font-weight:bold;">${m[2].trim()}</span>${m[3]} <span style="color:#007bff;">${m[4].trim()}</span></div>`;
-                    } else html += `<div class="trip-line">${line}</div>`;
-                  } else if (line.includes('| fő települések:')){
-                    let [left, right] = line.split('| fő települések:');
-                    let [tripNum, outliers] = left.split(':');
-                    html += `<div class="trip-line"><span style="font-weight:bold;">${tripNum}:</span> <span style="color:#d9534f; font-weight:bold;">${outliers.trim()}</span> | fő települések: <span style="color:#007bff;">${right.trim()}</span></div>`;
-                  } else html += `<div class="trip-line">${line}</div>`;
+                  if (line.endsWith(':')) html += `<div class="depot-header">${line.replace(/:$/, '')}</div>`;
+                  else html += `<div class="trip-line">${line}</div>`;
                 });
                 html += '</div>';
                 $('#results').html(html);
                 return;
               }
-
-              // többször szereplők
               if (Array.isArray(resp) && resp.length && typeof resp[0] === 'string' && resp[0].match(/^\d+: /)){
                 let html = '<h5>Többször szereplő, ellenőrizendő települések:</h5><ul>';
                 resp.forEach(city => html += `<li>${city}</li>`);
@@ -304,54 +292,79 @@
                 $('#results').html(html);
                 return;
               }
-
-              // 60 stop alatti
               if (Array.isArray(resp) && resp.length && resp.some(line => typeof line === 'string' && line.includes('db ('))){
                 let html = '<h5>60 stop alatti túrák depónként:</h5><div class="turalista-list">';
-                resp.forEach(line => {
-                  if (/^\d+\.$/.test(line)){ html += `<div class="depot-header">${line}</div>`; }
-                  else if (line.includes('db (')){ html += `<div class="trip-line">${line}</div>`; }
-                });
+                resp.forEach(line => html += `<div class="trip-line">${line}</div>`);
                 html += '</div>';
                 $('#results').html(html);
                 return;
               }
-
-              // turalista
               if (Array.isArray(resp) && resp.length && typeof resp[0] === 'string' && resp[0].match(/^\d+\.$/)){
                 let html = '<h5>Depónkénti túralista:</h5><div class="turalista-list">';
                 resp.forEach(line => {
-                  if (/^\d+\.$/.test(line)){ html += `<div class="depot-header">${line}</div>`; }
-                  else if (/^\d+$/.test(line)){ html += `<div class="autó">${line}</div>`; }
-                  else { html += `<div class="trip-line">${line}</div>`; }
+                  if (/^\d+\.$/.test(line)) html += `<div class="depot-header">${line}</div>`;
+                  else if (/^\d+$/.test(line)) html += `<div class="autó">${line}</div>`;
+                  else html += `<div class="trip-line">${line}</div>`;
                 });
                 html += '</div>';
                 $('#results').html(html);
                 return;
               }
-
-              // túraszám lista
               if (Array.isArray(resp) && resp.length && resp[0].tours_count !== undefined){
                 let html = '<h5>Depók és feltöltött túraszámok:</h5>';
                 resp.forEach(item => {
-                  const total    = Number(item.tours_count) || 0;
-                  const inactive = (item.inactive_count != null) ? Number(item.inactive_count) : null;
-                  const active   = (item.active_count   != null) ? Number(item.active_count) : (inactive != null ? (total - inactive) : null);
-                  html += `
-                    <div class="mb-2">
-                      <div>${item.depo}: ${total} túra</div>
-                      ${active   !== null ? `<div>- <span class="blue" style="font-weight: normal;">aktív: ${active}</span></div>`   : ``}
-                      ${inactive !== null ? `<div>- <span class="red"  style="font-weight: normal;">inaktív: ${inactive}</span></div>` : ``}
-                    </div>
-                  `;
+                  const total = Number(item.tours_count)||0;
+                  const inactive = item.inactive_count!=null ? Number(item.inactive_count):null;
+                  const active = item.active_count!=null ? Number(item.active_count) : (inactive!=null ? (total-inactive) : null);
+                  html += `<div class="mb-2">
+                    <div>${item.depo}: ${total} túra</div>
+                    ${active!==null?`<div>- <span class="blue" style="font-weight:normal;">aktív: ${active}</span></div>`:''}
+                    ${inactive!==null?`<div>- <span class="red" style="font-weight:normal;">inaktív: ${inactive}</span></div>`:''}
+                  </div>`;
                 });
                 $('#results').html(html);
                 return;
               }
 
-              // fallback táblázat
-              if (!resp.length){ $('#results').html('<p class="text-muted-2">Nincs találat.</p>'); return; }
+              // Nincs találat
+              if (!Array.isArray(resp) || !resp.length){
+                $('#results').html('<p class="text-muted-2">Nincs találat.</p>');
+                return;
+              }
 
+              // --- MOBIL: kártyák
+              if (isMobile()){
+                let out = '';
+                resp.forEach(it => {
+                  const title = `${it.depo} • Túra ${it.tour_number}`;
+                  const city  = it.city || '-';
+                  const street= it.street || '-';
+                  const time  = it.time_interval || '-';
+                  const plate = it.plate_number || '-';
+                  const date  = it.date || '-';
+                  out += `
+                    <div class="m-result-card" data-depo="${it.depo}" data-tour="${it.tour_number}">
+                      <div class="m-result-title">${title}</div>
+                      <div class="m-result-row"><span class="m-k">Település:</span><span class="m-v">${city}</span></div>
+                      <div class="m-result-row"><span class="m-k">Közterület:</span><span class="m-v">${street}</span></div>
+                      <div class="m-result-row"><span class="m-k">Időintervallum:</span><span class="m-v">${time}</span></div>
+                      <div class="m-btns">
+                        <button class="btn-pill primary btn-sm m-details-btn">Részletek</button>
+                        <button class="btn-pill danger  btn-sm m-pdf-btn">Túraleírás</button>
+                      </div>
+                      <div class="m-extra">
+                        <div class="m-result-row"><span class="m-k">Rendszám:</span><span class="m-v">${plate}</span></div>
+                        <div class="m-result-row"><span class="m-k">Dátum:</span><span class="m-v">${date}</span></div>
+                        <div class="m-result-row"><span class="m-k">Depó:</span><span class="m-v">${it.depo}</span></div>
+                      </div>
+                    </div>
+                  `;
+                });
+                $('#results').html(out);
+                return;
+              }
+
+              // --- ASZTALI: táblázat
               let tbl = '<table class="table table-bordered"><thead><tr>' +
                 ['Depó','Túraszám','Rendszám','Település','Közterület','Nap','Időintervallum','Műveletek']
                 .map(h => `<th class="text-center">${h}</th>`).join('') +
@@ -374,7 +387,7 @@
               $('#results').html(tbl + '</tbody></table>');
 
               $('#results tr.summary').each(function(){
-                const plateText = $(this).find('td').eq(2).text().normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+                const plateText = $(this).find('td').eq(2).text().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
                 if (plateText === 'inaktiv'){ $(this).addClass('inactive-highlight'); }
               });
             },
@@ -382,7 +395,7 @@
           });
         }
 
-        // Autocomplete & events
+        // Autocomplete
         $('#search-input').autocomplete({
           source: (req, res) => $.getJSON(`${backendUrl}suggest`, { field: 'city', q: req.term }, res),
           minLength: 3,
@@ -406,6 +419,7 @@
           select: function(event, ui){ $(this).val(ui.item.value); runSearch(); return false; }
         });
 
+        // Gombok
         $('#clear-btn').click(() => {
           $('#search-input,#street-input').val('');
           $('#results,#resultsPlain,#details').empty();
@@ -416,32 +430,10 @@
         $('#search-input, #street-input').on('keypress', function(e){ if (e.which === 13) runSearch(); });
         $('#search-btn').click(runSearch);
 
-        // Részletek gomb – mobilon kompakt kártya, desktopon szerveres HTML
+        // Asztali részletek (szerveres)
         $('#results').on('click', '.details-btn', function(){
           const r = $(this).closest('.summary');
-          const depo  = r.data('depo');
-          const tourn = r.data('tour_number');
-
-          if (isMobile()){
-            const city   = r.find('td').eq(3).text();
-            const street = r.find('td').eq(4).text() || '-';
-            const timeiv = r.find('td').eq(6).text();
-
-            const card = `
-              <div class="m-details-card">
-                <div class="rowline"><span class="k">Település:</span><span class="v">${city}</span></div>
-                <div class="rowline"><span class="k">Közterület:</span><span class="v">${street}</span></div>
-                <div class="rowline"><span class="k">Időintervallum:</span><span class="v">${timeiv}</span></div>
-              </div>
-            `;
-            const $det = $('#details');
-            $det.html(card);
-            $det[0].scrollIntoView({ behavior: 'smooth', block: 'start' });
-            return;
-          }
-
-          // Asztali: eredeti részletező HTML
-          $.get(`${backendUrl}details`, { depo: depo, tour_number: tourn }, function(html){
+          $.get(`${backendUrl}details`, { depo: r.data('depo'), tour_number: r.data('tour_number') }, function(html){
             const $det = $('#details');
             $det.html(html);
             const allText = $det.text().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
@@ -450,9 +442,20 @@
           });
         });
 
+        // MOBIL részletek: kártyán belüli extra blokk nyitása/csukása
+        $('#results').on('click', '.m-details-btn', function(){
+          $(this).closest('.m-result-card').find('.m-extra').slideToggle(150);
+        });
+
+        // PDF: mindkét nézetben
         $('#results').on('click', '.pdf-btn', function(){
           const r = $(this).closest('.summary');
           window.open(`${backendUrl}pdf?depo=${encodeURIComponent(r.data('depo'))}&tour_number=${encodeURIComponent(r.data('tour_number'))}`);
+        });
+        $('#results').on('click', '.m-pdf-btn', function(){
+          const card = $(this).closest('.m-result-card');
+          const depo = card.data('depo'); const tour = card.data('tour');
+          window.open(`${backendUrl}pdf?depo=${encodeURIComponent(depo)}&tour_number=${encodeURIComponent(tour)}`);
         });
 
         // Admin PDF hosszú feladat
