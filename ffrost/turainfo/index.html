@@ -67,7 +67,7 @@
 
       .divider{ margin: 16px auto 16px; height:1px; width:min(520px, 70%); background: linear-gradient(90deg, transparent, rgba(0,0,0,.12), transparent); }
 
-      /* Alap: rejtve, és csak tartalom esetén látszik */
+      /* találati sáv rejtése alapból */
       #results, #details { display: none; }
       #results:not(:empty), #details:not(:empty) {
         display: block;
@@ -79,16 +79,16 @@
       #results:not(:empty){ margin-top: 10px; }
       #details:not(:empty){ margin-top: 12px; }
 
-      /* Asztali táblázat */
+      /* PC */
       .desktop-only { display:block; }
 
       table.table{ border-collapse: separate; border-spacing: 0 0.1px; background: transparent; }
       table.table th{ text-align:center !important; vertical-align: middle; background: rgba(0,0,0,.04); }
       table.table td, table.table th{ border-color: rgba(0,0,0,.08) !important; }
 
-      /* Mobil kártyák – ALAPBÓL REJTETT DESKTOPON */
+      /* mobil kártya - rejtve */
       .mobile-only { display:none !important; }
-      .result-cards { display:none; gap:12px; } /* majd mobilon kapcsoljuk be */
+      .result-cards { display:none; gap:12px; }
       .result-card {
         background: rgba(255,255,255,.9);
         border-radius: 14px;
@@ -132,12 +132,12 @@
         .logo-container img{ width: 74px; }
         #results, #details{ border-radius: 12px; }
 
-        /* Mobil: táblázat el, kártyák be */
+        /* mobilnézet */
         .desktop-only { display:none !important; }
         .mobile-only  { display:block !important; }
         .result-cards { display:grid; }
 
-        /* Gombok kézre álló szélességgel */
+  
         .btn-pill{ width: auto; min-width: 140px; }
       }
       @media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important; } }
@@ -235,7 +235,7 @@
         const backendUrl = "https://fabuszilard.myftp.org/turainfo/";
         let exactCityMatch = false;
 
-        // Cloaked admin words/classes
+     
         const respKind   = atob("YWRtaW5fbWVuZXRyZW5k");
         const hiddenPath = atob("YWRtaW4vbWVuZXRyZW5k");
 
@@ -273,7 +273,6 @@
         }
 
         function buildMobileCards(resp){
-          // csak a fallback „táblázatos” válasz tömbhöz használjuk (amikor objektumok jönnek)
           let html = '<div class="result-cards mobile-only">';
           resp.forEach(it => {
             const head = `${it.depo} • Túra ${it.tour_number}`;
@@ -407,7 +406,6 @@
                 return;
               }
 
-              // fallback: TÁBLÁZAT (asztali) + KÁRTYÁK (mobil)
               if (!resp.length){ $('#results').html('<p class="text-muted-2">Nincs találat.</p>'); return; }
 
               let tbl = '<div class="desktop-only"><table class="table table-bordered"><thead><tr>' +
@@ -437,7 +435,7 @@
 
               $('#results').html(tbl + cards);
 
-              // Inaktív kiemelés (táblázat + kártya)
+              // inaktív kiemelés
               $('#results .summary').each(function(){
                 const plateRaw = $(this).data('plate') || $(this).find('td').eq(2).text();
                 const plateText = String(plateRaw).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
@@ -448,7 +446,7 @@
           });
         }
 
-        // Autocomplete & events
+
         $('#search-input').autocomplete({
           source: (req, res) => $.getJSON(`${backendUrl}suggest`, { field: 'city', q: req.term }, res),
           minLength: 3,
@@ -498,7 +496,7 @@
           window.open(`${backendUrl}pdf?depo=${encodeURIComponent(r.data('depo'))}&tour_number=${encodeURIComponent(r.data('tour_number'))}`);
         });
 
-        // Admin PDF long task with brand-styled progress
+
         $('#results').on('click', '.special-task-btn', async function(e){
           e.preventDefault();
           const $wrap = $('#results');
@@ -532,7 +530,7 @@
             clearInterval(timer); $wrap.html(originalHtml);
           }
         });
-        // (No auto-run search on load)
+ 
       }
     </script>
 
