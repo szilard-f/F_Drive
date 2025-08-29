@@ -110,6 +110,14 @@
       }
       .result-card.show-details .rc-details{ display:block; }
 
+      /* Ha mégis tábla érkezik a részletekben, mobilon rejtsük el */
+      @media (max-width: 600px){
+        .rc-details table,
+        .rc-details .table,
+        .rc-details iframe,
+        .rc-details embed { display:none !important; }
+      }
+
       .inactive-highlight{ background-color: rgba(255, 0, 0, 0.10); outline: 2px solid var(--brand); outline-offset: -2px; border-radius: 10px; padding: 0.25em; transition: background-color 0.3s ease; }
       .inactive-highlight td{ background-color: rgba(255,0,0,.06); }
 
@@ -470,23 +478,38 @@
         $('#search-input, #street-input').on('keypress', function(e){ if (e.which === 13) runSearch(); });
         $('#search-btn').click(runSearch);
 
-        // Részletek gomb – mobilon a kártyába tölti, asztalin a #details-be (régi viselkedés)
+        // Részletek gomb – mobilon kártyába, asztalin #details
         $('#results').on('click', '.details-btn', function(){
-          const r = $(this).closest('.summary');
+          const $summary = $(this).closest('.summary');
           const isMobile = window.matchMedia('(max-width: 600px)').matches;
 
-          if (isMobile){
-            const $box = r.find('.rc-details');
-            $.get(`${backendUrl}details`, { depo: r.data('depo'), tour_number: r.data('tour_number') }, function(html){
-              $box.html(html);
-              r.addClass('show-details');
-              $('html,body').animate({ scrollTop: r.offset().top - 12 }, 300);
+          if (isMobile) {
+            const $card = $(this).closest('.result-card');
+            const $box  = $card.find('.rc-details');
+
+            // Toggle
+            if ($card.hasClass('show-details')) {
+              $card.removeClass('show-details');
+              $box.empty();
+              return;
+            }
+
+            $.get(`${backendUrl}details`, { depo: $summary.data('depo'), tour_number: $summary.data('tour_number') }, function(html){
+              const $tmp = $('<div>').html(html);
+              // Táblák és „nehéz” elemek törlése
+              $tmp.find('table,.table,style,link,script,iframe,embed').remove();
+              // Üres p-k takarítása
+              $tmp.find('p').each(function(){ if ($(this).text().trim() === '') $(this).remove(); });
+
+              $box.html($tmp.html());
+              $card.addClass('show-details');
+              $('html,body').animate({ scrollTop: $card.offset().top - 12 }, 300);
             });
             return;
           }
 
-          // asztali – változatlanul
-          $.get(`${backendUrl}details`, { depo: r.data('depo'), tour_number: r.data('tour_number') }, function(html){
+          // Asztali – eredeti működés
+          $.get(`${backendUrl}details`, { depo: $summary.data('depo'), tour_number: $summary.data('tour_number') }, function(html){
             const $det = $('#details');
             $det.html(html);
             const allText = $det.text().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
