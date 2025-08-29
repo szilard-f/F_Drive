@@ -67,30 +67,42 @@
 
       .divider{ margin: 16px auto 16px; height:1px; width:min(520px, 70%); background: linear-gradient(90deg, transparent, rgba(0,0,0,.12), transparent); }
 
-      /* rejtett */
-      #results, #details {
-      display: none;
+      /* Alap: rejtve, és csak tartalom esetén látszik */
+      #results, #details { display: none; }
+      #results:not(:empty), #details:not(:empty) {
+        display: block;
+        background: rgba(255,255,255,.72);
+        border-radius: 16px;
+        padding: 12px;
+        box-shadow: 0 3px 12px rgba(0,0,0,.06);
       }
-
-      /* csak ha van találat - látsuik */
-      #results:not(:empty),
-      #details:not(:empty) {
-      display: block;
-      background: rgba(255,255,255,.72);
-      border-radius: 16px;
-      padding: 12px;
-      box-shadow: 0 3px 12px rgba(0,0,0,.06);
-      }
-
-      /* margók is */
       #results:not(:empty){ margin-top: 10px; }
       #details:not(:empty){ margin-top: 12px; }
-      
-	  
-	  
-	  table.table{ border-collapse: separate; border-spacing: 0 0.1px; background: transparent; }
+
+      /* Asztali táblázat */
+      .desktop-only { display:block; }
+
+      table.table{ border-collapse: separate; border-spacing: 0 0.1px; background: transparent; }
       table.table th{ text-align:center !important; vertical-align: middle; background: rgba(0,0,0,.04); }
       table.table td, table.table th{ border-color: rgba(0,0,0,.08) !important; }
+
+      /* Mobil kártyák – ALAPBÓL REJTETT DESKTOPON */
+      .mobile-only { display:none !important; }
+      .result-cards { display:none; gap:12px; } /* majd mobilon kapcsoljuk be */
+      .result-card {
+        background: rgba(255,255,255,.9);
+        border-radius: 14px;
+        box-shadow: 0 4px 14px rgba(0,0,0,.08);
+        padding: 12px 12px 10px;
+      }
+      .rc-head { font-weight:800; margin:0 0 6px; }
+      .rc-row  { font-size:.95rem; color:var(--ink); }
+      .rc-row + .rc-row { margin-top:4px; }
+      .rc-meta { color: var(--muted); font-size:.9rem; margin-top:4px; }
+      .rc-actions{
+        display:flex; gap:8px; justify-content:flex-end; margin-top:10px; flex-wrap:wrap;
+      }
+      .rc-actions .btn-pill{ min-width: 128px; padding:8px 14px; }
 
       .inactive-highlight{ background-color: rgba(255, 0, 0, 0.10); outline: 2px solid var(--brand); outline-offset: -2px; border-radius: 10px; padding: 0.25em; transition: background-color 0.3s ease; }
       .inactive-highlight td{ background-color: rgba(255,0,0,.06); }
@@ -114,13 +126,18 @@
       .red{ color: var(--brand); font-weight: 800; }
       .blue{ color: var(--blue); font-weight: 800; }
 
-      
-
-      @media (max-width: 600px){
+      @media (max-width: 992px){
         html, body{ background-attachment: scroll; }
         .card-app{ border-radius: 16px; padding: 18px; }
         .logo-container img{ width: 74px; }
         #results, #details{ border-radius: 12px; }
+
+        /* Mobil: táblázat el, kártyák be */
+        .desktop-only { display:none !important; }
+        .mobile-only  { display:block !important; }
+        .result-cards { display:grid; }
+
+        /* Gombok kézre álló szélességgel */
         .btn-pill{ width: auto; min-width: 140px; }
       }
       @media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important; } }
@@ -128,14 +145,8 @@
   </head>
 
   <body>
-
-
-
-  <body>
-    
     <div class="bg-overlay" aria-hidden="true"></div>
 
-    
     <div class="maintenance-overlay" id="maintenance-overlay" role="dialog" aria-labelledby="maint-title" aria-modal="true">
       <div class="maintenance-box">
         <h1 id="maint-title">⛔ Jelenleg karbantartás zajlik ⛔</h1>
@@ -144,7 +155,6 @@
       </div>
     </div>
 
-    
     <main class="shell" id="app" role="main">
       <section class="card-app" aria-labelledby="title">
         <header class="app-header">
@@ -159,7 +169,6 @@
 
         <div class="divider" aria-hidden="true"></div>
 
-        
         <section class="filters" aria-label="Szűrési feltételek">
           <div class="form-row">
             <div class="form-group col-md-6">
@@ -171,7 +180,6 @@
               <input type="text" id="street-input" class="form-control" placeholder="pl. József Attila utca" />
             </div>
           </div>
-          
           <small class="hint d-block mt-1">A közterület-szűrés csak település megadása után működik!</small>
 
           <div class="d-flex align-items-center mb-2 mt-2">
@@ -182,7 +190,6 @@
 
         <div class="divider" aria-hidden="true"></div>
 
-        
         <section>
           <div id="results"></div>
           <pre id="resultsPlain" style="display:none; background:#f8f9fa; padding:1em;"></pre>
@@ -191,7 +198,6 @@
       </section>
     </main>
 
-    
     <script>
       const rawTime = document.getElementById("target-time").textContent.trim();
       const formattedTime = rawTime.replace(/\./g, "-").replace(" ", "T");
@@ -221,11 +227,9 @@
       }
     </script>
 
-    
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
-    
     <script>
       if (!maintenanceMode){
         const backendUrl = "https://fabuszilard.myftp.org/turainfo/";
@@ -268,6 +272,29 @@
           return $tmp.html();
         }
 
+        function buildMobileCards(resp){
+          // csak a fallback „táblázatos” válasz tömbhöz használjuk (amikor objektumok jönnek)
+          let html = '<div class="result-cards mobile-only">';
+          resp.forEach(it => {
+            const head = `${it.depo} • Túra ${it.tour_number}`;
+            const meta = `${it.date} • ${it.time_interval}`;
+            const addr = `${it.city}${it.street ? ' — ' + it.street : ''}`;
+            const plate = it.plate_number || '';
+            html += `
+              <article class="result-card summary" data-depo="${it.depo}" data-tour_number="${it.tour_number}" data-plate="${plate}">
+                <h5 class="rc-head">${head}</h5>
+                <div class="rc-row"><strong>Rendszám:</strong> ${plate || '-'}</div>
+                <div class="rc-row"><strong>Cím:</strong> ${addr}</div>
+                <div class="rc-meta">${meta}</div>
+                <div class="rc-actions">
+                  <button class="btn-pill danger pdf-btn">Túraleírás</button>
+                </div>
+              </article>`;
+          });
+          html += '</div>';
+          return html;
+        }
+
         function runSearch(){
           let q = $('#search-input').val().trim();
           let s = $('#street-input').val().trim();
@@ -288,7 +315,7 @@
             url: `${backendUrl}search`,
             data: data,
             success: resp => {
-              // 
+              // Admin HTML
               if (resp && resp.kind === respKind){
                 $('#results').html(cloakAdminHtml(resp.html));
                 return;
@@ -380,32 +407,40 @@
                 return;
               }
 
-              // fallback táblázat
+              // fallback: TÁBLÁZAT (asztali) + KÁRTYÁK (mobil)
               if (!resp.length){ $('#results').html('<p class="text-muted-2">Nincs találat.</p>'); return; }
 
-              let tbl = '<table class="table table-bordered"><thead><tr>' +
+              let tbl = '<div class="desktop-only"><table class="table table-bordered"><thead><tr>' +
                 ['Depó','Túraszám','Rendszám','Település','Közterület','Nap','Időintervallum','Műveletek']
                 .map(h => `<th class="text-center">${h}</th>`).join('') +
                 '</tr></thead><tbody>';
 
               resp.forEach(it => {
-                tbl += `<tr class="summary" data-depo="${it.depo}" data-tour_number="${it.tour_number}">` +
-                  `<td class="text-center">${it.depo}</td>` +
-                  `<td class="text-center">${it.tour_number}</td>` +
-                  `<td class="text-center">${it.plate_number}</td>` +
-                  `<td class="text-center">${it.city}</td>` +
-                  `<td class="text-center">${it.street}</td>` +
-                  `<td class="text-center">${it.date}</td>` +
-                  `<td class="text-center">${it.time_interval}</td>` +
-                  `<td class="text-center">` +
-                    `<button class="btn btn-info btn-sm details-btn">Részletek</button> ` +
-                    `<button class="btn btn-secondary btn-sm pdf-btn">Túraleírás</button>` +
-                  `</td></tr>`;
+                tbl += `<tr class="summary" data-depo="${it.depo}" data-tour_number="${it.tour_number}">
+                  <td class="text-center">${it.depo}</td>
+                  <td class="text-center">${it.tour_number}</td>
+                  <td class="text-center">${it.plate_number}</td>
+                  <td class="text-center">${it.city}</td>
+                  <td class="text-center">${it.street}</td>
+                  <td class="text-center">${it.date}</td>
+                  <td class="text-center">${it.time_interval}</td>
+                  <td class="text-center">
+                    <button class="btn btn-info btn-sm details-btn">Részletek</button>
+                    <button class="btn btn-secondary btn-sm pdf-btn">Túraleírás</button>
+                  </td>
+                </tr>`;
               });
-              $('#results').html(tbl + '</tbody></table>');
+              tbl += '</tbody></table></div>';
 
-              $('#results tr.summary').each(function(){
-                const plateText = $(this).find('td').eq(2).text().normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+              // mobil kártyák
+              const cards = buildMobileCards(resp);
+
+              $('#results').html(tbl + cards);
+
+              // Inaktív kiemelés (táblázat + kártya)
+              $('#results .summary').each(function(){
+                const plateRaw = $(this).data('plate') || $(this).find('td').eq(2).text();
+                const plateText = String(plateRaw).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
                 if (plateText === 'inaktiv'){ $(this).addClass('inactive-highlight'); }
               });
             },
@@ -500,20 +535,12 @@
         // (No auto-run search on load)
       }
     </script>
-	
-	<script>
-	  document.addEventListener("DOMContentLoaded", function() {
-		const input = document.getElementById("search-input");
-		if (input) {
-		  input.focus();
-		}
-	  });
-	</script>
 
-	
-	
-	
-	
-	
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        const input = document.getElementById("search-input");
+        if (input) { input.focus(); }
+      });
+    </script>
   </body>
 </html>
