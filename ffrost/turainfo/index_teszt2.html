@@ -282,7 +282,7 @@
           return $tmp.html();
         }
 
-        /* ---- MOBIL KÁRTYÁK (egyszerűsített mezők) ---- */
+        /* ---- MOBIL KÁRTYÁK ---- */
         function buildMobileCards(resp){
           let html = '<div class="result-cards mobile-only">';
           resp.forEach(it => {
@@ -478,7 +478,7 @@
         $('#search-input, #street-input').on('keypress', function(e){ if (e.which === 13) runSearch(); });
         $('#search-btn').click(runSearch);
 
-        // Részletek gomb – mobilon kártyába, asztalin #details
+        /* --------- RÉSZLETEK: mobilon kivonatolt kártya, asztalin eredeti --------- */
         $('#results').on('click', '.details-btn', function(){
           const $summary = $(this).closest('.summary');
           const isMobile = window.matchMedia('(max-width: 600px)').matches;
@@ -487,29 +487,54 @@
             const $card = $(this).closest('.result-card');
             const $box  = $card.find('.rc-details');
 
-            // Toggle
+            // toggle
             if ($card.hasClass('show-details')) {
               $card.removeClass('show-details');
               $box.empty();
               return;
             }
 
-            $.get(`${backendUrl}details`, { depo: $summary.data('depo'), tour_number: $summary.data('tour_number') }, function(html){
-              const $tmp = $('<div>').html(html);
-              // Táblák és „nehéz” elemek törlése
-              $tmp.find('table,.table,style,link,script,iframe,embed').remove();
-              // Üres p-k takarítása
-              $tmp.find('p').each(function(){ if ($(this).text().trim() === '') $(this).remove(); });
+            $.get(`${backendUrl}details`, {
+              depo: $summary.data('depo'),
+              tour_number: $summary.data('tour_number')
+            }, function(html){
+              const $tmp  = $('<div>').html(html);
+              const text  = $tmp.text().replace(/\s+/g,' ').trim();
 
-              $box.html($tmp.html());
+              // célzott mezők
+              const rxCar   = /G[ée]pkocsi\s+sz[aá]ma\s*:\s*([0-9]+)/i;
+              const rxPlate = /G[ée]pkocsi\s+rendsz[aá]ma\s*:\s*([A-Z0-9-]+)/i;
+              const rxDate  = /Eredeti\s+d[aá]tum\s*:\s*([0-9]{4}\.[0-9]{2}\.[0-9]{2}\s*-\s*\S+)/i;
+
+              const rows = [];
+              const car   = (text.match(rxCar)   || [])[1];
+              const plate = (text.match(rxPlate) || [])[1];
+              const date  = (text.match(rxDate)  || [])[1];
+
+              if (car)   rows.push(`<div class="rc-row"><b>Gépkocsi száma:</b> <span>${car}</span></div>`);
+              if (plate) rows.push(`<div class="rc-row"><b>Gépkocsi rendszáma:</b> <span>${plate}</span></div>`);
+              if (date)  rows.push(`<div class="rc-row"><b>Eredeti dátum:</b> <span>${date}</span></div>`);
+
+              if (rows.length) {
+                $box.html(`<div class="rc-box">${rows.join('')}</div>`);
+              } else {
+                // fallback: minden „nehéz” elem törlése, maradék megjelenítése
+                $tmp.find('table,.table,style,link,script,iframe,embed').remove();
+                $box.html($tmp.html());
+              }
+
               $card.addClass('show-details');
               $('html,body').animate({ scrollTop: $card.offset().top - 12 }, 300);
             });
-            return;
+
+            return; // mobilon itt vége
           }
 
           // Asztali – eredeti működés
-          $.get(`${backendUrl}details`, { depo: $summary.data('depo'), tour_number: $summary.data('tour_number') }, function(html){
+          $.get(`${backendUrl}details`, {
+            depo: $summary.data('depo'),
+            tour_number: $summary.data('tour_number')
+          }, function(html){
             const $det = $('#details');
             $det.html(html);
             const allText = $det.text().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
