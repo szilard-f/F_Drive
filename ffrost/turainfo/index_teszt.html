@@ -235,6 +235,29 @@
         const backendUrl = "https://fabuszilard.myftp.org/turainfo/";
         let exactCityMatch = false;
 
+        // === Mobil billentyűzet bezárás util + globális delegálás (NINCS más logika módosítva) ===
+        function closeMobileKeyboard() {
+          const el = document.activeElement;
+          if (!el || (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA')) return;
+
+          const ua = navigator.userAgent.toLowerCase();
+          const isIOS = /iphone|ipad|ipod/.test(ua) || (/mac/.test(ua) && 'ontouchend' in document);
+
+          if (isIOS) {
+            const prev = el.readOnly;
+            el.readOnly = true;
+            setTimeout(() => { el.blur(); el.readOnly = prev; }, 0);
+          } else {
+            el.blur();
+          }
+        }
+        // Ha bárhová bökünk, ami NEM input/textarea és nem az autocomplete menü, csukjuk be
+        document.addEventListener('pointerdown', function(e){
+          const t = e.target;
+          if (t.closest('input, textarea, .ui-autocomplete, .ui-menu, .ui-menu-item, .ui-widget')) return;
+          closeMobileKeyboard();
+        }, { capture: true });
+
         // Cloaked admin words/classes
         const respKind   = atob("YWRtaW5fbWVuZXRyZW5k");
         const hiddenPath = atob("YWRtaW4vbWVuZXRyZW5k");
@@ -296,6 +319,9 @@
         }
 
         function runSearch(){
+          // Csukjuk a klaviatúrát, ha épp nyitva van
+          closeMobileKeyboard();
+
           let q = $('#search-input').val().trim();
           let s = $('#street-input').val().trim();
 
@@ -457,6 +483,7 @@
             $(this).val(ui.item.value);
             $('#street-input').val('');
             exactCityMatch = true;
+            closeMobileKeyboard();    // <-- billentyűzet zárása választás után
             runSearch();
             return false;
           }
@@ -469,7 +496,7 @@
             $.getJSON(`${backendUrl}suggest`, { field: 'street', q: req.term, city }, res);
           },
           minLength: 2,
-          select: function(event, ui){ $(this).val(ui.item.value); runSearch(); return false; }
+          select: function(event, ui){ $(this).val(ui.item.value); closeMobileKeyboard(); runSearch(); return false; }
         });
 
         $('#clear-btn').click(() => {
@@ -477,12 +504,16 @@
           $('#results,#resultsPlain,#details').empty();
           $('#resultsPlain').hide();
           $('.inactive-highlight').removeClass('inactive-highlight');
+          closeMobileKeyboard();  // <-- törlés után is csukjuk
         });
 
-        $('#search-input, #street-input').on('keypress', function(e){ if (e.which === 13) runSearch(); });
-        $('#search-btn').click(runSearch);
+        $('#search-input, #street-input').on('keypress', function(e){
+          if (e.which === 13){ closeMobileKeyboard(); runSearch(); }
+        });
+        $('#search-btn').click(function(){ closeMobileKeyboard(); runSearch(); });
 
         $('#results').on('click', '.details-btn', function(){
+          closeMobileKeyboard();  // <-- részletek előtt csukjuk
           const r = $(this).closest('.summary');
           $.get(`${backendUrl}details`, { depo: r.data('depo'), tour_number: r.data('tour_number') }, function(html){
             const $det = $('#details');
@@ -494,6 +525,7 @@
         });
 
         $('#results').on('click', '.pdf-btn', function(){
+          closeMobileKeyboard();  // <-- PDF előtt csukjuk
           const r = $(this).closest('.summary');
           window.open(`${backendUrl}pdf?depo=${encodeURIComponent(r.data('depo'))}&tour_number=${encodeURIComponent(r.data('tour_number'))}`);
         });
@@ -501,6 +533,7 @@
         // Admin PDF long task with brand-styled progress
         $('#results').on('click', '.special-task-btn', async function(e){
           e.preventDefault();
+          closeMobileKeyboard();  // <-- hosszú feladat előtt is csukjuk
           const $wrap = $('#results');
           const originalHtml = $wrap.html();
           $wrap.html(`
