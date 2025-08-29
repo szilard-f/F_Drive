@@ -67,7 +67,7 @@
 
       .divider{ margin: 16px auto 16px; height:1px; width:min(520px, 70%); background: linear-gradient(90deg, transparent, rgba(0,0,0,.12), transparent); }
 
-      /* találati sáv rejtése alapból */
+      /* Alap: rejtve, és csak tartalom esetén látszik */
       #results, #details { display: none; }
       #results:not(:empty), #details:not(:empty) {
         display: block;
@@ -79,14 +79,14 @@
       #results:not(:empty){ margin-top: 10px; }
       #details:not(:empty){ margin-top: 12px; }
 
-      /* PC */
+      /* Asztali táblázat */
       .desktop-only { display:block; }
 
       table.table{ border-collapse: separate; border-spacing: 0 0.1px; background: transparent; }
       table.table th{ text-align:center !important; vertical-align: middle; background: rgba(0,0,0,.04); }
       table.table td, table.table th{ border-color: rgba(0,0,0,.08) !important; }
 
-      /* mobil kártya - rejtve */
+      /* Mobil kártyák – Pc-n rejtve */
       .mobile-only { display:none !important; }
       .result-cards { display:none; gap:12px; }
       .result-card {
@@ -132,12 +132,12 @@
         .logo-container img{ width: 74px; }
         #results, #details{ border-radius: 12px; }
 
-        /* mobilnézet */
+        /* Mobil: táblázat cseréje */
         .desktop-only { display:none !important; }
         .mobile-only  { display:block !important; }
         .result-cards { display:grid; }
 
-  
+        
         .btn-pill{ width: auto; min-width: 140px; }
       }
       @media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important; } }
@@ -235,7 +235,27 @@
         const backendUrl = "https://fabuszilard.myftp.org/turainfo/";
         let exactCityMatch = false;
 
-     
+        function closeMobileKeyboard() {
+          const el = document.activeElement;
+          if (!el || (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA')) return;
+
+          const ua = navigator.userAgent.toLowerCase();
+          const isIOS = /iphone|ipad|ipod/.test(ua) || (/mac/.test(ua) && 'ontouchend' in document);
+
+          if (isIOS) {
+            const prev = el.readOnly;
+            el.readOnly = true;
+            setTimeout(() => { el.blur(); el.readOnly = prev; }, 0);
+          } else {
+            el.blur();
+          }
+        }
+        document.addEventListener('pointerdown', function(e){
+          const t = e.target;
+          if (t.closest('input, textarea, .ui-autocomplete, .ui-menu, .ui-menu-item, .ui-widget')) return;
+          closeMobileKeyboard();
+        }, { capture: true });
+
         const respKind   = atob("YWRtaW5fbWVuZXRyZW5k");
         const hiddenPath = atob("YWRtaW4vbWVuZXRyZW5k");
 
@@ -295,6 +315,8 @@
         }
 
         function runSearch(){
+          closeMobileKeyboard();
+
           let q = $('#search-input').val().trim();
           let s = $('#street-input').val().trim();
 
@@ -406,6 +428,7 @@
                 return;
               }
 
+              // TÁBLÁZAT (asztalinál) + KÁRTYÁK (mobil)
               if (!resp.length){ $('#results').html('<p class="text-muted-2">Nincs találat.</p>'); return; }
 
               let tbl = '<div class="desktop-only"><table class="table table-bordered"><thead><tr>' +
@@ -435,7 +458,7 @@
 
               $('#results').html(tbl + cards);
 
-              // inaktív kiemelés
+              // Inaktív kiemelés (táblázat + kártya)
               $('#results .summary').each(function(){
                 const plateRaw = $(this).data('plate') || $(this).find('td').eq(2).text();
                 const plateText = String(plateRaw).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
@@ -446,7 +469,6 @@
           });
         }
 
-
         $('#search-input').autocomplete({
           source: (req, res) => $.getJSON(`${backendUrl}suggest`, { field: 'city', q: req.term }, res),
           minLength: 3,
@@ -455,6 +477,7 @@
             $(this).val(ui.item.value);
             $('#street-input').val('');
             exactCityMatch = true;
+            closeMobileKeyboard();
             runSearch();
             return false;
           }
@@ -467,7 +490,7 @@
             $.getJSON(`${backendUrl}suggest`, { field: 'street', q: req.term, city }, res);
           },
           minLength: 2,
-          select: function(event, ui){ $(this).val(ui.item.value); runSearch(); return false; }
+          select: function(event, ui){ $(this).val(ui.item.value); closeMobileKeyboard(); runSearch(); return false; }
         });
 
         $('#clear-btn').click(() => {
@@ -475,12 +498,16 @@
           $('#results,#resultsPlain,#details').empty();
           $('#resultsPlain').hide();
           $('.inactive-highlight').removeClass('inactive-highlight');
+          closeMobileKeyboard();
         });
 
-        $('#search-input, #street-input').on('keypress', function(e){ if (e.which === 13) runSearch(); });
-        $('#search-btn').click(runSearch);
+        $('#search-input, #street-input').on('keypress', function(e){
+          if (e.which === 13){ closeMobileKeyboard(); runSearch(); }
+        });
+        $('#search-btn').click(function(){ closeMobileKeyboard(); runSearch(); });
 
         $('#results').on('click', '.details-btn', function(){
+          closeMobileKeyboard();
           const r = $(this).closest('.summary');
           $.get(`${backendUrl}details`, { depo: r.data('depo'), tour_number: r.data('tour_number') }, function(html){
             const $det = $('#details');
@@ -492,13 +519,15 @@
         });
 
         $('#results').on('click', '.pdf-btn', function(){
+          closeMobileKeyboard();
           const r = $(this).closest('.summary');
           window.open(`${backendUrl}pdf?depo=${encodeURIComponent(r.data('depo'))}&tour_number=${encodeURIComponent(r.data('tour_number'))}`);
         });
 
-
+        // Admin PDF long task with brand-styled progress
         $('#results').on('click', '.special-task-btn', async function(e){
           e.preventDefault();
+          closeMobileKeyboard();
           const $wrap = $('#results');
           const originalHtml = $wrap.html();
           $wrap.html(`
@@ -530,7 +559,6 @@
             clearInterval(timer); $wrap.html(originalHtml);
           }
         });
- 
       }
     </script>
 

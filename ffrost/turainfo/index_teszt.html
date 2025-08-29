@@ -86,9 +86,9 @@
       table.table th{ text-align:center !important; vertical-align: middle; background: rgba(0,0,0,.04); }
       table.table td, table.table th{ border-color: rgba(0,0,0,.08) !important; }
 
-      /* Mobil kártyák – ALAPBÓL REJTETT DESKTOPON */
+      /* Mobil kártyák – Pc-n rejtve */
       .mobile-only { display:none !important; }
-      .result-cards { display:none; gap:12px; } /* majd mobilon kapcsoljuk be */
+      .result-cards { display:none; gap:12px; }
       .result-card {
         background: rgba(255,255,255,.9);
         border-radius: 14px;
@@ -132,12 +132,12 @@
         .logo-container img{ width: 74px; }
         #results, #details{ border-radius: 12px; }
 
-        /* Mobil: táblázat el, kártyák be */
+        /* Mobil: táblázat cseréje */
         .desktop-only { display:none !important; }
         .mobile-only  { display:block !important; }
         .result-cards { display:grid; }
 
-        /* Gombok kézre álló szélességgel */
+        
         .btn-pill{ width: auto; min-width: 140px; }
       }
       @media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important; } }
@@ -235,7 +235,6 @@
         const backendUrl = "https://fabuszilard.myftp.org/turainfo/";
         let exactCityMatch = false;
 
-        // === Mobil billentyűzet bezárás util + globális delegálás (NINCS más logika módosítva) ===
         function closeMobileKeyboard() {
           const el = document.activeElement;
           if (!el || (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA')) return;
@@ -251,14 +250,12 @@
             el.blur();
           }
         }
-        // Ha bárhová bökünk, ami NEM input/textarea és nem az autocomplete menü, csukjuk be
         document.addEventListener('pointerdown', function(e){
           const t = e.target;
           if (t.closest('input, textarea, .ui-autocomplete, .ui-menu, .ui-menu-item, .ui-widget')) return;
           closeMobileKeyboard();
         }, { capture: true });
 
-        // Cloaked admin words/classes
         const respKind   = atob("YWRtaW5fbWVuZXRyZW5k");
         const hiddenPath = atob("YWRtaW4vbWVuZXRyZW5k");
 
@@ -296,7 +293,6 @@
         }
 
         function buildMobileCards(resp){
-          // csak a fallback „táblázatos” válasz tömbhöz használjuk (amikor objektumok jönnek)
           let html = '<div class="result-cards mobile-only">';
           resp.forEach(it => {
             const head = `${it.depo} • Túra ${it.tour_number}`;
@@ -319,7 +315,6 @@
         }
 
         function runSearch(){
-          // Csukjuk a klaviatúrát, ha épp nyitva van
           closeMobileKeyboard();
 
           let q = $('#search-input').val().trim();
@@ -433,7 +428,7 @@
                 return;
               }
 
-              // fallback: TÁBLÁZAT (asztali) + KÁRTYÁK (mobil)
+              // TÁBLÁZAT (asztalinál) + KÁRTYÁK (mobil)
               if (!resp.length){ $('#results').html('<p class="text-muted-2">Nincs találat.</p>'); return; }
 
               let tbl = '<div class="desktop-only"><table class="table table-bordered"><thead><tr>' +
@@ -474,7 +469,6 @@
           });
         }
 
-        // Autocomplete & events
         $('#search-input').autocomplete({
           source: (req, res) => $.getJSON(`${backendUrl}suggest`, { field: 'city', q: req.term }, res),
           minLength: 3,
@@ -483,7 +477,7 @@
             $(this).val(ui.item.value);
             $('#street-input').val('');
             exactCityMatch = true;
-            closeMobileKeyboard();    // <-- billentyűzet zárása választás után
+            closeMobileKeyboard();
             runSearch();
             return false;
           }
@@ -504,7 +498,7 @@
           $('#results,#resultsPlain,#details').empty();
           $('#resultsPlain').hide();
           $('.inactive-highlight').removeClass('inactive-highlight');
-          closeMobileKeyboard();  // <-- törlés után is csukjuk
+          closeMobileKeyboard();
         });
 
         $('#search-input, #street-input').on('keypress', function(e){
@@ -513,7 +507,7 @@
         $('#search-btn').click(function(){ closeMobileKeyboard(); runSearch(); });
 
         $('#results').on('click', '.details-btn', function(){
-          closeMobileKeyboard();  // <-- részletek előtt csukjuk
+          closeMobileKeyboard();
           const r = $(this).closest('.summary');
           $.get(`${backendUrl}details`, { depo: r.data('depo'), tour_number: r.data('tour_number') }, function(html){
             const $det = $('#details');
@@ -525,7 +519,7 @@
         });
 
         $('#results').on('click', '.pdf-btn', function(){
-          closeMobileKeyboard();  // <-- PDF előtt csukjuk
+          closeMobileKeyboard();
           const r = $(this).closest('.summary');
           window.open(`${backendUrl}pdf?depo=${encodeURIComponent(r.data('depo'))}&tour_number=${encodeURIComponent(r.data('tour_number'))}`);
         });
@@ -533,7 +527,7 @@
         // Admin PDF long task with brand-styled progress
         $('#results').on('click', '.special-task-btn', async function(e){
           e.preventDefault();
-          closeMobileKeyboard();  // <-- hosszú feladat előtt is csukjuk
+          closeMobileKeyboard();
           const $wrap = $('#results');
           const originalHtml = $wrap.html();
           $wrap.html(`
@@ -565,7 +559,6 @@
             clearInterval(timer); $wrap.html(originalHtml);
           }
         });
-        // (No auto-run search on load)
       }
     </script>
 
