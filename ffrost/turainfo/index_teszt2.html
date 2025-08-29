@@ -67,18 +67,13 @@
 
       .divider{ margin: 16px auto 16px; height:1px; width:min(520px, 70%); background: linear-gradient(90deg, transparent, rgba(0,0,0,.12), transparent); }
 
-      /* rejtve alapból; csak ha van tartalom, látszik */
+      /* Alapból rejtve a találati sávok – csak ha nem üres */
       #results, #details { display:none; }
-      #results:not(:empty),
-      #details:not(:empty){
-        display:block;
-        background: rgba(255,255,255,.72);
-        border-radius: 16px;
-        padding: 12px;
-        box-shadow: 0 3px 12px rgba(0,0,0,.06);
+      #results:not(:empty), #details:not(:empty){
+        display:block; background: rgba(255,255,255,.72); border-radius: 16px; padding: 12px; box-shadow: 0 3px 12px rgba(0,0,0,.06);
       }
-      #results:not(:empty){ margin-top:10px; }
-      #details:not(:empty){ margin-top:12px; }
+      #results:not(:empty){ margin-top: 10px; }
+      #details:not(:empty){ margin-top: 12px; }
 
       table.table{ border-collapse: separate; border-spacing: 0 0.1px; background: transparent; }
       table.table th{ text-align:center !important; vertical-align: middle; background: rgba(0,0,0,.04); }
@@ -106,27 +101,15 @@
       .red{ color: var(--brand); font-weight: 800; }
       .blue{ color: var(--blue); font-weight: 800; }
 
-      /* MOBILOS egyszerűsített részletkártya */
-      .mobile-detail-card{
-        border-radius: 16px;
-        background: rgba(255,255,255,.9);
-        box-shadow: 0 6px 18px rgba(0,0,0,.08);
-        padding: 14px;
+      /* MOBIL részletező kártya */
+      .m-details-card{
+        border-radius: 16px; background: rgba(255,255,255,.92); box-shadow: 0 6px 18px rgba(0,0,0,.10);
+        padding: 12px 14px; margin: 8px 0 4px;
       }
-      .mobile-detail-card h5{ margin: 4px 0 10px; font-weight:800; color:var(--ink); }
-      .mdc-row{ display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px dashed rgba(0,0,0,.08); }
-      .mdc-row:last-child{ border-bottom:none; }
-      .mdc-label{ color:var(--muted); font-weight:600; }
-      .mdc-value{ font-weight:700; }
-
-      .mobile-detail-actions{ display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; }
-      .btn-pill.outline{
-        background: #fff;
-        color: var(--blue);
-        border: 2px solid var(--blue);
-        box-shadow: none;
-        min-width: 140px;
-      }
+      .m-details-card .rowline{ display:flex; justify-content:space-between; gap:12px; padding:6px 0; border-bottom:1px dashed rgba(0,0,0,.08); }
+      .m-details-card .rowline:last-child{ border-bottom:none; }
+      .m-details-card .k{ color:var(--muted); font-weight:600; }
+      .m-details-card .v{ font-weight:700; }
 
       @media (max-width: 600px){
         html, body{ background-attachment: scroll; }
@@ -134,7 +117,10 @@
         .logo-container img{ width: 74px; }
         #results, #details{ border-radius: 12px; }
         .btn-pill{ width: auto; min-width: 140px; }
+        /* Biztonságból ne legyen vízszintes görgetés */
+        html, body { overflow-x: hidden; }
       }
+
       @media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important; } }
     </style>
   </head>
@@ -176,7 +162,6 @@
             </div>
           </div>
           <small class="hint d-block mt-1">A közterület-szűrés csak település megadása után működik!</small>
-
           <div class="d-flex align-items-center mb-2 mt-2">
             <button id="search-btn" class="btn-pill primary">Keresés</button>
             <button id="clear-btn" class="btn-pill danger ml-3">Szűrések törlése</button>
@@ -194,7 +179,6 @@
     </main>
 
     <script>
-      // Karbantartás overlay
       const rawTime = document.getElementById("target-time").textContent.trim();
       const formattedTime = rawTime.replace(/\./g, "-").replace(" ", "T");
       const targetDate = new Date(formattedTime);
@@ -202,8 +186,8 @@
       const maintenanceMode = now < targetDate;
 
       function updateCountdown(){
-        const now = new Date();
-        const diff = targetDate - now;
+        const now2 = new Date();
+        const diff = targetDate - now2;
         if (diff <= 0){
           document.getElementById("countdown-timer").innerText = "Karbantartás véget ért. Frissítés...";
           setTimeout(() => location.reload(), 2000);
@@ -230,11 +214,11 @@
       if (!maintenanceMode){
         const backendUrl = "https://fabuszilard.myftp.org/turainfo/";
         let exactCityMatch = false;
+        const isMobile = () => window.matchMedia('(max-width: 600px)').matches;
 
         // Cloaked admin words/classes
         const respKind   = atob("YWRtaW5fbWVuZXRyZW5k");
         const hiddenPath = atob("YWRtaW4vbWVuZXRyZW5k");
-
         const wA = atob("YWRtaW4");
         const wB = atob("bWVuZXRyZW5k");
         const origBtnCls    = `${wA}-${wB}-btn`;
@@ -285,32 +269,27 @@
             url: `${backendUrl}search`,
             data: data,
             success: resp => {
-              // Admin
               if (resp && resp.kind === respKind){
                 $('#results').html(cloakAdminHtml(resp.html));
                 return;
               }
 
               // gyanús települések
-              if (Array.isArray(resp) && resp.length && typeof resp[0] === 'string' && (resp[0].includes('kilógók:') || resp[0].includes('fő települések:') || resp[0].endsWith(':'))){
+              if (Array.isArray(resp) && resp.length && typeof resp[0] === 'string' &&
+                  (resp[0].includes('kilógók:') || resp[0].includes('fő települések:') || resp[0].endsWith(':'))){
                 let html = '<h5>Gyanús, oda nem illő települések depónként és túránként:</h5><div class="turalista-list">';
                 resp.forEach(line => {
-                  if (line.endsWith(':')){
-                    html += `<div class="depot-header">${line.replace(/:$/, '')}</div>`;
-                  } else if (line.includes('kilógók:')){
+                  if (line.endsWith(':')){ html += `<div class="depot-header">${line.replace(/:$/, '')}</div>`; }
+                  else if (line.includes('kilógók:')){
                     const m = line.match(/^(.*kilógók:)(.*?)(\s*\|\s*fő települések:)(.*)$/);
                     if (m){
                       html += `<div class="trip-line">${m[1]} <span style="color:#d9534f;font-weight:bold;">${m[2].trim()}</span>${m[3]} <span style="color:#007bff;">${m[4].trim()}</span></div>`;
-                    } else {
-                      html += `<div class="trip-line">${line}</div>`;
-                    }
+                    } else html += `<div class="trip-line">${line}</div>`;
                   } else if (line.includes('| fő települések:')){
                     let [left, right] = line.split('| fő települések:');
                     let [tripNum, outliers] = left.split(':');
                     html += `<div class="trip-line"><span style="font-weight:bold;">${tripNum}:</span> <span style="color:#d9534f; font-weight:bold;">${outliers.trim()}</span> | fő települések: <span style="color:#007bff;">${right.trim()}</span></div>`;
-                  } else {
-                    html += `<div class="trip-line">${line}</div>`;
-                  }
+                  } else html += `<div class="trip-line">${line}</div>`;
                 });
                 html += '</div>';
                 $('#results').html(html);
@@ -330,11 +309,8 @@
               if (Array.isArray(resp) && resp.length && resp.some(line => typeof line === 'string' && line.includes('db ('))){
                 let html = '<h5>60 stop alatti túrák depónként:</h5><div class="turalista-list">';
                 resp.forEach(line => {
-                  if (/^\d+\.$/.test(line)){
-                    html += `<div class="depot-header">${line}</div>`;
-                  } else if (line.includes('db (')){
-                    html += `<div class="trip-line">${line}</div>`;
-                  }
+                  if (/^\d+\.$/.test(line)){ html += `<div class="depot-header">${line}</div>`; }
+                  else if (line.includes('db (')){ html += `<div class="trip-line">${line}</div>`; }
                 });
                 html += '</div>';
                 $('#results').html(html);
@@ -345,13 +321,9 @@
               if (Array.isArray(resp) && resp.length && typeof resp[0] === 'string' && resp[0].match(/^\d+\.$/)){
                 let html = '<h5>Depónkénti túralista:</h5><div class="turalista-list">';
                 resp.forEach(line => {
-                  if (/^\d+\.$/.test(line)){
-                    html += `<div class="depot-header">${line}</div>`;
-                  } else if (/^\d+$/.test(line)){
-                    html += `<div class="autó">${line}</div>`;
-                  } else {
-                    html += `<div class="trip-line">${line}</div>`;
-                  }
+                  if (/^\d+\.$/.test(line)){ html += `<div class="depot-header">${line}</div>`; }
+                  else if (/^\d+$/.test(line)){ html += `<div class="autó">${line}</div>`; }
+                  else { html += `<div class="trip-line">${line}</div>`; }
                 });
                 html += '</div>';
                 $('#results').html(html);
@@ -444,72 +416,43 @@
         $('#search-input, #street-input').on('keypress', function(e){ if (e.which === 13) runSearch(); });
         $('#search-btn').click(runSearch);
 
-        // --- RÉSZLETEK: mobilon egyszerű kártya, asztalin teljes HTML ---
+        // Részletek gomb – mobilon kompakt kártya, desktopon szerveres HTML
         $('#results').on('click', '.details-btn', function(){
           const r = $(this).closest('.summary');
-          const isMobile = window.matchMedia('(max-width: 600px)').matches;
-          const depo = r.data('depo');
-          const tour = r.data('tour_number');
+          const depo  = r.data('depo');
+          const tourn = r.data('tour_number');
 
-          if (isMobile){
-            // kártya adatainak összerakása a táblázatsorból
-            const city    = r.find('td').eq(3).text().trim();
-            const street  = r.find('td').eq(4).text().trim() || '-';
-            const dateTxt = r.find('td').eq(5).text().trim();
-            const interv  = r.find('td').eq(6).text().trim();
+          if (isMobile()){
+            const city   = r.find('td').eq(3).text();
+            const street = r.find('td').eq(4).text() || '-';
+            const timeiv = r.find('td').eq(6).text();
 
             const card = `
-              <div class="mobile-detail-card">
-                <h5>${depo} • Túra ${tour}</h5>
-                <div class="mdc-row"><span class="mdc-label">Település</span><span class="mdc-value">${city}</span></div>
-                <div class="mdc-row"><span class="mdc-label">Közterület</span><span class="mdc-value">${street || '-'}</span></div>
-                <div class="mdc-row"><span class="mdc-label">Időintervallum</span><span class="mdc-value">${interv}</span></div>
-                <div class="mdc-row"><span class="mdc-label">Nap</span><span class="mdc-value">${dateTxt}</span></div>
-
-                <div class="mobile-detail-actions">
-                  <button class="btn-pill outline show-full-details" data-depo="${depo}" data-tour="${tour}">Teljes részletek</button>
-                  <button class="btn-pill danger open-pdf" data-depo="${depo}" data-tour="${tour}">Túraleírás</button>
-                </div>
-              </div>`;
+              <div class="m-details-card">
+                <div class="rowline"><span class="k">Település:</span><span class="v">${city}</span></div>
+                <div class="rowline"><span class="k">Közterület:</span><span class="v">${street}</span></div>
+                <div class="rowline"><span class="k">Időintervallum:</span><span class="v">${timeiv}</span></div>
+              </div>
+            `;
             const $det = $('#details');
             $det.html(card);
-            $('html,body').animate({ scrollTop: $det.offset().top - 8 }, 400);
-          } else {
-            // asztali – teljes részletek betöltése
-            $.get(`${backendUrl}details`, { depo: depo, tour_number: tour }, function(html){
-              const $det = $('#details');
-              $det.html(html);
-              const allText = $det.text().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-              if (allText.includes('inaktiv')){ $det.addClass('inactive-highlight'); } else { $det.removeClass('inactive-highlight'); }
-              $('html,body').animate({ scrollTop: $det.offset().top - 8 }, 400);
-            });
+            $det[0].scrollIntoView({ behavior: 'smooth', block: 'start' });
+            return;
           }
-        });
 
-        // „Teljes részletek” gomb a mobil kártyán
-        $('#details').on('click', '.show-full-details', function(){
-          const depo = $(this).data('depo');
-          const tour = $(this).data('tour');
-          $.get(`${backendUrl}details`, { depo: depo, tour_number: tour }, function(html){
+          // Asztali: eredeti részletező HTML
+          $.get(`${backendUrl}details`, { depo: depo, tour_number: tourn }, function(html){
             const $det = $('#details');
             $det.html(html);
             const allText = $det.text().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
             if (allText.includes('inaktiv')){ $det.addClass('inactive-highlight'); } else { $det.removeClass('inactive-highlight'); }
-            $('html,body').animate({ scrollTop: $det.offset().top - 8 }, 400);
+            $('html,body').animate({ scrollTop: $det.offset().top }, 500);
           });
         });
 
-        // Túraleírás (PDF) – mobil kártyáról is
         $('#results').on('click', '.pdf-btn', function(){
           const r = $(this).closest('.summary');
-          const depo = r.data('depo');
-          const tour = r.data('tour_number');
-          window.open(`${backendUrl}pdf?depo=${encodeURIComponent(depo)}&tour_number=${encodeURIComponent(tour)}`);
-        });
-        $('#details').on('click', '.open-pdf', function(){
-          const depo = $(this).data('depo');
-          const tour = $(this).data('tour');
-          window.open(`${backendUrl}pdf?depo=${encodeURIComponent(depo)}&tour_number=${encodeURIComponent(tour)}`);
+          window.open(`${backendUrl}pdf?depo=${encodeURIComponent(r.data('depo'))}&tour_number=${encodeURIComponent(r.data('tour_number'))}`);
         });
 
         // Admin PDF hosszú feladat
@@ -547,11 +490,13 @@
           }
         });
       }
+    </script>
 
-      // Autofocus a kereső mezőre
+    <script>
+      // Autofókusz a keresőre
       document.addEventListener("DOMContentLoaded", function() {
         const input = document.getElementById("search-input");
-        if (input) { input.focus(); }
+        if (input) input.focus();
       });
     </script>
   </body>
