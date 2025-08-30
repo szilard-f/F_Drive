@@ -11,154 +11,144 @@
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
 
-  <style>
-  :root{
-    --ink:#182433;
-    --muted:#5b6b7e;
-    --brand:#e94f3b;
-    --blue:#0888c8;
-    --blue-hover:#077ab4;
-    --surface: rgba(255,255,255,.70);
-    --overlay: rgba(255,255,255,.70);
-    --radius:24px;
-    --shadow:0 10px 30px rgba(0,0,0,.15);
-    --logo-size: 100px;
-  }
+    <style>
+      :root{
+        --ink:#182433;
+        --muted:#5b6b7e;
+        --brand:#e94f3b;
+        --blue:#0888c8;
+        --blue-hover:#077ab4;
+        --surface: rgba(255,255,255,.70);
+        --overlay: rgba(255,255,255,.70);
+        --radius:24px;
+        --shadow:0 10px 30px rgba(0,0,0,.15);
+        --logo-size: 100px;
+      }
 
-  #search-input::placeholder,
-  #street-input::placeholder {
-    color: rgba(0,0,0,.12);
-    opacity: 1;
-  }
+      #search-input::placeholder,
+      #street-input::placeholder {
+      color: rgba(0,0,0,.12);
+      opacity: 1;
+      }
 
-  html, body{
-    margin:0; padding:0; color:var(--ink);
-    font: 400 16px/1.65 system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"Noto Sans";
-    background: url('../fdrive/images/background.jpg') no-repeat center center fixed;
-    background-size:cover; min-height:100svh; overflow-y:auto;
-  }
 
-  .bg-overlay{ position:fixed; inset:0; background:var(--overlay); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); z-index:0; }
-  .shell{ position:relative; z-index:1; min-height:100svh; display:grid; place-content:start center; padding: clamp(20px, 3vw, 40px); }
+      html, body{
+        margin:0; padding:0; color:var(--ink);
+        font: 400 16px/1.65 system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"Noto Sans";
+        background: url('../fdrive/images/background.jpg') no-repeat center center fixed;
+        background-size:cover; min-height:100svh; overflow-y:auto;
+      }
 
-  .card-app{ width:min(1200px, 96vw); background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow); padding: clamp(20px, 3.6vw, 40px); animation: floatIn .6s ease-out both; isolation:isolate; }
-  .card-app::before{ content:""; position:absolute; inset:-2px; border-radius:calc(var(--radius) + 2px);
-    background: radial-gradient(1200px 300px at 50% -40%, rgba(233,79,59,.18), transparent 55%),
-                radial-gradient(1200px 300px at 50% 140%, rgba(0,153,255,.12), transparent 55%);
-    filter: blur(12px); z-index:-1; }
-  @keyframes floatIn{ from{ transform: translateY(16px); opacity:0; } to{ transform: translateY(0); opacity:1; } }
+      .bg-overlay{ position:fixed; inset:0; background:var(--overlay); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); z-index:0; }
+      .shell{ position:relative; z-index:1; min-height:100svh; display:grid; place-content:start center; padding: clamp(20px, 3vw, 40px); }
 
-  .app-header{ display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom: 6px; } /* 18px -> 6px */
-  .app-title{ margin:0; font-weight:800; letter-spacing:.2px; font-size: clamp(20px, 2.2vw + 8px, 32px); }
-  .app-title .red{ color: var(--brand); font-weight: 900; }
-  .app-title .blue{ color: var(--blue); font-weight: 900; }
-  .logo-container img{ width: var(--logo-size); height:auto; filter: drop-shadow(0 3px 10px rgba(0,0,0,.12)); }
+      .card-app{ width:min(1200px, 96vw); background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow); padding: clamp(20px, 3.6vw, 40px); animation: floatIn .6s ease-out both; isolation:isolate; }
+      .card-app::before{ content:""; position:absolute; inset:-2px; border-radius:calc(var(--radius) + 2px);
+        background: radial-gradient(1200px 300px at 50% -40%, rgba(233,79,59,.18), transparent 55%),
+                    radial-gradient(1200px 300px at 50% 140%, rgba(0,153,255,.12), transparent 55%);
+        filter: blur(12px); z-index:-1; }
+      @keyframes floatIn{ from{ transform: translateY(16px); opacity:0; } to{ transform: translateY(0); opacity:1; } }
 
-  .subhead{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin: 6px 0 10px; }
-  .subtitle{ margin:0; color: var(--muted); font-size: clamp(14px, 1.1vw + 10px, 18px); }
+      .app-header{ display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom: 18px; }
+      .app-title{ margin:0; font-weight:800; letter-spacing:.2px; font-size: clamp(20px, 2.2vw + 8px, 32px); }
+      .app-title .red{ color: var(--brand); font-weight: 900; }
+      .app-title .blue{ color: var(--blue); font-weight: 900; }
+      .logo-container img{ width: var(--logo-size); height:auto; filter: drop-shadow(0 3px 10px rgba(0,0,0,.12)); }
 
-  /* --- LOGÓK KÖZELEBB HOZÁSA (CSS-only) --- */
-  .subhead{ justify-content: flex-end; }                 /* második sor jobb szélre */
-  .subhead .logo-container{ margin-top: -8px; }          /* picit feljebb húzzuk */
-  /* ha még közelebb szeretnéd, növeld a negatív értéket pl. -12px */
+      .subhead{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin: 6px 0 10px; }
+      .subtitle{ margin:0; color: var(--muted); font-size: clamp(14px, 1.1vw + 10px, 18px); }
 
-  .filters{ margin-top: 10px; margin-bottom: 6px; }
-  .filters .form-group{ margin-bottom: 0; }
-  .filters .form-row{ align-items: flex-end; }
-  .filters .form-control{ height:44px; padding:10px 12px; box-sizing:border-box; }
-  .ui-autocomplete-input{ line-height:1.25; }
-  .hint{ color: var(--muted); font-size: .9rem; }
+      .filters{ margin-top: 10px; margin-bottom: 6px; }
+      .filters .form-group{ margin-bottom: 0; }
+      .filters .form-row{ align-items: flex-end; }
+      .filters .form-control{ height:44px; padding:10px 12px; box-sizing:border-box; }
+      .ui-autocomplete-input{ line-height:1.25; }
+      .hint{ color: var(--muted); font-size: .9rem; }
 
-  .btn-pill{ appearance:none; border:none; border-radius:999px; padding:10px 16px; font-weight:700; cursor:pointer;
-             box-shadow:0 6px 16px rgba(0,0,0,.08); transition: transform .05s ease, box-shadow .2s ease, background .15s ease; min-width:160px; text-align:center; }
-  .btn-pill.primary{ background: var(--blue); color:#fff; }
-  .btn-pill.primary:hover{ background: var(--blue-hover); }
-  .btn-pill.danger{ background: var(--brand); color:#fff; }
-  .btn-pill:active{ transform: translateY(1px); }
+      .btn-pill{ appearance:none; border:none; border-radius:999px; padding:10px 16px; font-weight:700; cursor:pointer;
+                 box-shadow:0 6px 16px rgba(0,0,0,.08); transition: transform .05s ease, box-shadow .2s ease, background .15s ease; min-width:160px; text-align:center; }
+      .btn-pill.primary{ background: var(--blue); color:#fff; }
+      .btn-pill.primary:hover{ background: var(--blue-hover); }
+      .btn-pill.danger{ background: var(--brand); color:#fff; }
+      .btn-pill:active{ transform: translateY(1px); }
 
-  .divider{ margin: 16px auto 16px; height:1px; width:min(520px, 70%); background: linear-gradient(90deg, transparent, rgba(0,0,0,.12), transparent); }
+      .divider{ margin: 16px auto 16px; height:1px; width:min(520px, 70%); background: linear-gradient(90deg, transparent, rgba(0,0,0,.12), transparent); }
 
-  /* Alap: rejtve, és csak tartalom esetén látszik */
-  #results, #details { display: none; }
-  #results:not(:empty), #details:not(:empty) {
-    display: block;
-    background: rgba(255,255,255,.72);
-    border-radius: 16px;
-    padding: 12px;
-    box-shadow: 0 3px 12px rgba(0,0,0,.06);
-  }
-  #results:not(:empty){ margin-top: 10px; }
-  #details:not(:empty){ margin-top: 12px; }
+      /* Alap: rejtve, és csak tartalom esetén látszik */
+      #results, #details { display: none; }
+      #results:not(:empty), #details:not(:empty) {
+        display: block;
+        background: rgba(255,255,255,.72);
+        border-radius: 16px;
+        padding: 12px;
+        box-shadow: 0 3px 12px rgba(0,0,0,.06);
+      }
+      #results:not(:empty){ margin-top: 10px; }
+      #details:not(:empty){ margin-top: 12px; }
 
-  /* Asztali táblázat */
-  .desktop-only { display:block; }
+      /* Asztali táblázat */
+      .desktop-only { display:block; }
 
-  table.table{ border-collapse: separate; border-spacing: 0 0.1px; background: transparent; }
-  table.table th{ text-align:center !important; vertical-align: middle; background: rgba(0,0,0,.04); }
-  table.table td, table.table th{ border-color: rgba(0,0,0,.08) !important; }
+      table.table{ border-collapse: separate; border-spacing: 0 0.1px; background: transparent; }
+      table.table th{ text-align:center !important; vertical-align: middle; background: rgba(0,0,0,.04); }
+      table.table td, table.table th{ border-color: rgba(0,0,0,.08) !important; }
 
-  /* Mobil kártyák – Pc-n rejtve */
-  .mobile-only { display:none !important; }
-  .result-cards { display:none; gap:12px; }
-  .result-card {
-    background: rgba(255,255,255,.9);
-    border-radius: 14px;
-    box-shadow: 0 4px 14px rgba(0,0,0,.08);
-    padding: 12px 12px 10px;
-  }
-  .rc-head { font-weight:800; margin:0 0 6px; }
-  .rc-row  { font-size:.95rem; color:var(--ink); }
-  .rc-row + .rc-row { margin-top:4px; }
-  .rc-meta { color: var(--muted); font-size:.9rem; margin-top:4px; }
-  .rc-actions{
-    display:flex; gap:8px; justify-content:flex-end; margin-top:10px; flex-wrap:wrap;
-  }
-  .rc-actions .btn-pill{ min-width: 128px; padding:8px 14px; }
+      /* Mobil kártyák – Pc-n rejtve */
+      .mobile-only { display:none !important; }
+      .result-cards { display:none; gap:12px; }
+      .result-card {
+        background: rgba(255,255,255,.9);
+        border-radius: 14px;
+        box-shadow: 0 4px 14px rgba(0,0,0,.08);
+        padding: 12px 12px 10px;
+      }
+      .rc-head { font-weight:800; margin:0 0 6px; }
+      .rc-row  { font-size:.95rem; color:var(--ink); }
+      .rc-row + .rc-row { margin-top:4px; }
+      .rc-meta { color: var(--muted); font-size:.9rem; margin-top:4px; }
+      .rc-actions{
+        display:flex; gap:8px; justify-content:flex-end; margin-top:10px; flex-wrap:wrap;
+      }
+      .rc-actions .btn-pill{ min-width: 128px; padding:8px 14px; }
 
-  .inactive-highlight{ background-color: rgba(255, 0, 0, 0.10); outline: 2px solid var(--brand); outline-offset: -2px; border-radius: 10px; padding: 0.25em; transition: background-color 0.3s ease; }
-  .inactive-highlight td{ background-color: rgba(255,0,0,.06); }
+      .inactive-highlight{ background-color: rgba(255, 0, 0, 0.10); outline: 2px solid var(--brand); outline-offset: -2px; border-radius: 10px; padding: 0.25em; transition: background-color 0.3s ease; }
+      .inactive-highlight td{ background-color: rgba(255,0,0,.06); }
 
-  .turalista-list .depot-header{ margin-top: 1rem; color: var(--brand); font-size: 1.1rem; font-weight: 800; }
-  .turalista-list .autó{ margin-left: 1rem; font-size: 1rem; font-weight: 700; }
-  .turalista-list .trip-line{ margin-left: 1.5rem; }
+      .turalista-list .depot-header{ margin-top: 1rem; color: var(--brand); font-size: 1.1rem; font-weight: 800; }
+      .turalista-list .autó{ margin-left: 1rem; font-size: 1rem; font-weight: 700; }
+      .turalista-list .trip-line{ margin-left: 1.5rem; }
 
-  .special-task-btn{ min-width: 260px; }
-  .special-center{ text-align:center; }
-  .special-hint{ margin-top: 8px; text-align:center; color: var(--muted); font-size: .9rem; }
-  .special-progress{ display:flex; justify-content:center; align-items:center; font-weight:bold; margin:10px auto; min-width:260px; text-align:center; }
-  .special-progress .dots{ display:inline-block; width:5ch; text-align:left; font-family:monospace; }
+      .special-task-btn{ min-width: 260px; }
+      .special-center{ text-align:center; }
+      .special-hint{ margin-top: 8px; text-align:center; color: var(--muted); font-size: .9rem; }
+      .special-progress{ display:flex; justify-content:center; align-items:center; font-weight:bold; margin:10px auto; min-width:260px; text-align:center; }
+      .special-progress .dots{ display:inline-block; width:5ch; text-align:left; font-family:monospace; }
 
-  .maintenance-overlay{ display:none; position:fixed; z-index:9999; inset:0; background:var(--overlay); text-align:center; justify-content:center; align-items:center; }
-  .maintenance-box{ background: rgba(255,255,255,.80); padding: clamp(20px, 3vw, 36px); border-radius: var(--radius); box-shadow: var(--shadow); max-width: 640px; margin: 20px; }
-  .maintenance-box h1{ font-size: clamp(20px, 2.2vw + 8px, 30px); margin-bottom: 6px; }
-  .countdown{ font-size: 1.4rem; color: var(--brand); margin-top: 8px; }
+      .maintenance-overlay{ display:none; position:fixed; z-index:9999; inset:0; background:var(--overlay); text-align:center; justify-content:center; align-items:center; }
+      .maintenance-box{ background: rgba(255,255,255,.80); padding: clamp(20px, 3vw, 36px); border-radius: var(--radius); box-shadow: var(--shadow); max-width: 640px; margin: 20px; }
+      .maintenance-box h1{ font-size: clamp(20px, 2.2vw + 8px, 30px); margin-bottom: 6px; }
+      .countdown{ font-size: 1.4rem; color: var(--brand); margin-top: 8px; }
 
-  .text-muted-2{ color: var(--muted); }
-  .red{ color: var(--brand); font-weight: 800; }
-  .blue{ color: var(--blue); font-weight: 800; }
+      .text-muted-2{ color: var(--muted); }
+      .red{ color: var(--brand); font-weight: 800; }
+      .blue{ color: var(--blue); font-weight: 800; }
 
-  @media (max-width: 992px){
-    html, body{ background-attachment: scroll; }
-    .card-app{ border-radius: 16px; padding: 18px; }
-    .logo-container img{ width: 74px; }
-    #results, #details{ border-radius: 12px; }
+      @media (max-width: 992px){
+        html, body{ background-attachment: scroll; }
+        .card-app{ border-radius: 16px; padding: 18px; }
+        .logo-container img{ width: 74px; }
+        #results, #details{ border-radius: 12px; }
 
-    /* Mobil: táblázat cseréje */
-    .desktop-only { display:none !important; }
-    .mobile-only  { display:block !important; }
-    .result-cards { display:grid; }
+        /* Mobil: táblázat cseréje */
+        .desktop-only { display:none !important; }
+        .mobile-only  { display:block !important; }
+        .result-cards { display:grid; }
 
-    .btn-pill{ width: auto; min-width: 140px; }
-  }
-
-  /* Asztalin picit kisebb logók, ha túl nagy a tömegük együtt */
-  @media (min-width: 993px){
-    .logo-container img{ width: 88px; } /* opcionális: állíthatod 84–92 px közé ízlésre */
-  }
-
-  @media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important; } }
-</style>
-
+        
+        .btn-pill{ width: auto; min-width: 140px; }
+      }
+      @media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important; } }
+    </style>
   </head>
 
   <body>
