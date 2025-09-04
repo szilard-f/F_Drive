@@ -13,5 +13,13 @@
   "disable_tours": 0,         // 1 → 'Túrák' menü tilt
 
   "enable_deleted": ["10"],             // depó ID-k, ahol a törlés gomb látszik
-  "force_depot_selected": ["10"]     // csak ezek a depók engedélyezettek pl ["10","12","02",] 
+  "force_depot_selected": [
+  "01", "02", "03", "04",
+  "06", "07", "08", "09",
+  "10", "11", "12", "13",
+  "14", "15", "16", "17",
+  "18", "19", "20", "21",
+  "22", "23", "24"
+]
+
 }
