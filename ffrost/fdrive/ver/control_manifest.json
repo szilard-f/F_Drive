@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "updated_at": "2025-09-04T17:34:00Z",
+
+  "latest_version": "1.42.2",
+  "changelog": [
+    "Gyorsabb indulás.",
+    "UI finomítások a menetrendeknél."
+  ],
+
+  "force_update": 3,          // ha > LOCAL FORCE_UPDATE → kötelező frissítés
+  "force_stop": 0,            // 1 → teljes tiltás (stop ablak)
+  "disable_tours": 0,         // 1 → 'Túrák' menü tilt
+
+  "enable_deleted": ["10"],             // depó ID-k, ahol a törlés gomb látszik
+  "force_depot_selected": ["10"]     // csak ezek a depók engedélyezettek
+}
