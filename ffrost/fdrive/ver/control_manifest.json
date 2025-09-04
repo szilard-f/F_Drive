@@ -2,24 +2,23 @@
   "schema": 1,
   "updated_at": "2025-09-04T17:34:00Z",
 
-  "latest_version": "1.42.2",
+  "latest_version": "1.4.2",
   "changelog": [
     "Gyorsabb indulás.",
     "UI finomítások a menetrendeknél."
   ],
 
-  "force_update": 3,          // ha > LOCAL FORCE_UPDATE → kötelező frissítés
-  "force_stop": 0,            // 1 → teljes tiltás (stop ablak)
-  "disable_tours": 0,         // 1 → 'Túrák' menü tilt
+  "force_update": 3,
+  "force_stop": 0,
+  "disable_tours": 0,
 
-  "enable_deleted": ["10"],             // depó ID-k, ahol a törlés gomb látszik
+  "enable_deleted": ["10"],
   "force_depot_selected": [
-  "01", "02", "03", "04",
-  "06", "07", "08", "09",
-  "10", "11", "12", "13",
-  "14", "15", "16", "17",
-  "18", "19", "20", "21",
-  "22", "23", "24"
-]
-
+    "01", "02", "03", "04",
+    "06", "07", "08", "09",
+    "10", "11", "12", "13",
+    "14", "15", "16", "17",
+    "18", "19", "20", "21",
+    "22", "23", "24"
+  ]
 }
