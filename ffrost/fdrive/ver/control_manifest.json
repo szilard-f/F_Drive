@@ -11,7 +11,7 @@
   ],
   "_comment_changelog": "Az új verzió újdonságainak listája.",
 
-  "force_update": 4,
+  "force_update": 3,
   "_comment_force_update": "Ha nagyobb, mint a helyi FORCE_UPDATE érték, akkor kötelező frissítés ablak jelenik meg.",
 
   "force_stop": 0,
