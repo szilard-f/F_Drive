@@ -1,28 +1,19 @@
 {
-  "schema": 1,
-  "updated_at": "2025-09-05",
-
   "latest_version": "1.36.6",
-  "_comment_latest_version": "aktuális legfrissebb verzió",
-
+  
   "changelog": [
     "✔ aktuális túraútvonalak ➔ esetleges (nem mindegyik) hibák kiemelése",
     "✘nem helyettesíti a manuális ellenőrzéseket✘"
   ],
-  "_comment_changelog": "Az új verzió újdonságainak listája.",
-
+  
   "force_update": 3,
-  "_comment_force_update": "Ha nagyobb, mint a helyi FORCE_UPDATE érték, akkor kötelező frissítés ablak jelenik meg.",
-
+  
   "force_stop": 0,
-  "_comment_force_stop": "1 = a program futását leállítjuk (piros figyelmeztető ablak). 0 = enged",
-
+  
   "disable_tours": 0,
-  "_comment_disable_tours": "1 = a 'Túrák' menüpontot letiltjuk. 0 = engedett.",
-
+  
   "enable_deleted": [],
-  "_comment_enable_deleted": "Depó ID-k listája, ahol a törlés gomb megjelenhet. Idézőjelek kellenek!",
-
+  
   "force_depot_selected": [
     "01", "02", "03", "04",
     "06", "07", "08", "09",
@@ -31,5 +22,4 @@
     "18", "19", "20", "21",
     "22", "23", "24"
   ],
-  "_comment_force_depot_selected": "Csak ezekről a depókról engedi a belépést."
 }
