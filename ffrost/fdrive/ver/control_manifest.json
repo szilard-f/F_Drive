@@ -14,7 +14,7 @@
   "force_update": 3,
   "_comment_force_update": "Ha nagyobb, mint a helyi FORCE_UPDATE érték, akkor kötelező frissítés ablak jelenik meg.",
 
-  "force_stop": 0,
+  "force_stop": 1,
   "_comment_force_stop": "1 = a program futását leállítjuk (piros figyelmeztető ablak). 0 = enged",
 
   "disable_tours": 0,
