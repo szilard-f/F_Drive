@@ -10,9 +10,9 @@
   
   "force_stop": 0,
   
-  "disable_tours": 1,
+  "disable_tours": 0,
   
-  "enable_deleted": [],
+  "enable_deleted": ["10"],
   
   "force_depot_selected": [
     "01", "02", "03", "04",
