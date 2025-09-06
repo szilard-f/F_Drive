@@ -6,9 +6,9 @@
     "✘nem helyettesíti a manuális ellenőrzéseket✘"
   ],
   
-  "force_update": 4,
+  "force_update": 3,
   
-  "force_stop": 0,
+  "force_stop": 1,
   
   "disable_tours": 0,
   
