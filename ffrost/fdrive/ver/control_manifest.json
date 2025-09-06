@@ -8,9 +8,9 @@
   
   "force_update": 3,
   
-  "force_stop": 1,
+  "force_stop": 0,
   
-  "disable_tours": 0,
+  "disable_tours": 1,
   
   "enable_deleted": [],
   
