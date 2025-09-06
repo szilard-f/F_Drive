@@ -1,0 +1,25 @@
+{
+  "latest_version": "1.36.6",
+  
+  "changelog": [
+    "✔ aktuális túraútvonalak ➔ esetleges (nem mindegyik) hibák kiemelése",
+    "✘nem helyettesíti a manuális ellenőrzéseket✘"
+  ],
+  
+  "force_update": 3,
+  
+  "force_stop": 0,
+  
+  "disable_tours": 0,
+  
+  "enable_deleted": [],
+  
+  "force_depot_selected": [
+    "01", "02", "03", "04",
+    "06", "07", "08", "09",
+    "11", "12", "13", "10",
+    "14", "15", "16", "17",
+    "18", "19", "20", "21",
+    "22", "23", "24"
+  ]
+}
