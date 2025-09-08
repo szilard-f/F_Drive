@@ -128,25 +128,6 @@
          background: rgba(233,79,59,.12);
          color: var(--brand);
          }
-         .badge.pulse{
-         animation: pulse 1.2s ease-in-out infinite;
-         will-change: transform;
-         }
-         .badge.prominent{
-         padding:.35em .8em;
-         font-size:.95em;
-         text-transform:uppercase;
-         letter-spacing:.04em;
-         background: linear-gradient(180deg, rgba(233,79,59,.18), rgba(233,79,59,.08));
-         box-shadow: 0 2px 8px rgba(233,79,59,.25), inset 0 0 0 2px rgba(233,79,59,.35);
-         }
-         .callout{
-         border-left: 5px solid var(--brand);
-         background: rgba(233,79,59,.06);
-         padding: 14px 16px;
-         border-radius: 16px;
-         box-shadow: 0 6px 20px rgba(0,0,0,.08);
-         }
          .warning{
          border-left: 4px solid var(--brand);
          background: rgba(233,79,59,.06);
@@ -161,7 +142,7 @@
          animation: pulse 1.2s ease-in-out infinite;
          }
          @media (prefers-reduced-motion: reduce){
-         *:not(.badge.pulse){ animation:none !important; transition:none !important; }
+         *{ animation:none !important; transition:none !important; }
          }
          .footertext{
          margin-top: 26px;
@@ -280,20 +261,16 @@
                </p>
                <p>
                   <strong>Túra megnyitása:</strong> A <a href="fdrive/pic/open_túra.png" target="_blank"> felbukkanó</a> ablakban ki tudjuk választani a már az adatbázisban lévő túrát, majd a megnyitást követően lehetőségünk van áttekinteni. (Itt a megállásokon nincs lehetőség módosítani).<br>
-                  
-               <div class="callout">
-                  <span class="badge pulse prominent">Új funkció</span><br>
-                  Többször előfordul, hogy az eredeti (webbase) adatbázisban hibás a település neve. 
-                  Ilyenkor mind az 
+                  <s>
+                  Többször előfordul, hogy az eredeti (webbase) adatbázisban hibás a település neve. Ilyenkor mind az 
                   <a href="https://fdriveanalytics.com/ffrost/turainfo/" target="_blank" rel="noopener noreferrer">információs weboldalon</a>, 
-                  mind a túraleírásban a téves név jelenik meg. Ez a mező dupla kattintással szerkeszthető lett, 
-                  de ügyeljetek rá, hogy mindig az alábbi formátumot használjátok, különben a közterület belecsúszhat a település nevébe, 
-                  ami még nagyobb bonyodalmakhoz vezethet: 
+                  mind a túraleírásban a téves név jelenik meg. Ez a mező dupla kattintással szerkeszthető lett, de ügyeljetek rá, hogy mindig az alábbi formátumot használjátok, különben a közterület belecsúszhat a település nevébe, ami még nagyobb bonyodalmakhoz vezethet: 
                   <code> irányítószám, település, közterület</code><br>
-                  Az alábbi példában szemléltetem a funkció működését:
+                  Az alábbi példában a „Kaposvár - Fészerlakpuszta” eredetileg „Kaposvár” néven szerepelt, amit javítottam:
                   <a href="fdrive/video/megállás_szerkesztés.mp4" target="_blank">Település módosítása</a><br>
-               </div>
-
+                  </s>
+                  <span style="color:gray; font-size:smaller;">(funkció felfüggesztve)</span>
+               </p>
                <p>
                   <strong>Túra mentése, KML + PDF export lehetőség:</strong> Az adatbázisból betöltött túra alapbeállításai (gépkocsi száma, rendszám és a nap) módosítható. Amennyiben az eredeti túraleírás és KML fájl már nem lenne meg, az itt pótolható. A mentés során a megváltoztatott paraméterekkel kerül felülírásra az eredeti túra.
                </p>
