@@ -1,9 +1,9 @@
 {
-  "latest_version": "1.36.6",
+  "latest_version": "1.37.2",
   
   "changelog": [
-    "✔ aktuális túraútvonalak ➔ esetleges (nem mindegyik) hibák kiemelése",
-    "✘nem helyettesíti a manuális ellenőrzéseket✘"
+    "✔ település/közterület szerkesztése ➔ már Fel/Le nyíl",
+    "Enter és egérrel kikattintásra is rögzül"
   ],
   
   "force_update": 4,
