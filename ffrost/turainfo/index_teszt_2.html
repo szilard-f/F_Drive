@@ -23,7 +23,6 @@
             --radius:24px;
             --shadow:0 10px 30px rgba(0,0,0,.15);
             --logo-size: 100px;
-
             --logo-stack-gap-desktop: 6px;
             --logo-stack-gap-mobile: -6px;
         }
@@ -75,6 +74,9 @@
         .btn-pill.primary:hover{ background: var(--blue-hover); }
         .btn-pill.danger{ background: var(--brand); color:#fff; }
         .btn-pill:active{ transform: translateY(1px); }
+
+        .btn-grid{ display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap; }
+        .btn-grid .btn-pill{ min-width: 140px; }
 
         .divider{ margin: 16px auto 16px; height:1px; width:min(520px, 70%); background: linear-gradient(90deg, transparent, rgba(0,0,0,.12), transparent); }
 
@@ -134,32 +136,18 @@
         .red{ color: var(--brand); font-weight: 800; }
         .blue{ color: var(--blue); font-weight: 800; }
 
-        /* Mobil beállítások */
         @media (max-width: 992px){
             html, body{ background-attachment: scroll; }
             .card-app{ border-radius: 16px; padding: 18px; }
-
             .logo-container img{ width: 74px; }
             .subhead{ margin-top: var(--logo-stack-gap-mobile); }
-
             .d-flex.align-items-center {justify-content: center; }
 
-            /* GOMBSOR – MOBILON OSZLOP, TELJES SZÉLESSÉG, SORREND:
-               1) KERESÉS (kék), 2) TÖRLÉS (piros), 3) TÉRKÉPES KERESÉS (kék) */
-            .btn-row{
-                width: 100%;
-                flex-direction: column;
-                align-items: stretch;
-                gap: 10px;
-            }
-            .btn-row .btn-pill{ width: 100%; min-width: 0; }
-
-            #search-btn { order: 1; }
-            #clear-btn  { order: 2; }
-            #map-btn    { order: 3; }
+            .btn-grid{ flex-direction: column; align-items: stretch; }
+            .btn-grid .btn-pill{ width: 100%; min-width: 0; }
 
             #results, #details{ border-radius: 12px; }
-            .filters .form-control {margin-bottom: 8px;}
+            .filters .form-control {margin-bottom: 8px;} 
 
             .desktop-only { display:none !important; }
             .mobile-only  { display:block !important; }
@@ -213,12 +201,10 @@
                         <input type="text" id="street-input" class="form-control" placeholder="pl. József Attila utca" />
                     </div>
                 </div>
-
-                <!-- GOMBSOR: asztali – Keresés, Térképes keresés, Törlés | mobil – Keresés, Törlés, Térképes keresés -->
-                <div class="d-flex align-items-center mb-2 mt-3 btn-row">
-                    <button id="search-btn" class="btn-pill primary mr-3">Keresés</button>
-                    <button id="map-btn" class="btn-pill primary">Térképes keresés</button>
-                    <button id="clear-btn" class="btn-pill danger ml-3">Törlés</button>
+                <div class="btn-grid mb-2 mt-3">
+                    <button id="search-btn" class="btn-pill primary">🔍 Keresés</button>
+                    <button id="clear-btn" class="btn-pill danger">Törlés</button>
+                    <button id="map-btn" class="btn-pill primary">🗺️ Térképes keresés</button>
                 </div>
             </section>
 
@@ -307,6 +293,7 @@
 
             function cloakAdminHtml(html){
                 const $tmp = $('<div>').html(html || "");
+
                 $tmp.find(`.${origBtnCls}`).each(function(){
                     const $btn = $(this);
                     $btn.addClass(aliasBtnCls).removeClass(origBtnCls);
@@ -314,9 +301,11 @@
                     const t = $btn.text();
                     $btn.text(t.replace(/menetrend/gi, 'Menetrend'));
                 });
+
                 $tmp.find(`.${origCenterCls}`).removeClass(origCenterCls).addClass(aliasCenterCls);
                 $tmp.find(`.${origHintCls}`).removeClass(origHintCls).addClass(aliasHintCls);
                 $tmp.find(`.${origProgCls}`).removeClass(origProgCls).addClass(aliasProgCls);
+
                 if (!$tmp.find(`.${aliasHintCls}`).length && $tmp.find(`.${aliasBtnCls}`).length){
                     $('<div>', { 'class': aliasHintCls, text: 'A művelet akár percekig is eltarthat.' }).insertAfter($tmp.find(`.${aliasBtnCls}`).first());
                 }
@@ -481,6 +470,7 @@
                         tbl += '</tbody></table></div>';
 
                         const cards = buildMobileCards(resp);
+
                         $('#results').html(tbl + cards);
 
                         $('#results .summary').each(function(){
@@ -539,6 +529,7 @@
                 }
             });
 
+
             $('#search-input, #street-input').on('keypress', function(e){
                 if (e.which === 13){
                     closeMobileKeyboard();
@@ -550,7 +541,6 @@
                 runSearch();
             });
 
-            /* ÚJ: TÉRKÉPES KERESÉS gomb – új lapon nyílik */
             $('#map-btn').click(function(){
                 closeMobileKeyboard();
                 window.open('https://fdriveanalytics.com/ffrost/turainfo/toursmap.html', '_blank', 'noopener,noreferrer');
@@ -623,3 +613,4 @@
     </script>
 </body>
 </html>
+	
