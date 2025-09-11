@@ -57,8 +57,7 @@
 
         .logo-container img{ width: var(--logo-size); height:auto; filter: drop-shadow(0 3px 10px rgba(0,0,0,.12)); }
 
-        .subhead{ display:flex; align-items:center; justify-content:flex-end; gap:12px;
-                  margin-top: var(--logo-stack-gap-desktop); }
+        .subhead{ display:flex; align-items:center; justify-content:flex-end; gap:12px; margin-top: var(--logo-stack-gap-desktop); }
         .subtitle{ margin:0; color: var(--muted); font-size: clamp(14px, 1.1vw + 10px, 18px); }
 
         .filters{ margin-top: 10px; margin-bottom: 6px; }
@@ -99,19 +98,12 @@
 
         .mobile-only { display:none !important; }
         .result-cards { display:none; gap:12px; }
-        .result-card {
-            background: rgba(255,255,255,.9);
-            border-radius: 14px;
-            box-shadow: 0 4px 14px rgba(0,0,0,.08);
-            padding: 12px 12px 10px;
-        }
+        .result-card { background: rgba(255,255,255,.9); border-radius: 14px; box-shadow: 0 4px 14px rgba(0,0,0,.08); padding: 12px 12px 10px; }
         .rc-head { font-weight:800; margin:0 0 6px; }
         .rc-row  { font-size:.95rem; color:var(--ink); }
         .rc-row + .rc-row { margin-top:4px; }
         .rc-meta { color: var(--muted); font-size:.9rem; margin-top:4px; }
-        .rc-actions{
-            display:flex; gap:8px; justify-content:flex-end; margin-top:10px; flex-wrap:wrap;
-        }
+        .rc-actions{ display:flex; gap:8px; justify-content:flex-end; margin-top:10px; flex-wrap:wrap; }
         .rc-actions .btn-pill{ min-width: 128px; padding:8px 14px; }
 
         .inactive-highlight{ background-color: rgba(255, 0, 0, 0.10); outline: 2px solid var(--brand); outline-offset: -2px; border-radius: 10px; padding: 0.25em; transition: background-color 0.3s ease; }
@@ -142,21 +134,36 @@
             .logo-container img{ width: 74px; }
             .subhead{ margin-top: var(--logo-stack-gap-mobile); }
             .d-flex.align-items-center {justify-content: center; }
-
             .btn-grid{ flex-direction: column; align-items: stretch; }
             .btn-grid .btn-pill{ width: 100%; min-width: 0; }
-
             #results, #details{ border-radius: 12px; }
             .filters .form-control {margin-bottom: 8px;} 
-
             .desktop-only { display:none !important; }
             .mobile-only  { display:block !important; }
             .result-cards { display:grid; }
-
             .btn-pill{ width: auto; min-width: 140px; }
         }
 
         @media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important; } }
+
+        .filters .form-row{ display:flex; gap:16px; justify-content:center; margin-left:auto; margin-right:auto; max-width:1100px; }
+        .filters .form-row > [class*="col-"]{ padding-left:0; padding-right:0; }
+        .filters .form-row .form-group{ flex:1 1 0; min-width:0; }
+        .filters .form-row .form-control{ width:100%; }
+        @media (max-width: 991.98px){
+            .filters .form-row{ flex-direction:column; max-width:720px; }
+        }
+
+        .btn-label{ display:inline; }
+        @media (max-width: 576px){
+            .btn-grid{ flex-direction: row; align-items:center; justify-content: center; gap:8px; }
+            .btn-grid .btn-pill{ flex:1 1 0; min-width:0; padding:8px 10px; border-radius:12px; }
+            .btn-grid .btn-pill i{ margin:0; font-size:18px; }
+            .btn-label{ display:none; }
+            #clear-btn{ order:1; }
+            #map-btn{ order:2; }
+            #search-btn{ order:3; }
+        }
     </style>
 </head>
 
@@ -202,9 +209,9 @@
                     </div>
                 </div>
                 <div class="btn-grid mb-2 mt-3">
-                    <button id="search-btn" class="btn-pill primary">🔍 Keresés</button>
-                    <button id="clear-btn" class="btn-pill danger">Törlés</button>
-                    <button id="map-btn" class="btn-pill primary">🗺️ Térképes keresés</button>
+                    <button id="search-btn" class="btn-pill primary"><i class="fas fa-search"></i> <span class="btn-label">Keresés</span></button>
+                    <button id="clear-btn" class="btn-pill danger"><i class="fas fa-trash-alt"></i> <span class="btn-label">Törlés</span></button>
+                    <button id="map-btn" class="btn-pill primary"><i class="fas fa-map-marked-alt"></i> <span class="btn-label">Térképes keresés</span></button>
                 </div>
             </section>
 
@@ -258,10 +265,8 @@
             function closeMobileKeyboard() {
                 const el = document.activeElement;
                 if (!el || (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA')) return;
-
                 const ua = navigator.userAgent.toLowerCase();
                 const isIOS = /iphone|ipad|ipod/.test(ua) || (/mac/.test(ua) && 'ontouchend' in document);
-
                 if (isIOS) {
                     const prev = el.readOnly;
                     el.readOnly = true;
@@ -293,7 +298,6 @@
 
             function cloakAdminHtml(html){
                 const $tmp = $('<div>').html(html || "");
-
                 $tmp.find(`.${origBtnCls}`).each(function(){
                     const $btn = $(this);
                     $btn.addClass(aliasBtnCls).removeClass(origBtnCls);
@@ -301,11 +305,9 @@
                     const t = $btn.text();
                     $btn.text(t.replace(/menetrend/gi, 'Menetrend'));
                 });
-
                 $tmp.find(`.${origCenterCls}`).removeClass(origCenterCls).addClass(aliasCenterCls);
                 $tmp.find(`.${origHintCls}`).removeClass(origHintCls).addClass(aliasHintCls);
                 $tmp.find(`.${origProgCls}`).removeClass(origProgCls).addClass(aliasProgCls);
-
                 if (!$tmp.find(`.${aliasHintCls}`).length && $tmp.find(`.${aliasBtnCls}`).length){
                     $('<div>', { 'class': aliasHintCls, text: 'A művelet akár percekig is eltarthat.' }).insertAfter($tmp.find(`.${aliasBtnCls}`).first());
                 }
@@ -336,22 +338,17 @@
 
             function runSearch(){
                 closeMobileKeyboard();
-
                 let q = $('#search-input').val().trim();
                 let s = $('#street-input').val().trim();
-
                 $('#results,#resultsPlain,#details').empty();
                 $('#resultsPlain').hide();
                 $('.inactive-highlight').removeClass('inactive-highlight');
-
                 if (!q){
                     $('#results').html('<p class="text-muted-2">Kérem adja meg a települést vagy irányítószámot!</p>');
                     return;
                 }
-
                 let data = { q, street: s };
                 if (exactCityMatch){ data.exact_city = "1"; exactCityMatch = false; }
-
                 $.ajax({
                     url: `${backendUrl}search`,
                     data: data,
@@ -360,7 +357,6 @@
                             $('#results').html(cloakAdminHtml(resp.html));
                             return;
                         }
-
                         if (Array.isArray(resp) && resp.length && typeof resp[0] === 'string' && (resp[0].includes('kilógók:') || resp[0].includes('fő települések:') || resp[0].endsWith(':'))){
                             let html = '<h5>Gyanús, oda nem illő települések depónként és túránként:</h5><div class="turalista-list">';
                             resp.forEach(line => {
@@ -385,7 +381,6 @@
                             $('#results').html(html);
                             return;
                         }
-
                         if (Array.isArray(resp) && resp.length && typeof resp[0] === 'string' && resp[0].match(/^\d+: /)){
                             let html = '<h5>Többször szereplő, ellenőrizendő települések:</h5><ul>';
                             resp.forEach(city => html += `<li>${city}</li>`);
@@ -393,7 +388,6 @@
                             $('#results').html(html);
                             return;
                         }
-
                         if (Array.isArray(resp) && resp.length && resp.some(line => typeof line === 'string' && line.includes('db ('))){
                             let html = '<h5>60 stop alatti túrák depónként:</h5><div class="turalista-list">';
                             resp.forEach(line => {
@@ -407,7 +401,6 @@
                             $('#results').html(html);
                             return;
                         }
-
                         if (Array.isArray(resp) && resp.length && typeof resp[0] === 'string' && resp[0].match(/^\d+\.$/)){
                             let html = '<h5>Depónkénti túralista:</h5><div class="turalista-list">';
                             resp.forEach(line => {
@@ -423,7 +416,6 @@
                             $('#results').html(html);
                             return;
                         }
-
                         if (Array.isArray(resp) && resp.length && resp[0].tours_count !== undefined){
                             let html = '<h5>Depók és feltöltött túraszámok:</h5>';
                             resp.forEach(item => {
@@ -441,17 +433,14 @@
                             $('#results').html(html);
                             return;
                         }
-
                         if (!resp.length){
                             $('#results').html('<p class="text-muted-2">Nincs találat.</p>');
                             return;
                         }
-
                         let tbl = '<div class="desktop-only"><table class="table table-bordered"><thead><tr>' +
                             ['Depó','Túraszám','Rendszám','Település','Közterület','Nap','Időintervallum','Műveletek']
                             .map(h => `<th class="text-center">${h}</th>`).join('') +
                             '</tr></thead><tbody>';
-
                         resp.forEach(it => {
                             tbl += `<tr class="summary" data-depo="${it.depo}" data-tour_number="${it.tour_number}">
                                 <td class="text-center">${it.depo}</td>
@@ -468,11 +457,8 @@
                             </tr>`;
                         });
                         tbl += '</tbody></table></div>';
-
                         const cards = buildMobileCards(resp);
-
                         $('#results').html(tbl + cards);
-
                         $('#results .summary').each(function(){
                             const plateRaw = $(this).data('plate') || $(this).find('td').eq(2).text();
                             const plateText = String(plateRaw).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
@@ -518,7 +504,6 @@
                 $('#resultsPlain').hide();
                 $('.inactive-highlight').removeClass('inactive-highlight');
                 closeMobileKeyboard();
-
                 const input = document.getElementById("search-input");
                 if (input) {
                     setTimeout(() => {
@@ -528,7 +513,6 @@
                     }, 0);
                 }
             });
-
 
             $('#search-input, #street-input').on('keypress', function(e){
                 if (e.which === 13){
@@ -579,10 +563,8 @@
                         <div class="special-hint">A művelet akár percekig is eltarthat.</div>
                     </div>
                 `);
-
                 let dotCount = 0; const $dots = $wrap.find('.dots');
                 const timer = setInterval(() => { dotCount = (dotCount % 5) + 1; $dots.text('.'.repeat(dotCount)); }, 400);
-
                 try{
                     const res = await fetch(`${backendUrl}${hiddenPath}`, { method: 'GET' });
                     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -613,4 +595,3 @@
     </script>
 </body>
 </html>
-	
