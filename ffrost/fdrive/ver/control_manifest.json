@@ -1,8 +1,9 @@
 {
-  "latest_version": "1.37.4",
+  "latest_version": "1.37.6",
   
   "changelog": [
-    "✔ elfogadott rendszámformátumok megkövetelése mentés során",
+    "✅ ütközés esetén azonnali figyelmeztetés a túra mentését követően ⚠⚠⚠⚠"
+	"✅ elfogadott rendszámformátumok megkövetelése mentés során",
     ""
   ],
   
@@ -12,7 +13,7 @@
   
   "disable_tours": 0,
   
-  "enable_deleted": ["10"],
+  "enable_deleted": [],
   
   "force_depot_selected": [
     "01", "02", "03", "04",
