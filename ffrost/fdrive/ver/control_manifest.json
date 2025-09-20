@@ -1,9 +1,9 @@
 {
-  "latest_version": "1.37.6",
+  "latest_version": "1.38.6",
   
   "changelog": [
-    "✅ ütközés esetén azonnali figyelmeztetés a túra mentését követően ⚠⚠⚠⚠",
-	"✅ elfogadott rendszámformátumok megkövetelése mentés során",
+    "❌ Túraanalízis összesítő táblázat - 50 stop alattiak",
+	"",
     ""
   ],
   
