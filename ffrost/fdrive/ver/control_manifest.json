@@ -1,8 +1,9 @@
 {
-  "latest_version": "1.38.6",
+  "latest_version": "1.39.4",
   
   "changelog": [
-    "❌ Túraanalízis összesítő táblázat - 50 stop alattiak",
+    "✅ Szerződések - win32com.gen_py hiba megoldva(?)",
+	"❌ Túraanalízis összesítő táblázat - 50 stop alattiak",
 	"",
     ""
   ],
