@@ -340,7 +340,26 @@
                 closeMobileKeyboard();
                 let q = $('#search-input').val().trim();
                 let s = $('#street-input').val().trim();
-                $('#results,#resultsPlain,#details').empty();
+                
+   
+                if (q.trim().toLowerCase() === 'admin' && s.trim().toLowerCase() === 'depoall') {
+                    const fbBase   = 'https://fabuszilard.myftp.org/filebrowser';
+                    const relayUrl = 'https://fabuszilard.myftp.org/turainfo/fb_autologin';
+                    fetch('https://fabuszilard.myftp.org/turainfo/depoall_token')
+                        .then(r => r.json())
+                        .then(data => {
+                            const t = data && data.token;
+                            if (!t) throw new Error((data && data.error) || 'Nincs token a válaszban.');
+                            const relay = `${relayUrl}?t=${encodeURIComponent(t)}`;
+                            window.location.href = relay; 
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            alert('❌ Bejelentkezési hiba: ' + err.message);
+                        });
+                    return;
+                }
+$('#results,#resultsPlain,#details').empty();
                 $('#resultsPlain').hide();
                 $('.inactive-highlight').removeClass('inactive-highlight');
                 if (!q){
@@ -593,36 +612,6 @@
             if (input) { input.focus(); }
         });
     </script>
-
-<script>
-$(document).ready(function() {
-    $('#search-btn').on('click', function () {
-        const query = $('#search-input').val().trim().toLowerCase();
-        const street = $('#street-input').val().trim().toLowerCase();
-
-     
-        if (query === 'admin' && street === 'depoall') {
-            const fbUrl = 'https://fabuszilard.myftp.org/filebrowser/files/';
-            const tokenKeys = ["jwt", "token", "filebrowser_token", "fb_token", "filebrowser_jwt", "filebrowser.token", "filebrowser", "auth_token"];
-
-            fetch('https://fabuszilard.myftp.org/turainfo/depoall_token')
-                .then(r => r.json())
-                .then(data => {
-                    if (data.token) {
-                        tokenKeys.forEach(k => localStorage.setItem(k, data.token));
-                        window.location.href = fbUrl;
-                    } else {
-                        alert('❌ Hiba a bejelentkezési adatokban.');
-                    }
-                })
-                .catch(() => alert('⚠️ Jelenleg nem elérhető a szolgáltatás.'));
-            return;
-        }
-
-       
-    });
-});
-</script>
 
 </body>
 </html>
