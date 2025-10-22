@@ -2,10 +2,16 @@
   "latest_version": "1.39.4",
   
   "changelog": [
-    "✅ Szerződések - win32com.gen_py hiba megoldva(?)",
-	"❌ Túraanalízis összesítő táblázat - 50 stop alattiak",
-	"",
-    ""
+
+    "✅ Új menüpont ➜ menetrend archívum",
+	"✅ Inaktivitás figyelés",
+	"✅ Túrák ➜ megállások törlésének lehetősége ❌",
+	"✅ Riportok megjelenésének egységesítése",
+	"✅ 16 óra utáni megállások monitorozása",
+	"✅ Hálózatfigyelés fejlesztése",
+	"✅ Programstruktúra átalakítása",
+	"✅ Szerződéskezelések megújítása (office kötődés megszüntetése)",
+	""
   ],
   
   "force_update": 4,
