@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="hu">
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <title>F_Drive Súgó</title>
+      <link rel="icon" href="/ffrost/fdrive/images/icon.png" type="image/png" />
+      <style>
+         :root{
+         --ink:#182433;
+         --muted:#5b6b7e;
+         --brand:#e94f3b;      
+         --blue:#0888c8;       
+         --surface: rgba(255,255,255,.60);
+         --overlay: rgba(255,255,255,.60);
+         --radius:24px;
+         --shadow:0 10px 30px rgba(0,0,0,.15);
+         }
+         html, body{
+         margin:0;
+         padding:0;
+         color:var(--ink);
+         font: 400 16px/1.65 system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"Noto Sans","Apple Color Emoji","Segoe UI Emoji";
+         background:url('../ffrost/fdrive/images/background.jpg') no-repeat center center fixed;
+         background-size:cover;
+         min-height:100svh;
+         overflow-y:auto;
+         }
+         .overlay{
+         position:fixed;
+         inset:0;
+         background:var(--overlay);
+         backdrop-filter: blur(2px);
+         -webkit-backdrop-filter: blur(2px);
+         z-index:0;
+         }
+         .shell{
+         position:relative;
+         z-index:1;
+         min-height:100svh;
+         display:grid;
+         place-content:start center;
+         padding: clamp(20px, 3vw, 40px);
+         }
+         .card{
+         width:min(1100px, 94vw);
+         background:var(--surface);
+         border-radius:var(--radius);
+         box-shadow:var(--shadow);
+         padding: clamp(24px, 4vw, 48px);
+         animation: floatIn .6s ease-out both;
+         isolation:isolate;
+         }
+         .card::before{
+         content:"";
+         position:absolute;
+         inset:-2px;
+         border-radius:calc(var(--radius) + 2px);
+         background:
+         radial-gradient(1200px 300px at 50% -40%, rgba(233,79,59,.18), transparent 55%),
+         radial-gradient(1200px 300px at 50% 140%, rgba(0,153,255,.12), transparent 55%);
+         filter: blur(12px);
+         z-index:-1;
+         }
+         @keyframes floatIn{ from{ transform: translateY(16px); opacity:0; } to{ transform: translateY(0); opacity:1; } }
+         .logo{
+         width:min(420px, 80%);
+         height:auto;
+         display:block;
+         margin:0 auto 14px;
+         filter: drop-shadow(0 3px 12px rgba(0,0,0,.15));
+         }
+         .logo-bottom{ margin-top: 26px; }
+         h1{
+         margin:0 0 6px;
+         text-align:center;
+         font-weight:700;
+         letter-spacing:.2px;
+         font-size: clamp(22px, 2.6vw + 8px, 34px);
+         }
+         .subtitle{
+         text-align:center;
+         margin:0 0 28px;
+         color:var(--muted);
+         font-size: clamp(14px, 1.1vw + 10px, 18px);
+         }
+         .prose{
+         max-width: 88ch;
+         margin-inline:auto;
+         }
+         .prose h2{
+         margin: 34px 0 10px;
+         font-size: clamp(20px, 1.6vw + 10px, 26px);
+         font-weight: 800;
+         letter-spacing:.2px;
+         }
+         .prose h3{
+         margin: 24px 0 8px;
+         font-size: clamp(18px, 1.2vw + 10px, 22px);
+         font-weight: 700;
+         font-style: italic;
+         }
+         .prose p{ margin: 12px 0; }
+         .prose ul, .prose ol{
+         margin: 8px 0 12px 22px;
+         }
+         code{
+         font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+         background: rgba(0,0,0,.06);
+         padding: .1em .35em;
+         border-radius: 6px;
+         }
+         a{ color: var(--blue); text-underline-offset: 2px; }
+         a:hover{ color:#077ab4; }
+         .divider{
+         margin: 22px auto 28px;
+         height:1px;
+         width:min(520px, 70%);
+         background: linear-gradient(90deg, transparent, rgba(0,0,0,.12), transparent);
+         }
+         .badge{
+         display:inline-block;
+         padding:.2em .6em;
+         border-radius:999px;
+         font-weight:700;
+         font-size:.85em;
+         vertical-align:middle;
+         background: rgba(233,79,59,.12);
+         color: var(--brand);
+         }
+         .badge.pulse{
+         animation: pulse 1.2s ease-in-out infinite;
+         will-change: transform;
+         }
+         .badge.prominent{
+         padding:.35em .8em;
+         font-size:.95em;
+         text-transform:uppercase;
+         letter-spacing:.04em;
+         background: linear-gradient(180deg, rgba(233,79,59,.18), rgba(233,79,59,.08));
+         box-shadow: 0 2px 8px rgba(233,79,59,.25), inset 0 0 0 2px rgba(233,79,59,.35);
+         }
+         .callout{
+         border-left: 5px solid var(--brand);
+         background: rgba(233,79,59,.06);
+         padding: 14px 16px;
+         border-radius: 16px;
+         box-shadow: 0 6px 20px rgba(0,0,0,.08);
+         }
+         .warning{
+         border-left: 4px solid var(--brand);
+         background: rgba(233,79,59,.06);
+         padding: 10px 14px;
+         border-radius: 10px;
+         }
+         @keyframes pulse { 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-1px); } }
+         .new-feature{
+         color: var(--brand);
+         font-weight:700;
+         margin-right:8px;
+         animation: pulse 1.2s ease-in-out infinite;
+         }
+         @media (prefers-reduced-motion: reduce){
+         *:not(.badge.pulse){ animation:none !important; transition:none !important; }
+         }
+         .footertext{
+         margin-top: 26px;
+         text-align:center;
+         font-size:12px;
+         line-height:1.4;
+         color:#333;
+         }
+         .footertext .small{
+         font-size:11px;
+         color:#555;
+         }
+         .skip-link{ position:absolute; left:-9999px; }
+         .skip-link:focus{ left: 50%; transform: translateX(-50%); top: 8px; z-index: 3; padding:8px 12px; background:#fff; border-radius:8px; box-shadow: var(--shadow); }
+      </style>
+   </head>
+   <body>
+      
+      <div class="overlay" aria-hidden="true"></div>
+      <main class="shell" id="content" role="main">
+         <section class="card" aria-labelledby="title">
+            <img src="../ffrost/fdrive/images/fdlogo.png" alt="F_Drive Logó" class="logo" />
+            <h1 id="title">F_Drive – Family Frost túra- és flotta analitikai szoftver</h1>
+            <p class="subtitle">Súgó és részletes ismertető</p>
+            <div class="divider" aria-hidden="true"></div>
+            <div class="prose">
+               <h2>A programról</h2>
+               <p>
+                  Ez a szoftver a Family Frost gépjárműveinek napi, illetve időszaki mozgásának, állásidejének és futásteljesítményének elemzésére szolgál.
+                  Az alkalmazás számos riportot és exportálási lehetőséget kínál, melyek segítségével részletes információk állnak rendelkezésre
+                  a menedzsment részére.
+               </p>
+               <p>
+                  Kihasználva a lehetőségeket jelentősen megkönnyíti a felhasználók (depóvezetők) munkáját, hiszen nemcsak az adatok importálásának a leegyszerűsítése a webbase rendszerből, de a funkciók egy platformon történő elérhetősége is nagy előnyt jelenthet számukra.
+               </p>
+               <p>
+                  A program több szálon kötődik a céges környezethez, ennek hiányában <a href="fdrive/pic/vállalat.jpg" target="_blank"> nem fog működni</a>.
+               </p>
+               <p>
+                  A működés során figyeli a frissítések megjelenését. Amennyiben normál frissítés jelenik meg, akkor elindulásnál figyelmeztet a letöltés lehetőségére, amit egy, csak ilyenkor látható menüben el is lehet végezni. Ennek végrehajtása a felhasználóra van bízva, de célszerű frissíteni, hiszen egyrészt valami oka volt az új verzió kiadásának, másrészt egészen addig figyelmeztet induláskor, amíg a régi verzió van fent.<br>
+                  Esetenként azonnali frissítésre kerülhet sor, ekkor azonban nincs lehetőség használni a már meglévő verziót, a frissítést mindenképpen végre kell hajtani. (Ilyen esetet pl. az adatbázis integrálás során tudok elképzelni.)
+               </p>
+               <h2>Előkészületek</h2>
+               <p>
+                  A jövőben egyetlen, "JSON" kiterjesztésű fájlt tartalmazó tömörített állományt ("zip") kell letölteni a webbase rendszeréből.<br>
+                  Fontos azonban, hogy ez tartalmazza a(z):<br>
+                  - elindulás/megállás<br>
+                  - koordináták<br>
+                  - járművezető adatokat <br>
+                  <a href="fdrive/video/data_from_webbase.mp4" target="_blank">(webbase művelet)</a>	<br>
+                  A webbase-n engedélyezett időtartam maximum 2 hónap lehet. Ettől függetlenül a program lehetővé teszi a nagyobb intervallum elemzését is, kérdés, hogy ez mennyire szükséges. Amennyiben pl. az egy évvel ezelőtti adathoz szeretnénk valamit összehasonlítani, elég csak az akkori és a jelenlegi adatot beolvasni, a köztes adat ilyenkor irreleváns. 
+                  <br>A futásteljesítménnyel kapcsolatos adatok egyezősége miatt időnként (2-4 havonta) célszerű a webbase felületen ún. "Kilométeróra-állás korrekciót" elvégezni, ezáltal egyezni fog a gépjármű és a statisztikák adata.  
+                  <br> <strong><span class="badge">Fontos</span></strong> Amennyiben a gépjárműbe szerelt GPS vevőkészülék <a href="fdrive/pic/routefail.jpg" target="_blank"> fals adatokat rögzít,</a> a statisztikák, útvonalpontok, állásidők, szóval minden adat használhatatlan lesz számunkra az adott gépjárműre vonatkozóan! Az ilyen esetek  lejelentésével ne késlekedjetek: <a href="mailto:support@secretcontrol.hu">support@secretcontrol.hu</a>
+               </p>
+               <h4 style="margin-bottom: 0.2em;">Megjegyzés:</h4>
+               <p style="margin-top: 0;">
+                  A program a mentéseket, riportokat a <code>D:\F_Drive</code>, valamint az abban található alkönyvtárakban tárolja, amelyek szükség esetén automatikusan létrejönnek. Minden elkészült riport ide lesz elmentve.
+               </p>
+               <p>&nbsp;<br>&nbsp;</p>
+               <h2>Belépés</h2>
+               <p>
+                  A jelszókezelő beépítése elengedhetetlen volt a túrák zavartalan kezeléséhez. Miután a depók vagy a felhasználók kiválasztásra kerültek, a felhasználónak egyetlen alkalommal kell megadnia a kapcsolódó jelszót, amelyet a rendszer egészen addig figyelembe vesz, amíg azt manuálisan ki nem törlik.
+               </p>
+               <h2>Menüpontok részletes leírása</h2>
+               <h3>File</h3>
+               <p>
+                  <strong>Megnyit:</strong>  A "zip" ("JSON") adatfájlok kiválasztása és betöltése.
+                  A felugró ablakban kiválasztható egy vagy több "zip", illetve "JSON" fájl, amelyeket a program beolvas, ellenőriz és feldolgoz.
+				  A már korábban betöltött fájlokat kihagyja, így elkerülhető az ismételt feldolgozás. A folyamat során - amennyiben a forrásadat nem tartalmaz "GPS" adatot, nem engedi megnyitni, illetve ha nem tartalmazza a "GÉPKOCSIVEZETŐ" és feltételezhetően nem tartalmazza az "ELINDULÁSOK-MEGÁLLÁSOK" adatait, figyelmeztet, de ebben az esetben továbbengedi a folyamatot. Más kérdés, hogy pl. hiányos megállás adatok mellett mennyire észszerű folytatni a munkát...
+			   </p>
+               <p>
+                  <strong>Mentés:</strong> Biztonsági mentést készít a betöltött adatokból. Érdemes minden nagyobb időszakot átölelő adat beolvasását követően végrehajtani, így nem kell legközelebb a webbase rendszeréből újra letölteni azt. 
+                  A mentett fájl neve a kezdő és végdátumot tartalmazza, és a <code>D:\F_Drive\Backup</code> könyvtárba kerül elmentésre.<br>
+                  Pl. egy teljes hónap adatait beolvasva észszerű egyből menteni azt, így <a href="fdrive/pic/backup.jpg" target="_blank"> jól beazonosítható</a> módon már ott lesz a mentési könyvtárban.
+               </p>
+               <p>
+                  <strong>Kilépés:</strong> A program bezárása.
+               </p>
+               <h3>Szerkesztés</h3>
+               <p>
+                  <strong>Adatok módosítása:</strong> Az adatsorban megjelenő rekordok közül törlésre kerülnek azok a bejegyzések, amelyek futással kapcsolatosak, illetve melyek 30 másodpercnél rövidebb megállásokat tartalmaznak. Emellett a képernyő alsó felén egy térkép jelenik meg, mely a rekordok vizuális megjelenítését szolgálja. <br>
+                  Egyúttal aktiválódik a törlés funkció, melyet a DEL billentyű vagy a jobb egérgombos művelet használatával lehet alkalmazni, így biztosítva a <a href="fdrive/pic/edit.png" target="_blank"> rekordok törlését illetve - szintén a jobb egérgombbal -  az elméleti túrakezdés felülírását.</a> A térképnézet természetesen  <a href="fdrive/pic/satelit.png" target="_blank"> műholdas</a> nézet opcióval is rendelkezik.<br>
+                  Fontos megemlíteni, hogy az eredeti adatok nem változnak, azaz pl., törlés, vagy elméleti túrakezdés felülírása esetén a zip fájl ismételt beolvasását követően a módosítások nélküli változat tér vissza.  
+               </p>
+               <h3>Túraanalízis – <span class="badge">60 STOP</span></h3>
+               <p>
+                  <strong>Túraanalízis gépkocsinként:</strong>  Egy gépjármű időszaki, vagy adott <a href="fdrive/pic/analízis.jpg" target="_blank"> napi</a> analízisét hajtja végre a megszokott formátumban.
+               </p>
+               <p>
+                  <strong>Túraanalízis összes gépkocsira:</strong> Az előzővel egyező formátumban, de az adatbázisban szereplő ÖSSZES gépjárműre elkészíti az időszaki, vagy adott napi analízist.
+               </p>
+               <p>
+                  <strong>Túraanalízis összesítő táblázat:</strong> A beolvasott összes gépjármű minden napjára vonatkozóan elkészíti a túraanalízis <a href="fdrive/pic/analízis_szum.jpg" target="_blank"> összesített</a> nézetét. Ez a gyors kontroll lehetősége miatt került fejlesztésre.
+               </p>
+               <p>
+                  <strong>Túraanalízis összesítő táblázat - 50 stop alattiak:</strong> Az előző menüvel egyező, azonban az elkészült riportban csak azok a napok szerepelnek, melyeken a minimum 50 stop feltétel nem teljesült.
+               </p>
+               <p>
+                  <strong>Túraanalízis összesítő táblázat - 60 stop alattiak:</strong> Az előző menüvel egyező, azonban az elkészült riportban csak azok a napok szerepelnek, melyeken a minimum 60 stop feltétel nem teljesült.
+               </p>
+            
+               <div class="callout">
+                  <span class="badge pulse prominent">Új funkció</span><br>
+                  <strong>Túraanalízis összesítő táblázat - 16 óra után:</strong> Késő délutáni megállások (16:00+).
+                  Az <a href="fdrive/pic/pm4.jpg" target="_blank"> utolsó táblázat</a> az eladók időszaki átlagait foglalja össze. Az összesített átlag alatti értékek piros kiemelést kapnak mindenhol a kimutatásban.
+               </div>
+               <p></p>
+               <p>
+                  <strong>Túraadatok összehasonlítása - gépjármű statisztika:</strong> Egy autó egy napjának összehasonlítása az adatbázisban szereplő ugyanazon napok adataival. Elsősorban a gépjármű futása alapján történik az elemzés, úgymint a megtett távolság, állásidő, illetve ugyanezen adatok, de már az elméleti túrakezdéstől számítva, mindezek az átlagértékek feltüntetésével. Az attól 15% nagyobb eltérés feltételes formázással <a href="fdrive/pic/több_vasárnap.jpg" target="_blank"> jelenik meg.</a> 
+               </p>
+               <p>
+                  <strong>Túraanalízis - részletes:</strong>  Egy autó - egy napjának elemzése. Tulajdonképpen az <a href="fdrive/pic/túraanalízis.jpg" target="_blank"> <strong>igazi túraellenőrzés</strong></a>. A túrák során a településenként mért állásidők, megtett km-ek és stop-ok száma jelenik meg. Az adatok csoportosítása és feltételes formázása segíti a részletes elemzést. (Piros szám, ha több a rövid, mint az optimális (02:00-10:00) állás. Az adatok az elméleti kezdéstől számítva jelennek meg, azonban fontos, hogy a kimutatások közül <strong>itt egyedül(!) ez az érték módosítható</strong> a fent már ismertetett módon (szerkesztés menü). Fontos továbbá megemlíteni, hogy az utolsó település csak abban az esetben jelenik meg a listában, ha az korábban, mint 19:00 lett elkezdve. 
+               </p>
+               <p>
+                  <strong>Több azonos túra (nap) analízise:</strong> A funkció egy autó egy napjának több, az adatbázisban szereplő azonos "hétnapon" történt túra adatait dolgozza fel települések szerinti elosztásban. Több táblázatban <a href="fdrive/pic/több_vasárnap_r.jpg" target="_blank"> jeleníti meg.</a> az információkat (max. 4 dátumos csoportokban), melyekben az átlagos értékek is kiszámolásra kerülnek és az ettől 15%-tól nagyobb eltérésű értékek piros színnel jelöltek. Lényeges, hogy itt - az előző menü funkciójától eltérően - amennyiben az autó visszatér egy-egy településre, akkor azok az adatok összeadódnak, míg az előzőnél teljesen megmarad a kronológiai sorrend. A településlista és ezáltal az adatsor dinamikusan nőhet, azaz ha egy település későbbi alkalommal jelenik meg, a listában már látható lesz, az előzőből adódóan viszont alul.
+               </p>
+               <h3>Túrák</h3>
+               <p>
+                  <strong>Először is létre kell hozni az „optimális túrákat”.</strong> Magyarázat helyett egy <a href="fdrive/video/túra_mentés.mp4" target="_blank"> bemutató</a> a folyamatról. <br>
+                  Az alábbi sorrend betartása lényeges:<br>
+                  1. Megfelelő túra kiválasztása<br>
+                  2. Szerkesztés / Adatok módosítása<br>
+                  3. Fölösleges adatsorok, esti depó rekordok törlése (körültekintően, térképen többször ellenőrizve, de alaposan kipucolva!)<br>
+                  4. Szükség esetén az elméleti túrakezdés felülbírálása (Ez az utolsó, különben marker törlés esetén visszaáll az eredeti értékre!)<br>
+                  A folyamat végén <strong>Túrák / Túra mentése , KML + PDF export lehetőség</strong>. Minden érték módosítható, beleértve a rendszámot (átírható), nap, export időértékek, stb. Ekkor az elkészült túra bekerül egy adatbázisba, egyúttal elkészül a túra <a href="fdrive/pic/túraleírás.jpg" target="_blank"> leírása</a> és egy egyből a navigációs készülékre másolható kml fájl, melyeket a későbbiekben át tudunk adni az esetleges új partnerek részére.
+               </p>
+               <p>
+                  <strong>Túra megnyitása:</strong> A <a href="fdrive/pic/open_túra.png" target="_blank"> felbukkanó</a> ablakban ki tudjuk választani a már az adatbázisban lévő túrát, majd a megnyitást követően lehetőségünk van áttekinteni. (Itt a megállásokon nincs lehetőség módosítani).<br>
+                  
+                  Többször előfordul, hogy az eredeti (webbase) adatbázisban hibás a település neve. 
+                  Ilyenkor mind az 
+                  <a href="https://fdriveanalytics.com/ffrost/turainfo/" target="_blank" rel="noopener noreferrer">információs weboldalon</a>, 
+                  mind a túraleírásban a téves név jelenik meg. Ez a mező dupla kattintással szerkeszthető lett, 
+                  de ügyeljetek rá, hogy mindig az alábbi formátumot használjátok, különben a közterület belecsúszhat a település nevébe, 
+                  ami még nagyobb bonyodalmakhoz vezethet: 
+                  <code> irányítószám, település, közterület</code><br>
+                  Az alábbi példában szemléltetem a funkció működését:
+                  <a href="fdrive/video/megállás_szerkesztés.mp4" target="_blank">Település módosítása</a><br>
+               </p>
+               <div class="callout">
+                  <span class="badge pulse prominent">Új funkció</span><br>
+                  Elérhetővé vált a tévedésből bennmaradt adatsorok törlése ebben a fázisban is, mely a megszokott DEL billentyű,
+                  vagy jobb egérgombos művelet segítségével érhető el.
+               </div>
+               <p></p>
+               <p>
+                  <strong>Túra mentése, KML + PDF export lehetőség:</strong> Az adatbázisból betöltött túra alapbeállításai (gépkocsi száma, rendszám és a nap) módosítható. Amennyiben az eredeti túraleírás és KML fájl már nem lenne meg, az itt pótolható. A mentés során a megváltoztatott paraméterekkel kerül felülírásra az eredeti túra.
+               </p>
+               <h3><span class="badge">Fenti funkciók fejlesztésének köszönhetően:</span></h3>
+               <p>
+                  <strong>
+                  - leegyszerűsödött a forrásadatok kezelése<br>
+                  - egy platformon belül megoldott az útvonal megjelenítése, optimalizálása, kezelése valamint mentése<br>
+                  - nem kell többé a txt fájlokkal bíbelődni, a program minden mentés során automatikusan beküldi a frissített túraadatokat<br>
+                  - alapvető változtatások könnyen és jól ellenőrizhetően elvégezhetők <br>
+                  </strong>
+               </p>
+               <p>&nbsp;<br>&nbsp;</p>
+               <h3>Útvonal</h3>
+               <p>
+                  <strong>Optimális útvonal megjelenítése:</strong> A kijelölt szegmensek koordinátái alapján összeállít egy URL-t az útvonaltervezéshez (Google Térkép), majd az alapértelmezett böngészőben megnyitja azt, így vizuálisan is ellenőrizhető az optimális útvonal. Lényeges, hogy egyszerre maximum 10 adatpont (2 kezdő, illetve záró és 8 köztes) megjelenítésére alkalmas, de arra mindenesetre jó lehet, ha demonstrálni kell pl. egy-egy optimálisabb útvonalat a ténylegestől.<br>
+                  A képernyőn megjelenő adatsor bármely elemére kattintva automatikusan megnyílik a Google Térkép, amely az adott pontot jeleníti meg. Így, ha egy helyzet kérdéses, nem szükséges külön elindítani az integrált térkép funkciót.
+               </p>
+               <h3>Menetlevél</h3>
+               <p class="warning">
+                  <strong>FONTOS!</strong> A hatályos jogszabály alapján (14/2021. (VIII. 31.) BM utasítás) ezen funkciók <strong>NEM</strong> mentesítenek a papír alapú menetlevelek vezetésétől!
+               </p>
+               <p>
+                  <strong>Menetlevél gépkocsinként:</strong>  Részletes riportot készít az aktuálisan kiválasztott jármű <a href="fdrive/pic/menetlevél.jpg" target="_blank"> futásteljesítményéről</a>, mely tartalmazza a rendszámot, gépkocsivezető nevét, dátumot, menetlevél sorszámot, indulási és érkezési időpontokat, valamint csoportosítja az azonos településen történt megállásokat, és megjeleníti az összesítő adatokat<sup>*</sup>
+                  <br><small><em><sup>*</sup>A táblázat kizárólag azokat a településeket tartalmazza, ahol az állásidő meghaladta a 10 percet. A forrásadatok esetenkénti pontatlansága miatt előfordulhat, hogy bizonyos települések vagy időpontok nem szerepelnek a listában.</em></small>
+                  <br><strong>Menetlevél minden gépjárműre:</strong>  Az előző funkció kiterjesztése az adatbázisban szereplő összes gépjárműre vonatkozóan. A riport kiegészül a flotta záró km (ciklus) óra állását tartalmazó táblázattal is. <br>
+                  <strong>Menetlevél összesítő:</strong> <a href="fdrive/pic/menetlevél_össz.jpg" target="_blank">Összesített kimutatást</a> generál, amely tartalmazza az időszakot, rendszámot, gépkocsivezetőt, megtett távolságot, menetidőt, állásidőt, valamint a gyújtáson mért állásidőt, napi átlagokkal.<br>
+                  <strong>Menetlevél összesítő minden gépjárműre:</strong> Előzővel megegyező tartalom megjelenítése az adatbázisban szereplő összes gépjárműre, valamint a lista alján itt is szerepel az összes jármű utolsó km óra állása.
+               </p>
+               <h3>FamilyFrost_NET</h3>
+               <p>
+                  <strong>Túrakm export:</strong> Túrák távolságadatait generálja a flottaprogram számára. A fájlok a <code>C:\F_Drive\Túrakm_maison</code> könyvtárba kerülnek, ezért a flottaprogramban <a href="fdrive/pic/flotta_import.jpg" target="_blank">ehhez</a> a könyvtárhoz kell beállítani az importálási forráshelyet. 
+               </p>
+               <div class="callout" role="note" aria-label="Kiemelt információ">
+                  <!-- <span class="badge pulse prominent" aria-hidden="true">Figyelem</span><br> -->
+                  💡 Az egész folyamatot bemutató videó 
+                  <a href="fdrive/video/webbase_Fd_maison.mp4" target="_blank" rel="noopener noreferrer"><strong>ITT</strong></a> látható.
+               </div>
+               <p>&nbsp;</p>
+               <h3>Szerződések:</h3>
+               <p>
+                  <strong>Adatok törlése:</strong> A szerződő fél személyes adatait a rendszer átmenetileg egy helyi adatbázisban rögzíti. Ez a menüpont lehetőséget ad az így tárolt adatok törlésére. Fontos, hogy a műveletet minden szerződéskötés után el kell végezni, elkerülve ezzel mások személyes adatainak véletlenszerű tárolását!
+               </p>
+               <p>
+                  <strong>Egyéni vállalkozás:</strong> Címben szereplő csomagok külön megállapodás és kimondottan gépkocsi megállapodás nyomtatási lehetőséggel. 
+               </p>
+               <p>
+                  <strong>Társas vállalkozás:</strong> Címben szereplő csomagok külön megállapodás és kimondottan gépkocsi megállapodás nyomtatási lehetőséggel. 
+               </p>
+               <p>
+                  <strong>GDPR nyilatkozatok nyomtatása:</strong> Címben szereplő funkció
+               </p>
+               <p>
+                  <strong>QR kód olvasó átvételi elismervény nyomtatása:</strong> Címben szereplő funkció
+               </p>
+               <h3>Súgó</h3>
+               <p>
+                  <strong>Súgó:</strong> Ez az. 
+               </p>
+               <p>
+                  <strong>Névjegy F_Drive:</strong> A program neve, verziószáma, készítő adatai, jogi nyilatkozat.
+               </p>
+               <p>&nbsp;<br>&nbsp;</p>
+               <h3>Fejlesztői megjegyzés:</h3>
+               <p>
+                  A program Python nyelven íródott, és a fejlesztés során alkalmaztam néhány ingyenesen, szabadon hozzáférhető függvényt és megoldást is, melyek bizonyos esetekben inspirációt nyújtottak a megvalósításban.
+               </p>
+               <div class="logo-bottom">
+                  <img src="../ffrost/fdrive/images/fdlogo.png" alt="F_Drive Logó" class="logo" />
+               </div>
+               <div class="footertext">
+                  <div><strong>F_Drive - Family Frost túra- és flotta analitikai szoftver</strong></div>
+                  <div class="small">© 2025 <a href="https://fdriveanalytics.com" target="_blank" rel="noopener noreferrer">fdriveanalytics.com</a> – Készítette: Fabu Szilárd (Minden jog fenntartva)</div>
+               </div>
+            </div>
+         </section>
+      </main>
+   </body>
+</html>

@@ -1,0 +1,12 @@
+4:
+1.36.6-ra történő frissítés kényszerítése, településnevek szerkesztése, egyéb átalakítások 
+
+3:
+1.28.5-re történő frissítés kényszerítése, melyben lehetőség van a csak a túra menü tiltására
+
+2:
+1.28.1-re történő frissítés kényszerítése, melyben megváltoztak az icontent API címei
+
+1:
+1.26.7-re történő frissítés kényszerítése, melyben ideiglenes tiltásra került a települések szerkesztése
+

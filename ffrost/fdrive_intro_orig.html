@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="hu">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>F_Drive_intro</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.2/dist/plyr.css" />
+    <link rel="icon" href="/ffrost/fdrive/images/icon.png" type="image/png" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
+    <style>
+      body {
+        background: black;
+        margin: 0;
+        padding: 0;
+      }
+      
+      #intro-header {
+        text-align: center;
+      }
+      
+      #logo {
+        display: none;
+      }
+      
+      .logo-center {
+        position: fixed;
+        top: 5%;
+        left: 5%;
+        transform: translate(-50%, -50%);
+        z-index: 10000;
+        display: block;
+        margin: 0;
+        max-width: 100px;
+        height: auto;
+      }
+      
+      #ticker {
+        position: fixed;
+        top: 20px;
+        left: 100vw;
+        z-index: 9999;
+        background: rgba(255, 0, 0, 0.8);
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        white-space: nowrap;
+        color: #fff;
+        font-weight: bold;
+        display: none; /* alapból rejtve */
+      }
+      
+      #plyr-container {
+        position: fixed;
+        top: 40%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1; /* Alacsonyabb, mint a ticker és logo */
+        max-width: 90%; /* Opció: reszponzivitás miatt */
+      }
+    </style>
+  </head>
+  <body class="text-white flex flex-col items-center min-h-screen">
+    <h1 id="intro-header" class="text-2xl font-bold mt-4 mb-4"></h1>
+    <img id="logo" src="../ffrost/fdrive/images/fdlogo.png" alt="F_Drive Logo" />
+    <div id="plyr-container" class="relative w-full max-w-4xl mx-auto mt-12">
+      <video id="player" class="w-full h-auto rounded-xl shadow" playsinline controls>
+        <source src="https://fabuszilard.myftp.org/fdriveintro" type="video/mp4">
+        A böngésződ nem támogatja a videólejátszást.
+      </video>
+    </div>
+    <div
+      id="fullscreenTicker"
+      style="position: fixed; bottom: 10px; width: 100%; text-align: center; color: white; background: rgba(0,0,0,0.5); padding: 0.5rem; display: none;"
+    >
+      Nyomj F11-et a teljes képernyő módhoz!
+    </div>
+    <div id="ticker">
+      Hamarosan...
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/plyr@3.7.2/dist/plyr.polyfilled.js"></script>
+    <script>
+      const container = document.getElementById('plyr-container');
+      const player = new Plyr('#player', {
+        controls: ['play', 'mute', 'volume'],
+        fullscreen: {
+          enabled: true,
+          fallback: true,
+          iosNative: false,
+          container: "#plyr-container"
+        }
+      });
+      
+      const images = [
+        "../ffrost/fdrive/images/background.jpg",
+        "../ffrost/fdrive/images/stars.jpg",
+        "../ffrost/fdrive/images/brownold.jpg",
+        "../ffrost/fdrive/images/brown.jpg",
+        "../ffrost/fdrive/images/fbackground.jpg"
+      ];
+      
+      images.forEach(src => {
+        const img = new Image();
+        img.src = src;
+      });
+      
+      const start1 = 611.4, end1 = 616.5, start2 = 888, end2 = 893;
+      const start3 = 11, end3 = 329;
+      const start4 = 334, end4 = 498;
+      const start5 = 498, end5 = 573;
+      const start6 = 619, end6 = 888;
+      
+      player.on('timeupdate', () => {
+        const t = player.currentTime;
+      
+        
+        if ((t >= start1 && t <= end1) || (t >= start2 && t <= end2)) {
+          document.body.style.background = "url('../ffrost/fdrive/images/background.jpg') no-repeat center center";
+          document.body.style.backgroundSize = "cover";
+        }
+        
+        else if (t >= start3 && t <= end3) {
+          document.body.style.background = "url('../ffrost/fdrive/images/stars.jpg') no-repeat center center";
+          document.body.style.backgroundSize = "cover";
+        }
+        
+        else if (t >= start4 && t <= end4) {
+          document.body.style.background = "url('../ffrost/fdrive/images/brownold.jpg') no-repeat center center";
+          document.body.style.backgroundSize = "cover";
+        }
+        
+        else if (t >= start5 && t <= end5) {
+          document.body.style.background = "url('../ffrost/fdrive/images/brown.jpg') no-repeat center center";
+          document.body.style.backgroundSize = "cover";
+        }
+        
+        else if (t >= start6 && t <= end6) {
+          document.body.style.background = "url('../ffrost/fdrive/images/fbackground.jpg') no-repeat center center";
+          document.body.style.backgroundSize = "cover";
+        }
+        
+        else {
+          document.body.style.background = "black";
+        }
+      });
+      
+      const SWITCH_TIME = 660;
+      player.on('timeupdate', () => {
+        if (player.currentTime >= SWITCH_TIME) {
+          document.getElementById('intro-header').style.visibility = 'hidden';
+          const logoEl = document.getElementById('logo');
+          logoEl.style.display = 'block';
+          logoEl.classList.add('logo-center');
+        } else {
+          document.getElementById('intro-header').style.visibility = 'visible';
+          const logoEl = document.getElementById('logo');
+          logoEl.style.display = 'none';
+          logoEl.classList.remove('logo-center');
+        }
+      });
+      
+      const TICKER_START_TIME = 640;
+      let tickerTween = null;
+      let tickerActive = false;
+      const tickerEl = document.getElementById('ticker');
+      
+      function startTicker() {
+        tickerEl.style.display = 'block';
+        gsap.set(tickerEl, { left: window.innerWidth + "px" });
+        const tickerWidth = tickerEl.offsetWidth;
+        tickerTween = gsap.to(tickerEl, {
+          duration: 20,
+          left: -tickerWidth + "px",
+          ease: "none"
+        });
+      }
+      
+      function stopTicker() {
+        if (tickerTween) {
+          tickerTween.kill();
+          tickerTween = null;
+        }
+        tickerEl.style.display = 'none';
+      }
+      
+      player.on('timeupdate', () => {
+        const t = player.currentTime;
+        if (t >= TICKER_START_TIME && !tickerActive) {
+          tickerActive = true;
+          startTicker();
+          setInterval(() => {
+            if (tickerActive) startTicker();
+          }, 120000);
+        } else if (t < TICKER_START_TIME && tickerActive) {
+          tickerActive = false;
+          stopTicker();
+        }
+      });
+      
+      
+      let lastTime = 0;
+      player.on('timeupdate', () => {
+        lastTime = player.currentTime;
+      });
+      player.on('seeking', () => {
+        if (Math.abs(player.currentTime - lastTime) > 1) {
+          player.currentTime = lastTime;
+        }
+      });
+      
+      
+      document.addEventListener('fullscreenchange', () => {
+        if (document.fullscreenElement) {
+          document.fullscreenElement.appendChild(tickerEl);
+        } else {
+          container.appendChild(tickerEl);
+        }
+      });
+    </script>
+  </body>
+</html>

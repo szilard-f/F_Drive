@@ -1,0 +1,42 @@
+# OS / IDE szemét
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Python cache és virtualenv
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+env/
+venv/
+
+# Logok, ideiglenes fájlok
+*.log
+*.tmp
+
+# Binárisok és telepítők
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Nagy média fájlok
+*.mkv
+*.avi
+*.mov
+
+# Model / pickle fájlok
+*.pkl
+
+# Build / dist kimenet
+dist/
+build/
+*.egg-info/
+
+# Node / frontend cache
+node_modules/
+npm-debug.log
+yarn-error.log
