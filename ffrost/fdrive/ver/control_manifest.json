@@ -14,7 +14,7 @@
   ],
   "force_update": 4,
   "force_stop": 0,
-  "disable_tours": 0,
+  "disable_tours": 1,
   "enable_deleted": [],
   "force_depot_selected": [
     "01", "02", "03", "04",
