@@ -1,23 +1,19 @@
 {
   "latest_version": "1.46.2",
   "changelog": [
-    "✅ Elméleti túrakezdés számításának módosítása",
-    "✅ Új menüpont ➜ értékesítésen kívüli futásadatok",
-    "✅ Új menüpont ➜ menetrend archívum",
-    "✅ Inaktivitás figyelés",
-    "✅ Túrák ➜ megállások törlésének lehetősége ❌",
-    "✅ Riportok megjelenésének egységesítése",
-    "✅ 16 óra utáni megállások monitorozása",
-    "✅ Hálózatfigyelés fejlesztése",
-    "✅ Programstruktúra átalakítása",
-    "✅ Szerződéskezelések megújítása (office kötődés megszüntetése)"
+    "✅ Adatbázis kezelések átalakítása",
   ],
   "force_update": 5,
   "force_stop": 0,
   "disable_tours": 0,
   "enable_deleted": [],
   "force_depot_selected": [
-    "10"
+    "01", "02", "03", "04",
+    "06", "07", "08", "09",
+    "11", "12", "13", "10",
+    "14", "15", "16", "17",
+    "18", "19", "20", "21",
+    "22", "23", "24"
   ],
   "locale_db_deleted": []
 }
