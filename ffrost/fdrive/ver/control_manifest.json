@@ -1,10 +1,11 @@
 {
   "latest_version": "1.46.4",
   "changelog": [
+    "❌ Időzár az API terhelések csökkentése miatt",
     "✅ Hálózati beállítás módosítás",
     "✅ Adatbázis kezelések átalakítása"
   ],
-  "force_update": 5,
+  "force_update": 6,
   "force_stop": 0,
   "disable_tours": 0,
   "enable_deleted": [],

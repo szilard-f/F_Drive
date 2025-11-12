@@ -1,3 +1,5 @@
+6:
+1.46.4-re történő frissítés kényszerítése, API terhelések csökkentése a fölösleges restartok miatt
 5:
 1.46.2-re történő frissítés kényszerítése, adatbázis frissítése az API-ból, W meghajtó kötődés megszüntetése
 
