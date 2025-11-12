@@ -8,7 +8,7 @@
   "disable_tours": 0,
   "enable_deleted": [],
   "force_depot_selected": [
-    "10"
+    "10", "21"
   ],
   "locale_db_deleted": []
 }
