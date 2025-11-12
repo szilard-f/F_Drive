@@ -1,6 +1,7 @@
 {
-  "latest_version": "1.46.2",
+  "latest_version": "1.46.4",
   "changelog": [
+    "✅ Hálózati beállítás módosítás",
     "✅ Adatbázis kezelések átalakítása"
   ],
   "force_update": 5,
