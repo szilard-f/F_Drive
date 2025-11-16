@@ -1,9 +1,8 @@
 {
-  "latest_version": "1.46.4",
+  "latest_version": "1.46.6",
   "changelog": [
-    "❌ Időzár az API terhelések csökkentése miatt",
-    "✅ Hálózati beállítás módosítás",
-    "✅ Adatbázis kezelések átalakítása"
+    "✅ Jövőbeni frissítések automatizálása",
+    "✅ Adatbázis visszaállítás metódus változtatás"
   ],
   "force_update": 6,
   "force_stop": 0,
