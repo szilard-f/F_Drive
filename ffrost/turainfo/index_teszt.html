@@ -648,7 +648,8 @@
                  const templateText =
                      'Kedves Vásárlónk!\n\n' +
                      `Tájékoztatjuk, hogy rendelése várhatóan ${formattedDate}, ${dayWithSuffix} ${startLabel} - ${endLabel} óra között kerül kiszállításra.\n\n` +
-                     'Értékesítőnk közvetlen elérhetősége:';
+                     'Értékesítőnk közvetlen elérhetősége:\n\n'
+					 '';
          
                  navigator.clipboard.writeText(templateText)
                      .then(() => $('#templateCopiedModal').modal('show'))
