@@ -1000,50 +1000,84 @@
                     const depoName = row.find("td").eq(0).text().trim();
 
                     const DEPO_DATA = {
-                        Székesfehérvár: { num: "01", phone: "+36303009111" },
-                        Veszprém: { num: "02", phone: "+36303009112" },
-                        Sóskút: { num: "03", phone: "+36303009113" },
-                        Tatabánya: { num: "04", phone: "+36303009114" },
-                        Gödöllő: { num: "06", phone: "+36303009116" },
-                        Soroksár: { num: "07", phone: "+36303009117" },
-                        Rákosmező: { num: "08", phone: "+36303009118" },
-                        Csorna: { num: "09", phone: "+36303009119" },
-                        Nagybajom: { num: "10", phone: "+36303009120" },
-                        Kecskemét: { num: "11", phone: "+36303009121" },
-                        Vép: { num: "12", phone: "+36303009122" },
-                        Pécs: { num: "13", phone: "+36303009123" },
-                        Szeged: { num: "14", phone: "+36303009124" },
-                        Szolnok: { num: "15", phone: "+36303009125" },
-                        Eger: { num: "16", phone: "+36303009126" },
-                        Debrecen: { num: "17", phone: "+36303009127" },
-                        Nyíregyháza: { num: "18", phone: "+36303009128" },
-                        Békés: { num: "19", phone: "+36303009129" },
-                        Felsőzsolca: { num: "20", phone: "+36303009130" },
+                        Székesfehérvár: {
+                            num: "01",
+                            phone: "+36303009111",
+                            address: "8000 Székesfehérvár, Takarodó út 4.",
+                        },
+                        Veszprém: { num: "02", phone: "+36303009112", address: "8200 Veszprém, Házgyári út 20." },
+                        Sóskút: {
+                            num: "03",
+                            phone: "+36303009113",
+                            address: "2038 Sóskút, Ipari Park, Gábor Dénes u.",
+                        },
+                        Tatabánya: {
+                            num: "04",
+                            phone: "+36303009114",
+                            address: "2800 Tatabánya, Táncsics Mihály u. 1/F.",
+                        },
+                        Gödöllő: { num: "06", phone: "+36303009116", address: "2100 Gödöllő, Tessedik Sámuel u. 4." },
+                        Soroksár: {
+                            num: "07",
+                            phone: "+36303009117",
+                            address: "1239 Budapest XXIII., Haraszti út 46.",
+                        },
+                        Rákosmező: { num: "08", phone: "+36303009118", address: "1171 Budapest XVII., Pesti út 237." },
+                        Csorna: { num: "09", phone: "+36303009119", address: "9300 Csorna, Köztársaság út 26." },
+                        Nagybajom: { num: "10", phone: "+36303009120", address: "7561 Nagybajom, Kossuth u. 37." },
+                        Kecskemét: { num: "11", phone: "+36303009121", address: "6000 Kecskemét, Búzakalász u. 20." },
+                        Vép: { num: "12", phone: "+36303009122", address: "9751 Vép, Szent Imre herceg u. 36." },
+                        Pécs: { num: "13", phone: "+36303009123", address: "7673 Cserkút, Batvölgyi út 2." },
+                        Szeged: { num: "14", phone: "+36303009124", address: "6728 Szeged, Kereskedőköz 1/B." },
+                        Szolnok: { num: "15", phone: "+36303009125", address: "5000 Szolnok, Thököly út 107." },
+                        Eger: { num: "16", phone: "+36303009126", address: "3300 Eger, Vincellériskola u. 7." },
+                        Debrecen: {
+                            num: "17",
+                            phone: "+36303009127",
+                            address: "4030 Debrecen, Szávay Gyula utca 108.",
+                        },
+                        Nyíregyháza: { num: "18", phone: "+36303009128", address: "4400 Nyíregyháza, Oros" },
+                        Békés: { num: "19", phone: "+36303009129", address: "5630 Békés, Szent Pál sor 1." },
+                        Felsőzsolca: { num: "20", phone: "+36303009130", address: "3561 Felsőzsolca, Ongai út 23." },
+                    };
+
+                    const DEPO_RAGOZOTT = {
+                        Székesfehérvár: "Székesfehérvári",
+                        Veszprém: "Veszprémi",
+                        Sóskút: "Sóskúti",
+                        Tatabánya: "Tatabányai",
+                        Gödöllő: "Gödöllői",
+                        Soroksár: "Soroksári",
+                        Rákosmező: "Rákosmezei",
+                        Csorna: "Csornai",
+                        Nagybajom: "Nagybajomi",
+                        Kecskemét: "Kecskeméti",
+                        Vép: "Vépi",
+                        Pécs: "Pécsi",
+                        Szeged: "Szegedi",
+                        Szolnok: "Szolnoki",
+                        Eger: "Egri",
+                        Debrecen: "Debreceni",
+                        Nyíregyháza: "Nyíregyházi",
+                        Békés: "Békési",
+                        Felsőzsolca: "Felsőzsolcai",
                     };
 
                     const depo = DEPO_DATA[depoName];
-
-                    function formatPhone(num) {
-                        return num.replace(/(\+36)(\d{2})(\d{3})(\d{4})/, "$1 $2 $3 $4");
-                    }
-
-                    function ragozottDepoNev(name) {
-                        if (name.toLowerCase().endsWith("i")) return name + "i";
-                        return name + "i";
-                    }
+                    const depoNevRagozva = DEPO_RAGOZOTT[depoName] || depoName + "i";
 
                     let depoPhoneFormatted = "";
                     let depoEmail = "";
-                    let depoNevRagozva = depoName;
+                    let depoAddress = "";
 
                     if (depo) {
-                        depoPhoneFormatted = formatPhone(depo.phone);
+                        depoPhoneFormatted = depo.phone.replace(/(\+36)(\d{2})(\d{3})(\d{4})/, "$1 $2 $3 $4");
                         depoEmail = `depo${depo.num}@family-frost.hu`;
-                        depoNevRagozva = ragozottDepoNev(depoName);
+                        depoAddress = depo.address;
                     }
 
+                    // ---- Nap kiterjesztése (hétfő → hétfőn) ----
                     const dayText = row.find("td").eq(5).text().trim().toLowerCase();
-
                     const dayWithSuffixMap = {
                         hétfő: "hétfőn",
                         kedd: "kedden",
@@ -1055,22 +1089,22 @@
                     };
                     const dayWithSuffix = dayWithSuffixMap[dayText] || dayText;
 
+                    // ---- Intervallum ----
                     const interval = row.find("td").eq(6).text().trim();
                     const [t1, t2] = interval.split("-").map((t) => t.trim());
                     const [sh, sm] = t1.split(":");
                     const [eh, em] = t2.split(":");
 
-                    function floorToHalfHour(hStr, mStr) {
-                        let h = parseInt(hStr, 10) || 0;
-                        let m = parseInt(mStr, 10) || 0;
+                    function floorToHalfHour(h, m) {
+                        h = parseInt(h) || 0;
+                        m = parseInt(m) || 0;
                         if (m < 30) m = 0;
                         else m = 30;
                         return { h, m };
                     }
-
-                    function ceilToHalfHour(hStr, mStr) {
-                        let h = parseInt(hStr, 10) || 0;
-                        let m = parseInt(mStr, 10) || 0;
+                    function ceilToHalfHour(h, m) {
+                        h = parseInt(h) || 0;
+                        m = parseInt(m) || 0;
                         if (m === 0) m = 0;
                         else if (m <= 30) m = 30;
                         else {
@@ -1086,6 +1120,7 @@
                     const startLabel = `${String(start.h).padStart(2, "0")}:${start.m === 0 ? "00" : "30"}`;
                     const endLabel = `${String(end.h).padStart(2, "0")}:${end.m === 0 ? "00" : "30"}`;
 
+                    // ---- Következő nap dátuma ----
                     const weekdays = {
                         hétfő: 1,
                         kedd: 2,
@@ -1099,7 +1134,6 @@
                     const targetDow = weekdays[dayText];
                     const now = new Date();
                     const todayDow = now.getDay();
-
                     let diff = targetDow - todayDow;
                     if (diff <= 0) diff += 7;
 
@@ -1110,6 +1144,7 @@
                     const mm = String(targetDate.getMonth() + 1).padStart(2, "0");
                     const dd = String(targetDate.getDate()).padStart(2, "0");
 
+                    // ---- Sablon összeállítása ----
                     const templateText =
                         "Kedves Vásárlónk!\n\n\n" +
                         `Tájékoztatjuk, hogy rendelése várhatóan ${yyyy}.${mm}.${dd}., ${dayWithSuffix} ${startLabel} - ${endLabel} óra között kerül kiszállításra.\n\n` +
@@ -1118,8 +1153,9 @@
                         "Üdvözlettel,\n\n" +
                         "Family Frost Kft.\n" +
                         `${depoNevRagozva} depó\n` +
-                        `📞${depoPhoneFormatted}\n` +
-                        `📧️${depoEmail}`;
+                        `📍 ${depoAddress}\n` +
+                        `📞 ${depoPhoneFormatted}\n` +
+                        `📧 ${depoEmail}`;
 
                     navigator.clipboard
                         .writeText(templateText)
