@@ -1076,7 +1076,7 @@
                         depoAddress = depo.address;
                     }
 
-                    // ---- Nap kiterjesztése (hétfő → hétfőn) ----
+
                     const dayText = row.find("td").eq(5).text().trim().toLowerCase();
                     const dayWithSuffixMap = {
                         hétfő: "hétfőn",
@@ -1089,7 +1089,7 @@
                     };
                     const dayWithSuffix = dayWithSuffixMap[dayText] || dayText;
 
-                    // ---- Intervallum ----
+
                     const interval = row.find("td").eq(6).text().trim();
                     const [t1, t2] = interval.split("-").map((t) => t.trim());
                     const [sh, sm] = t1.split(":");
@@ -1120,31 +1120,49 @@
                     const startLabel = `${String(start.h).padStart(2, "0")}:${start.m === 0 ? "00" : "30"}`;
                     const endLabel = `${String(end.h).padStart(2, "0")}:${end.m === 0 ? "00" : "30"}`;
 
-                    // ---- Következő nap dátuma ----
-                    const weekdays = {
-                        hétfő: 1,
-                        kedd: 2,
-                        szerda: 3,
-                        csütörtök: 4,
-                        péntek: 5,
-                        szombat: 6,
-                        vasárnap: 0,
-                    };
 
-                    const targetDow = weekdays[dayText];
-                    const now = new Date();
-                    const todayDow = now.getDay();
-                    let diff = targetDow - todayDow;
-                    if (diff <= 0) diff += 7;
+					const weekdays = {
+						hétfő: 1,
+						kedd: 2,
+						szerda: 3,
+						csütörtök: 4,
+						péntek: 5,
+						szombat: 6,
+						vasárnap: 0,
+					};
 
-                    const targetDate = new Date();
-                    targetDate.setDate(now.getDate() + diff);
+					const targetDow = weekdays[dayText];
+					const now = new Date();
+					const todayDow = now.getDay();
 
-                    const yyyy = targetDate.getFullYear();
-                    const mm = String(targetDate.getMonth() + 1).padStart(2, "0");
-                    const dd = String(targetDate.getDate()).padStart(2, "0");
+					let diff;
 
-                    // ---- Sablon összeállítása ----
+
+					if (todayDow === targetDow) {
+						const limit = new Date();
+						limit.setHours(08, 0, 0, 0);  // 08:00
+
+						if (now < limit) {
+							diff = 0;   // 08:00 előtt → mai nap
+						} else {
+							diff = 7;   // 08:00 után → következő hét azonos napja
+						}
+
+					} else {
+						// Normál eset: következő ilyen nap
+						let d = targetDow - todayDow;
+						if (d <= 0) d += 7;
+						diff = d;
+					}
+
+					const targetDate = new Date();
+					targetDate.setDate(now.getDate() + diff);
+
+					const yyyy = targetDate.getFullYear();
+					const mm = String(targetDate.getMonth() + 1).padStart(2, "0");
+					const dd = String(targetDate.getDate()).padStart(2, "0");
+
+
                     const templateText =
                         "Kedves Vásárlónk!\n\n\n" +
                         `Tájékoztatjuk, hogy rendelése várhatóan ${yyyy}.${mm}.${dd}., ${dayWithSuffix} ${startLabel} - ${endLabel} óra között kerül kiszállításra.\n\n` +
