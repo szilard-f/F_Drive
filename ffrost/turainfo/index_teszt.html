@@ -9,7 +9,7 @@
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
         <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
-        <style>
+        <style> 
             :root {
                 --ink: #182433;
                 --muted: #5b6b7e;
@@ -863,7 +863,10 @@
                                     .join("") +
                                 "</tr></thead><tbody>";
                             resp.forEach((it) => {
-                                tbl += `<tr class="summary" data-depo="${it.depo}" data-tour_number="${it.tour_number}">
+                                tbl += `<tr class="summary"
+												data-depo="${it.depo}"
+												data-tour_number="${it.tour_number}"
+												data-vehicle_id="${it.vehicle_id}">
                                  <td class="text-center">${it.depo}</td>
                                  <td class="text-center">${it.tour_number}</td>
                                  <td class="text-center">${it.plate_number}</td>
@@ -996,7 +999,9 @@
 
                 $("#results").on("click", ".template-btn", function () {
                     const row = $(this).closest(".summary");
-
+                    const tourNumber = row.find("td").eq(1).text().trim();
+                    const vehicle = row.data("vehicle_id");
+                    const belsoAzonosito = `/// Belső hiv.: ${vehicle}_${tourNumber} ///`;
                     const depoName = row.find("td").eq(0).text().trim();
 
                     const DEPO_DATA = {
@@ -1076,7 +1081,6 @@
                         depoAddress = depo.address;
                     }
 
-
                     const dayText = row.find("td").eq(5).text().trim().toLowerCase();
                     const dayWithSuffixMap = {
                         hétfő: "hétfőn",
@@ -1088,7 +1092,6 @@
                         vasárnap: "vasárnap",
                     };
                     const dayWithSuffix = dayWithSuffixMap[dayText] || dayText;
-
 
                     const interval = row.find("td").eq(6).text().trim();
                     const [t1, t2] = interval.split("-").map((t) => t.trim());
@@ -1120,52 +1123,49 @@
                     const startLabel = `${String(start.h).padStart(2, "0")}:${start.m === 0 ? "00" : "30"}`;
                     const endLabel = `${String(end.h).padStart(2, "0")}:${end.m === 0 ? "00" : "30"}`;
 
+                    const weekdays = {
+                        hétfő: 1,
+                        kedd: 2,
+                        szerda: 3,
+                        csütörtök: 4,
+                        péntek: 5,
+                        szombat: 6,
+                        vasárnap: 0,
+                    };
 
-					const weekdays = {
-						hétfő: 1,
-						kedd: 2,
-						szerda: 3,
-						csütörtök: 4,
-						péntek: 5,
-						szombat: 6,
-						vasárnap: 0,
-					};
+                    const targetDow = weekdays[dayText];
+                    const now = new Date();
+                    const todayDow = now.getDay();
 
-					const targetDow = weekdays[dayText];
-					const now = new Date();
-					const todayDow = now.getDay();
+                    let diff;
 
-					let diff;
+                    if (todayDow === targetDow) {
+                        const limit = new Date();
+                        limit.setHours(08, 0, 0, 0); // 08:00
 
+                        if (now < limit) {
+                            diff = 0; // 08:00 előtt → mai nap
+                        } else {
+                            diff = 7; // 08:00 után → következő hét azonos napja
+                        }
+                    } else {
+                        // Normál eset: következő ilyen nap
+                        let d = targetDow - todayDow;
+                        if (d <= 0) d += 7;
+                        diff = d;
+                    }
 
-					if (todayDow === targetDow) {
-						const limit = new Date();
-						limit.setHours(08, 0, 0, 0);  // 08:00
+                    const targetDate = new Date();
+                    targetDate.setDate(now.getDate() + diff);
 
-						if (now < limit) {
-							diff = 0;   // 08:00 előtt → mai nap
-						} else {
-							diff = 7;   // 08:00 után → következő hét azonos napja
-						}
-
-					} else {
-						// Normál eset: következő ilyen nap
-						let d = targetDow - todayDow;
-						if (d <= 0) d += 7;
-						diff = d;
-					}
-
-					const targetDate = new Date();
-					targetDate.setDate(now.getDate() + diff);
-
-					const yyyy = targetDate.getFullYear();
-					const mm = String(targetDate.getMonth() + 1).padStart(2, "0");
-					const dd = String(targetDate.getDate()).padStart(2, "0");
-
+                    const yyyy = targetDate.getFullYear();
+                    const mm = String(targetDate.getMonth() + 1).padStart(2, "0");
+                    const dd = String(targetDate.getDate()).padStart(2, "0");
 
                     const templateText =
                         "Kedves Vásárlónk!\n\n\n" +
-                        `Tájékoztatjuk, hogy rendelése várhatóan ${yyyy}.${mm}.${dd}., ${dayWithSuffix} ${startLabel} - ${endLabel} óra között kerül kiszállításra.\n\n` +
+                        `Tájékoztatjuk, hogy rendelése várhatóan ${yyyy}.${mm}.${dd}., ${dayWithSuffix} ${startLabel} - ${endLabel} óra között kerül kiszállításra.\n` +
+                        "\n" +
                         "Értékesítőnk közvetlen elérhetősége:\n\n" +
                         "Rendelését köszönjük!\n\n" +
                         "Üdvözlettel,\n\n" +
@@ -1173,7 +1173,8 @@
                         `${depoNevRagozva} depó\n` +
                         `📍 ${depoAddress}\n` +
                         `📞 ${depoPhoneFormatted}\n` +
-                        `📧 ${depoEmail}`;
+                        `📧 ${depoEmail}\n\n` +
+                        `${belsoAzonosito}\n\n`;
 
                     navigator.clipboard
                         .writeText(templateText)
