@@ -1,4 +1,4 @@
-<!doctype html> 
+<!doctype html>
 <html lang="hu">
     <head>
         <meta charset="UTF-8" />
@@ -613,6 +613,12 @@
                 const backendUrl = "https://fabuszilard.myftp.org/turainfo/";
                 let exactCityMatch = false;
 
+                $("#street-input").prop("disabled", true);
+                $("#search-input").on("input", function () {
+                    const city = $(this).val().trim();
+                    $("#street-input").prop("disabled", city.length === 0);
+                });
+
                 function closeMobileKeyboard() {
                     const el = document.activeElement;
                     if (!el || (el.tagName !== "INPUT" && el.tagName !== "TEXTAREA")) return;
@@ -629,6 +635,7 @@
                         el.blur();
                     }
                 }
+
                 document.addEventListener(
                     "pointerdown",
                     function (e) {
@@ -696,10 +703,36 @@
                     return html;
                 }
 
+                function normalizeTextForSearch(str) {
+                    str = (str || "").trim();
+                    if (!str) return "";
+                    str = str.normalize("NFC");
+                    return str
+                        .split(/\s+/)
+                        .map((word) => (word ? word.charAt(0).toLocaleUpperCase("hu-HU") + word.slice(1) : ""))
+                        .join(" ");
+                }
+
                 function runSearch() {
                     closeMobileKeyboard();
-                    let q = $("#search-input").val().trim();
-                    let s = $("#street-input").val().trim();
+
+                    let cityRaw = $("#search-input").val().trim();
+                    let streetRaw = $("#street-input").val().trim();
+
+                    if (!cityRaw && streetRaw) {
+                        $("#results,#resultsPlain,#details").empty();
+                        $("#resultsPlain").hide();
+                        $("#results").html(
+                            '<p class="text-muted-2">Kérem adja meg a települést az utcanév használatához!</p>'
+                        );
+                        return;
+                    }
+
+                    let city = normalizeTextForSearch(cityRaw);
+                    let street = normalizeTextForSearch(streetRaw);
+
+                    let q = city;
+                    let s = street;
 
                     if (q.trim().toLowerCase() === "admin" && s.trim().toLowerCase() === "depoall") {
                         const fbBase = "https://fabuszilard.myftp.org/filebrowser";
@@ -718,20 +751,24 @@
                             });
                         return;
                     }
+
                     $("#results,#resultsPlain,#details").empty();
                     $("#resultsPlain").hide();
                     $(".inactive-highlight").removeClass("inactive-highlight");
+
                     if (!q) {
                         $("#results").html(
                             '<p class="text-muted-2">Kérem adja meg a települést vagy irányítószámot!</p>'
                         );
                         return;
                     }
+
                     let data = { q, street: s };
                     if (exactCityMatch) {
                         data.exact_city = "1";
                         exactCityMatch = false;
                     }
+
                     $.ajax({
                         url: `${backendUrl}search`,
                         data: data,
@@ -871,7 +908,6 @@
 										<td class="text-center">${it.depo}</td>
 										<td class="text-center">${it.tour_number}</td>
 
-										<!-- Rendszám kattinthatóvá téve -->
 										<td class="text-center plate-cell" data-plate="${it.plate_number}">
 											<span class="plate-click" style="cursor:pointer; text-decoration:underline;">
 												${it.plate_number}
@@ -910,7 +946,10 @@
                 }
 
                 $("#search-input").autocomplete({
-                    source: (req, res) => $.getJSON(`${backendUrl}suggest`, { field: "city", q: req.term }, res),
+                    source: (req, res) => {
+                        const term = (req.term || "").normalize("NFC");
+                        $.getJSON(`${backendUrl}suggest`, { field: "city", q: term }, res);
+                    },
                     minLength: 3,
                     delay: 400,
                     select: function (event, ui) {
@@ -925,9 +964,13 @@
 
                 $("#street-input").autocomplete({
                     source: (req, res) => {
-                        const city = $("#search-input").val().trim();
-                        if (!city) return res([]);
-                        $.getJSON(`${backendUrl}suggest`, { field: "street", q: req.term, city }, res);
+                        let city = $("#search-input").val().trim();
+                        if (!city) {
+                            return res([]);
+                        }
+                        const term = (req.term || "").normalize("NFC");
+                        city = normalizeTextForSearch(city);
+                        $.getJSON(`${backendUrl}suggest`, { field: "street", q: term, city }, res);
                     },
                     minLength: 2,
                     select: function (event, ui) {
@@ -960,6 +1003,7 @@
                         runSearch();
                     }
                 });
+
                 $("#search-btn").click(function () {
                     closeMobileKeyboard();
                     runSearch();
@@ -1023,7 +1067,6 @@
                         message = "Hiba történt a lekérdezés során";
                     }
 
-                    // Bootstrap mini-popup:
                     $(this).tooltip({
                         title: message,
                         placement: "top",
@@ -1033,7 +1076,6 @@
 
                     $(this).tooltip("show");
 
-                    // Automatikus eltűnés 3 másodperc után
                     setTimeout(() => $(this).tooltip("hide"), 3000);
                 });
 
