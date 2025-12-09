@@ -1,4 +1,4 @@
-<!doctype html>
+<!doctype html> 
 <html lang="hu">
     <head>
         <meta charset="UTF-8" />
@@ -9,7 +9,7 @@
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
         <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
-        <style> 
+        <style>
             :root {
                 --ink: #182433;
                 --muted: #5b6b7e;
@@ -862,25 +862,34 @@
                                     .map((h) => `<th class="text-center">${h}</th>`)
                                     .join("") +
                                 "</tr></thead><tbody>";
+
                             resp.forEach((it) => {
                                 tbl += `<tr class="summary"
-												data-depo="${it.depo}"
-												data-tour_number="${it.tour_number}"
-												data-vehicle_id="${it.vehicle_id}">
-                                 <td class="text-center">${it.depo}</td>
-                                 <td class="text-center">${it.tour_number}</td>
-                                 <td class="text-center">${it.plate_number}</td>
-                                 <td class="text-center">${it.city}</td>
-                                 <td class="text-center">${it.street}</td>
-                                 <td class="text-center">${it.date}</td>
-                                 <td class="text-center">${it.time_interval}</td>
-         <td class="text-center">
-         	<button class="btn btn-info btn-sm details-btn">Részletek</button>
-         	<button class="btn btn-secondary btn-sm pdf-btn">Túraleírás</button>
-         	<button class="btn btn-success btn-sm template-btn">Értesítés</button>
-         </td>
-                             </tr>`;
+											data-depo="${it.depo}"
+											data-tour_number="${it.tour_number}"
+											data-vehicle_id="${it.vehicle_id}">
+										<td class="text-center">${it.depo}</td>
+										<td class="text-center">${it.tour_number}</td>
+
+										<!-- Rendszám kattinthatóvá téve -->
+										<td class="text-center plate-cell" data-plate="${it.plate_number}">
+											<span class="plate-click" style="cursor:pointer; text-decoration:underline;">
+												${it.plate_number}
+											</span>
+										</td>
+
+										<td class="text-center">${it.city}</td>
+										<td class="text-center">${it.street}</td>
+										<td class="text-center">${it.date}</td>
+										<td class="text-center">${it.time_interval}</td>
+										<td class="text-center">
+											<button class="btn btn-info btn-sm details-btn">Részletek</button>
+											<button class="btn btn-secondary btn-sm pdf-btn">Túraleírás</button>
+											<button class="btn btn-success btn-sm template-btn">Értesítés</button>
+										</td>
+									</tr>`;
                             });
+
                             tbl += "</tbody></table></div>";
                             const cards = buildMobileCards(resp);
                             $("#results").html(tbl + cards);
@@ -989,6 +998,45 @@
                     );
                 });
 
+                $("#results").on("click", ".plate-click", async function () {
+                    const plate = $(this).closest(".plate-cell").data("plate");
+                    if (!plate) return;
+
+                    let message = "";
+
+                    try {
+                        const resp = await fetch(`${backendUrl}api/phone?plate=${encodeURIComponent(plate)}`, {
+                            cache: "no-store",
+                        });
+
+                        if (resp.ok) {
+                            const data = await resp.json();
+                            if (data && data.phone) {
+                                message = `📞 ${data.phone}`;
+                            } else {
+                                message = "(nincs telefonszám)";
+                            }
+                        } else {
+                            message = `Hiba: HTTP ${resp.status}`;
+                        }
+                    } catch (e) {
+                        message = "Hiba történt a lekérdezés során";
+                    }
+
+                    // Bootstrap mini-popup:
+                    $(this).tooltip({
+                        title: message,
+                        placement: "top",
+                        trigger: "manual",
+                        html: true,
+                    });
+
+                    $(this).tooltip("show");
+
+                    // Automatikus eltűnés 3 másodperc után
+                    setTimeout(() => $(this).tooltip("hide"), 3000);
+                });
+
                 $("#results").on("click", ".pdf-btn", function () {
                     closeMobileKeyboard();
                     const r = $(this).closest(".summary");
@@ -997,12 +1045,39 @@
                     );
                 });
 
-                $("#results").on("click", ".template-btn", function () {
+                $("#results").on("click", ".template-btn", async function () {
                     const row = $(this).closest(".summary");
                     const tourNumber = row.find("td").eq(1).text().trim();
                     const vehicle = row.data("vehicle_id");
                     const belsoAzonosito = `/// Belső hiv.: ${vehicle}_${tourNumber} ///`;
                     const depoName = row.find("td").eq(0).text().trim();
+
+                    const plateRaw = row.data("plate") || row.find("td").eq(2).text().trim();
+
+                    let phoneLine = "";
+
+                    try {
+                        if (plateRaw) {
+                            const resp = await fetch(`${backendUrl}api/phone?plate=${encodeURIComponent(plateRaw)}`, {
+                                cache: "no-store",
+                            });
+                            if (resp.ok) {
+                                const data = await resp.json();
+                                if (data && data.phone) {
+                                    phoneLine = `${data.phone}\n\n`;
+                                } else {
+                                    phoneLine = "(nincs telefonszám)\n\n";
+                                }
+                            } else {
+                                phoneLine = `(telefon lekérés sikertelen, HTTP ${resp.status})\n\n`;
+                            }
+                        } else {
+                            phoneLine = "(nincs rendszám a sorban)\n\n";
+                        }
+                    } catch (e) {
+                        console.warn("Telefon lekérdezés hiba:", e);
+                        phoneLine = "(hiba a telefon lekérése közben)\n\n";
+                    }
 
                     const DEPO_DATA = {
                         Székesfehérvár: {
@@ -1141,15 +1216,14 @@
 
                     if (todayDow === targetDow) {
                         const limit = new Date();
-                        limit.setHours(08, 0, 0, 0); // 08:00
+                        limit.setHours(8, 0, 0, 0);
 
                         if (now < limit) {
-                            diff = 0; // 08:00 előtt → mai nap
+                            diff = 0;
                         } else {
-                            diff = 7; // 08:00 után → következő hét azonos napja
+                            diff = 7;
                         }
                     } else {
-                        // Normál eset: következő ilyen nap
                         let d = targetDow - todayDow;
                         if (d <= 0) d += 7;
                         diff = d;
@@ -1163,10 +1237,10 @@
                     const dd = String(targetDate.getDate()).padStart(2, "0");
 
                     const templateText =
-                        "Kedves Vásárlónk!\n\n\n" +
+                        "Kedves Vásárlónk!\n\n\n\n" +
                         `Tájékoztatjuk, hogy rendelése várhatóan ${yyyy}.${mm}.${dd}., ${dayWithSuffix} ${startLabel} - ${endLabel} óra között kerül kiszállításra.\n` +
-                        "\n" +
-                        "Értékesítőnk közvetlen elérhetősége:\n\n" +
+                        "Értékesítőnk közvetlen elérhetősége: " +
+                        phoneLine +
                         "Rendelését köszönjük!\n\n" +
                         "Üdvözlettel,\n\n" +
                         "Family Frost Kft.\n" +
