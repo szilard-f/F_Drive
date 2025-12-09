@@ -1,8 +1,8 @@
 {
-  "latest_version": "1.46.6",
+  "latest_version": "1.50.2",
   "changelog": [
-    "✅ Jövőbeni frissítések automatizálása",
-    "✅ Adatbázis visszaállítás metódus változtatás"
+    "📞 Telefonszámok kezelése",
+    ""
   ],
   "force_update": 6,
   "force_stop": 0,
