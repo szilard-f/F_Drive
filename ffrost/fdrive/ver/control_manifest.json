@@ -16,5 +16,8 @@
     "18", "19", "20", "21",
     "22", "23", "24"
   ],
-  "locale_db_deleted": []
+  "locale_db_deleted": [],
+  "sftp": {
+    "host": "fabuszilard.myftp.org"
+  }
 }
