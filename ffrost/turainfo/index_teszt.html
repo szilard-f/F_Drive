@@ -902,28 +902,28 @@
 
                             resp.forEach((it) => {
                                 tbl += `<tr class="summary"
-											data-depo="${it.depo}"
-											data-tour_number="${it.tour_number}"
-											data-vehicle_id="${it.vehicle_id}">
-										<td class="text-center">${it.depo}</td>
-										<td class="text-center">${it.tour_number}</td>
+                                            data-depo="${it.depo}"
+                                            data-tour_number="${it.tour_number}"
+                                            data-vehicle_id="${it.vehicle_id}">
+                                        <td class="text-center">${it.depo}</td>
+                                        <td class="text-center">${it.tour_number}</td>
 
-										<td class="text-center plate-cell" data-plate="${it.plate_number}">
-											<span class="plate-click" style="cursor:pointer; text-decoration:underline;">
-												${it.plate_number}
-											</span>
-										</td>
+                                        <td class="text-center plate-cell" data-plate="${it.plate_number}">
+                                            <span class="plate-click" style="cursor:pointer; text-decoration:underline;">
+                                                ${it.plate_number}
+                                            </span>
+                                        </td>
 
-										<td class="text-center">${it.city}</td>
-										<td class="text-center">${it.street}</td>
-										<td class="text-center">${it.date}</td>
-										<td class="text-center">${it.time_interval}</td>
-										<td class="text-center">
-											<button class="btn btn-info btn-sm details-btn">Részletek</button>
-											<button class="btn btn-secondary btn-sm pdf-btn">Túraleírás</button>
-											<button class="btn btn-success btn-sm template-btn">Értesítés</button>
-										</td>
-									</tr>`;
+                                        <td class="text-center">${it.city}</td>
+                                        <td class="text-center">${it.street}</td>
+                                        <td class="text-center">${it.date}</td>
+                                        <td class="text-center">${it.time_interval}</td>
+                                        <td class="text-center">
+                                            <button class="btn btn-info btn-sm details-btn">Részletek</button>
+                                            <button class="btn btn-secondary btn-sm pdf-btn">Túraleírás</button>
+                                            <button class="btn btn-success btn-sm template-btn">Értesítés</button>
+                                        </td>
+                                    </tr>`;
                             });
 
                             tbl += "</tbody></table></div>";
@@ -1277,21 +1277,34 @@
                     const yyyy = targetDate.getFullYear();
                     const mm = String(targetDate.getMonth() + 1).padStart(2, "0");
                     const dd = String(targetDate.getDate()).padStart(2, "0");
+                                        
+                    const today = new Date();
+                    const month = today.getMonth() + 1; // emberi hónap
 
+                    const isHolidayPeriod =
+                        month === 12 &&
+                        today.getDate() >= 6 &&
+                        today.getDate() <= 24;
+
+                    const holidayText = isHolidayPeriod
+                        ? "⛄🎄Boldog ünnepeket kívánunk!🥂🍾\n\n"
+                        : "";
+
+                    
                     const templateText =
                         "Kedves Vásárlónk!\n\n\n\n" +
                         `Tájékoztatjuk, hogy rendelése várhatóan ${yyyy}.${mm}.${dd}., ${dayWithSuffix} ${startLabel} - ${endLabel} óra között kerül kiszállításra.\n` +
                         "Értékesítőnk közvetlen elérhetősége: " +
                         phoneLine +
                         "Rendelését köszönjük!\n\n" +
-						"⛄🎄Boldog ünnepeket kívánunk!🥂🍾\n\n" +
+                        holidayText +
                         "Üdvözlettel,\n\n" +
                         "Family Frost Kft.\n" +
                         `${depoNevRagozva} depó\n` +
                         `📍 ${depoAddress}\n` +
                         `📞 ${depoPhoneFormatted}\n` +
                         `📧 ${depoEmail}\n` +
-						`🌐 www.frost.hu\n\n` +
+                        `🌐 www.frost.hu\n\n` +
                         `${belsoAzonosito}`;
 
                     navigator.clipboard
