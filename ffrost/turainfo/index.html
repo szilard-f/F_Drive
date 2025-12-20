@@ -610,7 +610,7 @@
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
         <script>
             if (!maintenanceMode) {
-                const backendUrl = "https://fabuszilard.myftp.org/turainfo/";
+                const backendUrl = "https://api.fdriveanalytics.com/turainfo/";
                 let exactCityMatch = false;
 
                 $("#street-input").prop("disabled", true);
@@ -735,9 +735,9 @@
                     let s = street;
 
                     if (q.trim().toLowerCase() === "admin" && s.trim().toLowerCase() === "depoall") {
-                        const fbBase = "https://fabuszilard.myftp.org/filebrowser";
-                        const relayUrl = "https://fabuszilard.myftp.org/turainfo/fb_autologin";
-                        fetch("https://fabuszilard.myftp.org/turainfo/depoall_token")
+                        const fbBase = "https://api.fdriveanalytics.com/filebrowser";
+                        const relayUrl = "https://api.fdriveanalytics.com/turainfo/fb_autologin";
+                        fetch("https://api.fdriveanalytics.com/turainfo/depoall_token")
                             .then((r) => r.json())
                             .then((data) => {
                                 const t = data && data.token;
