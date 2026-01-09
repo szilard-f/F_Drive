@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="hu">
-    <head> 
+    <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="./static/images/logo.png" type="image/png" />
@@ -474,6 +474,69 @@
                     order: 3;
                 }
             }
+        
+
+            table.table {
+                width: 100%;
+                table-layout: auto;
+            }
+
+            table.table td:nth-child(3),
+            table.table th:nth-child(3),
+            table.table td:nth-child(7),
+            table.table th:nth-child(7),
+            table.table td:nth-child(8),
+            table.table th:nth-child(8) {
+                white-space: nowrap;
+            }
+
+            table.table td:nth-child(8) {
+                overflow: visible;
+            }
+
+            table.table td:nth-child(8) button {
+                white-space: nowrap;
+                display: inline-block;
+            }
+
+            td.city-cell,
+            td.street-cell {
+                max-width: 1px;
+                width: 100%;
+                white-space: nowrap;
+                overflow: hidden;
+            }
+
+            table.table th:nth-child(4),
+            table.table td:nth-child(4),
+            table.table th:nth-child(5),
+            table.table td:nth-child(5) {
+                width: 18%;
+            }
+
+
+            .marquee-wrap {
+                width: 100%;
+                overflow: hidden;
+                white-space: nowrap;
+                position: relative;
+            }
+
+            .marquee-text {
+                display: inline-block;
+                white-space: nowrap;
+            }
+
+            .marquee-animate {
+                animation: marquee 12s linear infinite;
+                padding-left: 100%;
+            }
+
+            @keyframes marquee {
+                from { transform: translateX(0); }
+                to   { transform: translateX(-100%); }
+            }
+
         </style>
     </head>
     <body>
@@ -918,8 +981,8 @@
                                             </span>
                                         </td>
 
-                                        <td class="text-center">${it.city}</td>
-                                        <td class="text-center">${it.street}</td>
+                                        <td class="text-center city-cell"><div class="marquee-wrap"><span class="marquee-text">${it.city}</span></div></td>
+                                        <td class="text-center street-cell"><div class="marquee-wrap"><span class="marquee-text">${it.street}</span></div></td>
                                         <td class="text-center">${it.date}</td>
                                         <td class="text-center">${it.time_interval}</td>
                                         <td class="text-center">
@@ -1371,5 +1434,50 @@
                 }
             });
         </script>
-    </body>
+    
+        <script>
+            function initConditionalMarquee() {
+                document.querySelectorAll('.marquee-wrap').forEach(wrap => {
+                    const text = wrap.querySelector('.marquee-text');
+                    if (!text) return;
+                    text.classList.remove('marquee-animate');
+                    if (text.scrollWidth > wrap.clientWidth) {
+                        text.classList.add('marquee-animate');
+                    }
+                });
+            }
+            document.addEventListener('DOMContentLoaded', initConditionalMarquee);
+            window.addEventListener('resize', initConditionalMarquee);
+        </script>
+
+    
+<script>
+(function(){
+    function startMarquee(){
+        document.querySelectorAll('.marquee-wrap').forEach(wrap => {
+            const text = wrap.querySelector('.marquee-text');
+            if (!text) return;
+
+            text.classList.remove('marquee-animate');
+            void text.offsetWidth;
+
+            if (text.scrollWidth > wrap.clientWidth + 1) {
+                text.classList.add('marquee-animate');
+            }
+        });
+    }
+ 
+    startMarquee();
+
+    const target = document.querySelector('#results') || document.body;
+    const obs = new MutationObserver(() => {
+        startMarquee();
+    });
+    obs.observe(target, { childList: true, subtree: true });
+
+    window.addEventListener('resize', startMarquee);
+})();
+</script>
+
+</body>
 </html>
