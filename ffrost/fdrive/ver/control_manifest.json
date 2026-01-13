@@ -1,8 +1,8 @@
 {
-  "latest_version": "1.50.2",
+  "latest_version": "1.52.6",
   "changelog": [
-    "📞 Telefonszámok kezelése",
-    ""
+    "⇄ Hálózati beállítások ",
+    "✓ megjelenés optimalizálás"
   ],
   "force_update": 6,
   "force_stop": 0,
