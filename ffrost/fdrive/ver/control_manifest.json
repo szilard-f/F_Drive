@@ -1,8 +1,8 @@
 {
-  "latest_version": "1.52.6",
+  "latest_version": "2.04.6",
   "changelog": [
-    "⇄ Hálózati beállítások ",
-    "✓ megjelenés optimalizálás"
+    "⇄ Hálózati kapcsolat ellenőrzésének finomítása ",
+    ""
   ],
   "force_update": 6,
   "force_stop": 0,
