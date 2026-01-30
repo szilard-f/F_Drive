@@ -1,0 +1,41 @@
+{
+  "latest_version": "2.04.6",
+  "changelog": [
+    "⇄ Hálózati kapcsolat ellenőrzésének finomítása ",
+    ""
+  ],
+  "force_update": 6,
+  "force_stop": 0,
+  "disable_tours": 0,
+  "enable_deleted": [],
+  "force_depot_selected": [
+    "01",
+    "02",
+    "03",
+    "04",
+    "06",
+    "07",
+    "08",
+    "09",
+    "11",
+    "12",
+    "13",
+    "10",
+    "14",
+    "15",
+    "16",
+    "17",
+    "18",
+    "19",
+    "20",
+    "21",
+    "22",
+    "23",
+    "24"
+  ],
+  "locale_db_deleted": [],
+  "sftp": {
+    "host": "fdriveanalytics.v4.hu",
+    "host2": "api.fdriveanalytics.com"
+  }
+}
