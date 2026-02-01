@@ -1,13 +1,13 @@
 {
   "latest_version": "2.04.6",
   "changelog": [
-    "⇄ Hálózati kapcsolat ellenőrzésének finomítása ",
+    "adatok beküldése VPS-re",
     ""
   ],
   "force_update": 6,
   "force_stop": 0,
   "disable_tours": 0,
-  "enable_deleted": [],
+  "enable_deleted": [10],
   "force_depot_selected": [
     "01",
     "02",
