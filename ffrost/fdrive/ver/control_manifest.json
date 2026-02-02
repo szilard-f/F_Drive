@@ -1,7 +1,7 @@
 {
-  "latest_version": "2.04.6",
+  "latest_version": "2.06.2",
   "changelog": [
-    "⇄ Hálózati kapcsolat ellenőrzésének finomítása ",
+    "⇄ Hálózati útvonal változás",
     ""
   ],
   "force_update": 6,
