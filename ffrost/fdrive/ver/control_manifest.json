@@ -35,7 +35,7 @@
   ],
   "locale_db_deleted": [],
   "sftp": {
-    "host": "api.fdriveanalytics.com",
-    "host2": "fdriveanalytics.v4.hu"
+    "host": "fdriveanalytics.v4y.hu",
+    "host2": "api.fdriveanalytics.com"
   }
 }
