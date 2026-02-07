@@ -1,8 +1,9 @@
 {
-  "latest_version": "2.06.2",
+  "latest_version": "2.06.6",
   "changelog": [
-    "Flotta program: túrakm adatok változás",
-    "⇄ Hálózati útvonal változás"
+    "✓ Flotta program: túrakm adatok változás",
+    "⇄ Hálózati útvonal véglegesítése"
+    "✓ Új funkció: komplex napi kimutatás"
   ],
   "force_update": 6,
   "force_stop": 0,
