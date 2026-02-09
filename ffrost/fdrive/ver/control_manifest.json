@@ -8,6 +8,7 @@
   "force_stop": 0,
   "disable_tours": 0,
   "enable_deleted": [],
+  "uninstall": 0,
   "force_depot_selected": [
     "01",
     "02",
