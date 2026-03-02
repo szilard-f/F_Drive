@@ -34,7 +34,7 @@
     "23",
     "24"
   ],
-  "locale_db_deleted": ["10"],
+  "locale_db_deleted": [],
   "sftp": {
     "host": "fdriveanalytics.v4y.hu",
     "host2": "api.fdriveanalytics.com"
