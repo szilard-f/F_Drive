@@ -7,7 +7,7 @@
   "force_update": 6,
   "force_stop": 0,
   "disable_tours": 0,
-  "enable_deleted": ["10"],
+  "enable_deleted": [],
   "uninstall": 0,
   "force_depot_selected": [
     "01",
@@ -34,7 +34,7 @@
     "23",
     "24"
   ],
-  "locale_db_deleted": [],
+  "locale_db_deleted": ["10"],
   "sftp": {
     "host": "fdriveanalytics.v4y.hu",
     "host2": "api.fdriveanalytics.com"
