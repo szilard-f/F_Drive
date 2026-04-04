@@ -1116,7 +1116,7 @@
                     let message = "";
 
                     try {
-                        const resp = await fetch(`${backendUrl}api/phone?plate=${encodeURIComponent(plate)}`, {
+                        const resp = await fetch(`${backendUrl}api/phone?plate=${encodeURIComponent(plate)}&src=plate_click`, {
                             cache: "no-store",
                         });
 
@@ -1167,7 +1167,7 @@
 
                     try {
                         if (plateRaw) {
-                            const resp = await fetch(`${backendUrl}api/phone?plate=${encodeURIComponent(plateRaw)}`, {
+                            const resp = await fetch(`${backendUrl}api/phone?plate=${encodeURIComponent(plateRaw)}&src=template_btn`, {
                                 cache: "no-store",
                             });
                             if (resp.ok) {
