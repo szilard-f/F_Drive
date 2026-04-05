@@ -1,7 +1,7 @@
 {
-  "latest_version": "2.10.2",
+  "latest_version": "2.14.6",
   "changelog": [
-    "✅ - adatbázis beküldés optimalizálás",
+    "✅ - túraadat beküldés optimalizálás - próbálkozások számának növelése",
     ""
   ],
   "force_update": 6,
