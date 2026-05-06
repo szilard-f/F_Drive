@@ -1,9 +1,9 @@
 {
-  "latest_version": "2.16.2",
+  "latest_version": "2.18.6",
   "changelog": [
-    "⚠⚠⚠ - túrák mentése: percenkénti szünet! (API tiltások elkerülése miatt)",
-    "✅ - 16 óra utáni megállások, már autónként és dátumonként is szűrhető",
-	"✅ - szűrések törlése - teljes alaphelyzet"
+    "",
+    "✅ 16 óra utáni megállások - 25 alattiak új almenü",
+	""
   ],
   "force_update": 6,
   "force_stop": 0,
