@@ -6,8 +6,8 @@
 	""
   ],
   "force_update": 6,
-  "force_stop": 1,
-  "disable_tours": 1,
+  "force_stop": 0,
+  "disable_tours": 0,
   "enable_deleted": [],
   "uninstall": 0,
   "force_depot_selected": [
