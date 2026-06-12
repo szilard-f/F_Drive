@@ -1,8 +1,8 @@
 {
-  "latest_version": "2.22.2",
+  "latest_version": "2.24.4",
   "changelog": [
     "",
-    "✅ menetlevelek - hibajavítás",
+    "❌ túrák menü - ideiglenes korlátozás javítása",
 	""
   ],
   "force_update": 6,
