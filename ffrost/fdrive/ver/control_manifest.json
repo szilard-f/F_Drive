@@ -1,12 +1,12 @@
 {
-  "latest_version": "2.22.2",
+  "latest_version": "2.26.2",
   "changelog": [
     "",
-    "❌ túrák menü - ideiglenes korlátozás javítása",
+    "✅ kód optimalizálás",
 	""
   ],
   "force_update": 6,
-  "force_stop": 1,
+  "force_stop": 0,
   "disable_tours": 0,
   "enable_deleted": [],
   "uninstall": 0,
