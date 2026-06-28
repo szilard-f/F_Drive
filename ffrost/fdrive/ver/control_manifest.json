@@ -1,8 +1,8 @@
 {
-  "latest_version": "2.26.2",
+  "latest_version": "2.26.6",
   "changelog": [
     "",
-    "✅ kód optimalizálás",
+    "✅ beragadó mentési ablak javítása",
 	""
   ],
   "force_update": 6,
