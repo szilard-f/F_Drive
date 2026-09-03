@@ -1,9 +1,9 @@
 {
-  "latest_version": "2.28.4",
+  "latest_version": "2.34.6",
   "changelog": [
     "",
-    "➤ részletekről küldtem  email-t",
-	""
+    "⮕ túraanalízisek: depón belüli esti megállások eltüntetése (100m)",
+	"⮕ I/O (hw) hiba esetén hangsúlyos figyelmeztetés és tiltás + extra log"
   ],
   "force_update": 6,
   "force_stop": 0,
