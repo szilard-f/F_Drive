@@ -11,6 +11,7 @@
   "android_latest_version": "1.32.2",
   "force_stop_fdnoti": 0,
   "fdnoti_latest_version": "1.39.2",
+  "fdnoti_download_url": "https://api.fdriveanalytics.com/valódi-fájlnév.apk"
   "force_stop_outlook": 0,
   "outlook_latest_version": "4.9.5.8",
   "disable_tours": 0,
