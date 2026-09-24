@@ -9,6 +9,8 @@
   "force_stop": 0,
   "force_stop_android": 0,
   "android_latest_version": "1.32.2",
+  "force_stop_ffnoti": 0,
+  "ffnoti_latest_version": "1.39.2",
   "force_stop_outlook": 0,
   "outlook_latest_version": "4.9.5.8",
   "disable_tours": 0,
