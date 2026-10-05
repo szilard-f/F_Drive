@@ -10,7 +10,7 @@
   "force_stop_android": 0,
   "android_latest_version": "1.32.2",
   "force_stop_fdnoti": 0,
-  "fdnoti_latest_version": "1.39.6",
+  "fdnoti_latest_version": "1.40.7",
   "fdnoti_download_url": "https://api.fdriveanalytics.com/fdnoti",
   "fdnoti_install_url": "https://fdriveanalytics.com/ffrost/fdrive/pic/canvas.png",
   "force_stop_outlook": 0,
