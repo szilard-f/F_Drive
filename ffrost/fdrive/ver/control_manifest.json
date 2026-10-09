@@ -16,7 +16,7 @@
   "force_stop_outlook": 0,
   "outlook_latest_version": "1.41.4.0",
   "outlook_automatic_order_processing_depots": ["01", "02", "03", "04", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"],
-  "outlook_automatic_notification_sending_depots": ["01", "02", "03", "04", "06", "07", "08", "09", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"],
+  "outlook_automatic_notification_sending_depots": ["01", "02", "03", "04", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"],
   "disable_tours": 0,
   "enable_deleted": [],
   "uninstall": 0,
