@@ -1,7 +1,7 @@
 {
-  "latest_version": "2.40.2",
+  "latest_version": "2.43.4",
   "changelog": [
-    "📞 F_Drive telefonszámok meglétének ellenőrzése minden induláskor",
+    "✅ OSM térkép megjelenítésének javítása",
     "",
 	""
   ],
