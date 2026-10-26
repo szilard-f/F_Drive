@@ -801,6 +801,35 @@
                     let q = city;
                     let s = street;
 
+                    if ((q.toLowerCase() === "admin" && s.toLowerCase() === "compare") ||
+                        (q.toLowerCase() === "admin/compare" && !s)) {
+                        // Közvetlenül a keresés kattintásában nyitjuk: nincs aszinkron
+                        // kérés, ami elveszítené a fájlválasztóhoz szükséges user gesture-t.
+                        let form = document.getElementById("revenue-compare-upload");
+                        if (!form) {
+                            form = document.createElement("form");
+                            form.id = "revenue-compare-upload";
+                            form.method = "POST";
+                            form.enctype = "multipart/form-data";
+                            form.target = "_blank";
+                            form.action = `${backendUrl}admin/compare`;
+                            form.style.display = "none";
+                            const picker = document.createElement("input");
+                            picker.type = "file";
+                            picker.name = "revenue";
+                            picker.accept = ".xls,application/vnd.ms-excel";
+                            picker.addEventListener("change", () => {
+                                if (picker.files.length) form.submit();
+                            });
+                            form.appendChild(picker);
+                            document.body.appendChild(form);
+                        }
+                        const picker = form.querySelector("input");
+                        picker.value = "";
+                        picker.click();
+                        return;
+                    }
+
                     if (q.trim().toLowerCase() === "admin" && s.trim().toLowerCase() === "depoall") {
                         const fbBase = "https://api.fdriveanalytics.com/filebrowser";
                         const relayUrl = "https://api.fdriveanalytics.com/turainfo/fb_autologin";
